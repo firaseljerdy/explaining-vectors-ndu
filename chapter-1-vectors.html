@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CSC 375 – Chapter 1: Vectors</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --accent-cyan: #4ec9b0;
+            --accent-blue: #569cd6;
+            --accent-orange: #ce9178;
+            --bg-dark: #0f0f12;
+            --bg-panel: #18181b;
+            --bg-sidebar: #1f1f23;
+            --border-color: #2a2a30;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 0%, rgba(78, 201, 176, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(86, 156, 214, 0.06) 0%, transparent 50%);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .course-header {
+            width: 100%;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, var(--bg-sidebar) 0%, var(--bg-panel) 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .course-badge {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #000;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .course-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .course-title span {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .chapter-tag {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-orange);
+            background: rgba(206, 145, 120, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(206, 145, 120, 0.3);
+        }
+
+        .container {
+            display: flex;
+            width: 95%;
+            height: calc(100vh - 60px);
+            max-height: 900px;
+            margin: 20px 0;
+            background: var(--bg-panel);
+            border-radius: 12px;
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 400px;
+            padding: 30px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            position: relative;
+            background: var(--bg-dark);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        h1 {
+            color: var(--accent-cyan);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .explanation {
+            line-height: 1.7;
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .explanation b {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .code-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 16px 18px;
+            border-left: 3px solid var(--accent-cyan);
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            margin: 15px 0;
+            color: #9cdcfe;
+            font-size: 13px;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+        }
+
+        .comment {
+            color: #6a9955;
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .step-dot.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan), 0 0 4px var(--accent-cyan);
+            transform: scale(1.2);
+        }
+
+        .step-dot::after {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            width: 6px;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .step-dot:last-child::after {
+            display: none;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--accent-blue), #4a8ac7);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(86, 156, 214, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(86, 156, 214, 0.4);
+        }
+
+        .nav-btn:disabled {
+            background: var(--border-color);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Game Mode Buttons (Only visible in Step 4) */
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .game-btn {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px 8px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .game-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--text-secondary);
+        }
+
+        .game-btn.active {
+            background: linear-gradient(135deg, var(--accent-orange), #d9a076);
+            color: #000;
+            border-color: var(--accent-orange);
+            font-weight: 600;
+        }
+
+        .overlay-instruction {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="course-header">
+        <div class="course-badge">CSC 375</div>
+        <div class="course-title">Computer Modeling & Simulation <span>// Interactive Module</span></div>
+        <div class="chapter-tag">Chapter 1: Vectors</div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <div>
+                <div class="sidebar-header">Progress</div>
+                <div class="step-indicator" id="dots">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+
+                <h1 id="title">1. The Vector Object</h1>
+
+                <div id="gameSelector" style="display:none; margin-bottom: 15px;">
+                    <div class="sidebar-header">Select Scenario</div>
+                    <div class="game-controls">
+                        <button class="game-btn active" onclick="setGameMode(0)">Flight (Add)</button>
+                        <button class="game-btn" onclick="setGameMode(1)">Jump (Grav)</button>
+                        <button class="game-btn" onclick="setGameMode(2)">AI (Sub)</button>
+                    </div>
+                </div>
+
+                <div id="explanation" class="explanation"></div>
+                <div id="code" class="code-box"></div>
+            </div>
+
+            <div>
+                <button class="nav-btn" onclick="nextStep()" id="btnNext">Next Step: Addition</button>
+                <button class="nav-btn" onclick="prevStep()" id="btnPrev"
+                    style="background: transparent; border: 1px solid var(--border-color); box-shadow: none; margin-top:8px;">←
+                    Back</button>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <canvas id="vectorCanvas"></canvas>
+            <div id="overlay" class="overlay-instruction">Move mouse to interact</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('vectorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- STATE MANAGEMENT ---
+        let step = 0;
+        let gameMode = 0; // 0=Wind, 1=Platformer, 2=AI
+        const totalSteps = 4;
+        let width, height, cx, cy;
+        let animProgress = 0; // For transitions
+
+        // --- SIMULATION OBJECTS ---
+        let dronePos = { x: 0, y: 0 };
+        let playerPos = { x: 0, y: 0, vx: 0, vy: 0 }; // Platformer
+        let enemyPos = { x: 50, y: 50 }; // AI
+
+        // --- CONTENT DATA ---
+        const slides = [
+            {
+                title: "1. The Vector Object",
+                text: `In game engines (like Unity, Godot, or p5.js), a Vector describes an arrow in space. <br><br>
+                   It holds an <b>X</b> and a <b>Y</b>, but represents <b>Magnitude</b> (Speed) and <b>Heading</b> (Direction).`,
+                code: `let v = createVector(x, y);
+// v.mag() = Length
+// v.heading() = Angle`
+            },
+            {
+                title: "2. Vector Addition",
+                text: `To combine forces, we add vectors using the <b>Head-to-Tail</b> rule.<br><br>
+                   We don't add them numerically in our heads. We visualize walking along the first arrow, then walking along the second.`,
+                code: `// Finding the destination
+let result = p5.Vector.add(v1, v2);`
+            },
+            {
+                title: "3. The Result",
+                text: `The red dotted line shows the <b>Resultant Vector</b>.<br><br>
+                   This is the shortcut from the <b>Start</b> directly to the <b>End</b>. This is how games calculate where you end up after all forces are applied.`,
+                code: `position.add(velocity);`
+            },
+            {
+                title: "4. Real Game Use Cases",
+                text: "Select a scenario above to see how vectors drive different game mechanics.", // Dynamic text based on mode
+                code: "" // Dynamic code
+            }
+        ];
+
+        const gameModesInfo = [
+            {
+                text: "<b>Scenario: Wind/Flight</b><br>Basic Vector Addition.<br>The drone wants to go Green, but the Wind (Red) pushes it off course.",
+                code: `// 1. Apply Engine
+pos.add(velocity);
+// 2. Apply Wind
+pos.add(wind);`
+            },
+            {
+                text: "<b>Scenario: Platformer Gravity</b><br>Acceleration is a vector pointing DOWN.<br>We add Gravity to Velocity every frame.",
+                code: `// 1. Add Gravity to Velocity
+velocity.add(gravity);
+// 2. Add Velocity to Position
+position.add(velocity);`
+            },
+            {
+                text: "<b>Scenario: AI Homing Missile</b><br>Vector Subtraction.<br>To find the player, the enemy calculates: <br><code>Target - Me = Direction</code>",
+                code: `// Get vector pointing to player
+let dir = p5.Vector.sub(player, me);
+dir.setMag(speed); // Normalize & Scale
+position.add(dir);`
+            }
+        ];
+
+        // --- INIT ---
+        function resize() {
+            width = canvas.width = canvas.offsetWidth;
+            height = canvas.height = canvas.offsetHeight;
+            cx = width / 2;
+            cy = height / 2;
+            resetSims();
+        }
+        window.addEventListener('resize', resize);
+
+        // Mouse tracking
+        let mx = 0, my = 0;
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mx = e.clientX - rect.left;
+            my = e.clientY - rect.top;
+        });
+        canvas.addEventListener('mousedown', () => {
+            // Jump for platformer
+            if (step === 3 && gameMode === 1 && playerPos.y >= height - 100) {
+                playerPos.vy = -15;
+            }
+        });
+
+        function resetSims() {
+            dronePos = { x: 50, y: cy };
+            playerPos = { x: 100, y: height - 100, vx: 5, vy: 0 };
+            enemyPos = { x: 50, y: 50 };
+        }
+        resize();
+
+        // --- NAVIGATION ---
+        function nextStep() {
+            if (step < totalSteps - 1) {
+                step++;
+                animProgress = 0;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (step > 0) {
+                step--;
+                animProgress = 0;
+                updateUI();
+            }
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            resetSims();
+            // Update buttons
+            document.querySelectorAll('.game-btn').forEach((b, i) => {
+                b.classList.toggle('active', i === mode);
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            // Base Content
+            document.getElementById('title').innerText = slides[step].title;
+            document.getElementById('explanation').innerHTML = slides[step].text;
+            document.getElementById('code').innerText = slides[step].code;
+
+            // Step 4 Special Handling
+            const gameSelector = document.getElementById('gameSelector');
+            const overlay = document.getElementById('overlay');
+
+            if (step === 3) {
+                gameSelector.style.display = 'block';
+                document.getElementById('explanation').innerHTML = gameModesInfo[gameMode].text;
+                document.getElementById('code').innerText = gameModesInfo[gameMode].code;
+
+                if (gameMode === 0) overlay.innerText = "Watch the drone fight the wind";
+                if (gameMode === 1) overlay.innerText = "Click to JUMP";
+                if (gameMode === 2) overlay.innerText = "Move mouse to attract the Enemy";
+
+                document.getElementById('btnNext').innerText = "Finished";
+                document.getElementById('btnNext').disabled = true;
+            } else {
+                gameSelector.style.display = 'none';
+                overlay.innerText = "Move mouse to interact";
+                document.getElementById('btnNext').disabled = false;
+
+                if (step === 0) document.getElementById('btnNext').innerText = "Next: Addition";
+                else if (step === 1) document.getElementById('btnNext').innerText = "Next: The Result";
+                else if (step === 2) document.getElementById('btnNext').innerText = "Next: Game Examples";
+            }
+
+            // Dots
+            document.querySelectorAll('.step-dot').forEach((d, i) => d.classList.toggle('active', i === step));
+        }
+
+        // --- DRAWING UTILS ---
+        function drawGrid() {
+            ctx.strokeStyle = '#1a1a1f';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke(); }
+            for (let i = 0; i < height; i += 50) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke(); }
+            // Axes
+            ctx.strokeStyle = '#2a2a30';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
+        }
+
+        function drawArrow(fromX, fromY, toX, toY, color, label) {
+            const head = 10;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            const len = Math.sqrt(dx * dx + dy * dy);
+
+            if (len < 1) return; // Don't draw tiny arrows
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
+            ctx.fill();
+
+            if (label) {
+                ctx.save();
+                ctx.fillStyle = '#f4f4f5';
+                ctx.font = '600 11px JetBrains Mono, Consolas, monospace';
+                ctx.translate((fromX + toX) / 2, (fromY + toY) / 2);
+                // Keep text upright
+                if (Math.abs(angle) > Math.PI / 2) ctx.rotate(angle + Math.PI);
+                else ctx.rotate(angle);
+                ctx.fillText(label, 0, -8);
+                ctx.restore();
+            }
+        }
+
+        // --- MAIN LOOP ---
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+
+            // ---------------- STEP 0: ANATOMY ----------------
+            if (step === 0) {
+                const dx = mx - cx;
+                const dy = my - cy;
+                // Origin
+                ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+                // Arrow
+                drawArrow(cx, cy, mx, my, '#4ec9b0', 'v');
+                // Components
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#569cd6'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, cy); ctx.stroke();
+                ctx.strokeStyle = '#ce9178'; ctx.beginPath(); ctx.moveTo(mx, cy); ctx.lineTo(mx, my); ctx.stroke();
+                ctx.setLineDash([]);
+                // Stats
+                ctx.fillStyle = '#a1a1aa';
+                ctx.font = '13px JetBrains Mono, Consolas, monospace';
+                ctx.fillText(`magnitude: ${Math.round(Math.sqrt(dx * dx + dy * dy))}px`, 20, height - 20);
+            }
+
+            // ---------------- STEP 1 & 2: ADDITION ----------------
+            if (step === 1 || step === 2) {
+                const ax = cx - 120, ay = cy + 60; // Start
+                const bx = cx + 60, by = cy - 60;  // End of A
+
+                // Animating B into place
+                if (animProgress < 1) animProgress += 0.02;
+
+                // Vector B Targets
+                const bVecX = 120;
+                const bVecY = -20;
+
+                // Where B starts (floating) vs Where B ends (Tail to Head)
+                const floatStartX = cx - 100;
+                const floatStartY = cy - 100;
+
+                const curBX = floatStartX + (bx - floatStartX) * animProgress;
+                const curBY = floatStartY + (by - floatStartY) * animProgress;
+
+                // Draw A
+                drawArrow(ax, ay, bx, by, '#569cd6', 'A');
+
+                // Draw B
+                drawArrow(curBX, curBY, curBX + bVecX, curBY + bVecY, '#ce9178', 'B');
+
+                // Draw Result (Only Step 2)
+                if (step === 2 && animProgress >= 0.9) {
+                    ctx.setLineDash([5, 5]);
+                    drawArrow(ax, ay, bx + bVecX, by + bVecY, '#4ec9b0', 'A+B');
+                    ctx.setLineDash([]);
+                }
+            }
+
+            // ---------------- STEP 3: GAME MODES ----------------
+            if (step === 3) {
+
+                // --- MODE 0: WIND (ADDITION) ---
+                if (gameMode === 0) {
+                    const engineX = 2;
+                    const engineY = -1;
+                    const windX = Math.sin(Date.now() / 500) * 1.5 - 0.5; // Turbulent wind
+                    const windY = 0;
+
+                    dronePos.x += engineX + windX;
+                    dronePos.y += engineY + windY;
+                    if (dronePos.x > width) dronePos.x = 0;
+                    if (dronePos.y < 0) dronePos.y = height;
+
+                    // Draw Drone
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(dronePos.x, dronePos.y, 8, 0, Math.PI * 2); ctx.fill();
+
+                    // Vectors
+                    drawArrow(dronePos.x, dronePos.y, dronePos.x + engineX * 40, dronePos.y + engineY * 40, '#4ec9b0', 'Vel');
+                    const tipX = dronePos.x + engineX * 40;
+                    const tipY = dronePos.y + engineY * 40;
+                    drawArrow(tipX, tipY, tipX + windX * 40, tipY + windY * 40, '#ce9178', 'Wind');
+                }
+
+                // --- MODE 1: PLATFORMER (GRAVITY) ---
+                if (gameMode === 1) {
+                    // Physics
+                    playerPos.vy += 0.5; // Gravity
+                    playerPos.x += playerPos.vx;
+                    playerPos.y += playerPos.vy;
+
+                    // Ground collision
+                    if (playerPos.y > height - 50) {
+                        playerPos.y = height - 50;
+                        playerPos.vy = 0;
+                    }
+                    // Walls
+                    if (playerPos.x > width) playerPos.x = 0;
+
+                    // Draw Ground
+                    ctx.fillStyle = '#444'; ctx.fillRect(0, height - 50, width, 50);
+
+                    // Draw Player
+                    ctx.fillStyle = '#fff'; ctx.fillRect(playerPos.x - 10, playerPos.y - 20, 20, 20);
+
+                    // Draw Vectors
+                    // Velocity (Green)
+                    drawArrow(playerPos.x, playerPos.y - 10, playerPos.x + playerPos.vx * 10, playerPos.y - 10 + playerPos.vy * 10, '#4ec9b0', 'Vel');
+                    // Gravity (Red - Constant down)
+                    drawArrow(playerPos.x - 20, playerPos.y - 40, playerPos.x - 20, playerPos.y - 10, '#ce9178', 'Grav');
+                }
+
+                // --- MODE 2: AI (SUBTRACTION) ---
+                if (gameMode === 2) {
+                    // Calculate Vector to Target (Mouse)
+                    let dx = mx - enemyPos.x;
+                    let dy = my - enemyPos.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    // Normalize and Scale (Speed = 3)
+                    if (dist > 0) {
+                        dx = (dx / dist) * 3;
+                        dy = (dy / dist) * 3;
+                    }
+
+                    // Move Enemy
+                    if (dist > 5) { // Stop if close
+                        enemyPos.x += dx;
+                        enemyPos.y += dy;
+                    }
+
+                    // Draw Target (Mouse)
+                    ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(mx, my, 10, 0, Math.PI * 2); ctx.stroke();
+
+                    // Draw Enemy
+                    ctx.fillStyle = '#ce9178';
+                    ctx.beginPath();
+                    ctx.moveTo(enemyPos.x, enemyPos.y - 10);
+                    ctx.lineTo(enemyPos.x - 10, enemyPos.y + 10);
+                    ctx.lineTo(enemyPos.x + 10, enemyPos.y + 10);
+                    ctx.fill();
+
+                    // Draw "Look At" Vector
+                    // We draw the arrow from enemy to mouse to show the Subtraction result
+                    drawArrow(enemyPos.x, enemyPos.y, mx, my, '#4ec9b0', 'Target - Me');
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        updateUI();
+        animate();
+
+    </script>
+</body>
+
+</html>

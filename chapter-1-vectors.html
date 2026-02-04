@@ -3,111 +3,339 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSC 375 – Chapter 1: Vectors</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent-cyan: #4ec9b0;
-            --accent-blue: #569cd6;
-            --accent-orange: #ce9178;
-            --bg-dark: #0f0f12;
-            --bg-panel: #18181b;
-            --bg-sidebar: #1f1f23;
-            --border-color: #2a2a30;
-            --text-primary: #f4f4f5;
-            --text-secondary: #a1a1aa;
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        body {
-            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
-            background: var(--bg-dark);
-            background-image:
-                radial-gradient(ellipse at 20% 0%, rgba(78, 201, 176, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(86, 156, 214, 0.06) 0%, transparent 50%);
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-            overflow: hidden;
-        }
-
-        .course-header {
-            width: 100%;
-            padding: 12px 30px;
-            background: linear-gradient(90deg, var(--bg-sidebar) 0%, var(--bg-panel) 100%);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            padding: 0;
             box-sizing: border-box;
         }
 
-        .course-badge {
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            color: #000;
-            font-weight: 700;
-            font-size: 11px;
-            padding: 6px 12px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            white-space: nowrap;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .course-title {
-            font-size: 15px;
+        /* Header */
+        header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
             font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-canvas);
             color: var(--text-primary);
         }
 
-        .course-title span {
-            color: var(--text-secondary);
-            font-weight: 400;
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
-        .chapter-tag {
-            margin-left: auto;
-            font-family: 'JetBrains Mono', monospace;
+        .chapter-badge {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
             font-size: 12px;
-            color: var(--accent-orange);
-            background: rgba(206, 145, 120, 0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(206, 145, 120, 0.3);
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
         }
 
-        .container {
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .progress-container {
             display: flex;
-            width: 95%;
-            height: calc(100vh - 60px);
-            max-height: 900px;
-            margin: 20px 0;
-            background: var(--bg-panel);
-            border-radius: 12px;
-            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 120px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
             overflow: hidden;
         }
 
-        .sidebar {
-            width: 400px;
-            padding: 30px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            min-height: calc(100vh - 73px);
+        }
+
+        /* Content Panel */
+        .content-panel {
             display: flex;
             flex-direction: column;
+        }
+
+        .slide-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-blue);
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .slide-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .slide-content {
+            flex: 1;
+        }
+
+        .slide-text {
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .slide-text strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.08));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .highlight-box h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .highlight-box p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .code-block {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #e2e8f0;
+            margin: 0;
+        }
+
+        .code-block .keyword { color: #c084fc; }
+        .code-block .function { color: #67e8f9; }
+        .code-block .number { color: #fbbf24; }
+        .code-block .comment { color: #64748b; }
+        .code-block .string { color: #86efac; }
+
+        .formula-box {
+            background: var(--bg-white);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+
+        .formula .var { color: var(--accent-blue); font-weight: 600; }
+        .formula .op { color: var(--accent-orange); }
+
+        /* Navigation */
+        .nav-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-md), 0 0 0 0 rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg), 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-btn.secondary {
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .nav-btn.secondary:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Canvas Panel */
+        .canvas-panel {
+            background: var(--bg-white);
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
             justify-content: space-between;
         }
 
-        .content-area {
-            flex-grow: 1;
+        .canvas-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .canvas-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
             position: relative;
-            background: var(--bg-dark);
+            background: var(--bg-canvas);
         }
 
         canvas {
@@ -117,585 +345,969 @@
             cursor: crosshair;
         }
 
-        h1 {
-            color: var(--accent-cyan);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            color: var(--accent-blue);
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .explanation {
-            line-height: 1.7;
-            color: var(--text-secondary);
-            font-size: 15px;
-            margin-bottom: 20px;
-        }
-
-        .explanation b {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .code-box {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 16px 18px;
-            border-left: 3px solid var(--accent-cyan);
-            font-family: 'JetBrains Mono', 'Consolas', monospace;
-            margin: 15px 0;
-            color: #9cdcfe;
-            font-size: 13px;
-            border-radius: 0 8px 8px 0;
-            line-height: 1.6;
-        }
-
-        .comment {
-            color: #6a9955;
-        }
-
-        .step-indicator {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            align-items: center;
-        }
-
-        .step-dot {
-            width: 10px;
-            height: 10px;
-            background: var(--border-color);
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .step-dot.active {
-            background: var(--accent-cyan);
-            box-shadow: 0 0 12px var(--accent-cyan), 0 0 4px var(--accent-cyan);
-            transform: scale(1.2);
-        }
-
-        .step-dot::after {
-            content: '';
+        .canvas-overlay {
             position: absolute;
-            right: -12px;
-            top: 50%;
-            width: 6px;
-            height: 1px;
-            background: var(--border-color);
-        }
-
-        .step-dot:last-child::after {
-            display: none;
-        }
-
-        .nav-btn {
-            background: linear-gradient(135deg, var(--accent-blue), #4a8ac7);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(86, 156, 214, 0.3);
-        }
-
-        .nav-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(86, 156, 214, 0.4);
-        }
-
-        .nav-btn:disabled {
-            background: var(--border-color);
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-
-        /* Game Mode Buttons (Only visible in Step 4) */
-        .game-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .game-btn {
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            padding: 10px 8px;
-            cursor: pointer;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .game-btn:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--text-secondary);
-        }
-
-        .game-btn.active {
-            background: linear-gradient(135deg, var(--accent-orange), #d9a076);
-            color: #000;
-            border-color: var(--accent-orange);
-            font-weight: 600;
-        }
-
-        .overlay-instruction {
-            position: absolute;
-            bottom: 25px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(10px);
+            background: var(--bg-white);
             padding: 10px 20px;
-            border-radius: 25px;
-            border: 1px solid var(--border-color);
-            pointer-events: none;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+            font-size: 13px;
             color: var(--text-secondary);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .sidebar-header {
+        .canvas-overlay svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-blue);
+        }
+
+        /* Stats Display */
+        .stats-bar {
+            padding: 12px 24px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
             font-size: 11px;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
             font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Slide Dots */
+        .slide-dots {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .slide-dot {
+            width: 32px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .slide-dot:hover {
+            background: var(--border-medium);
+        }
+
+        .slide-dot.active {
+            background: var(--accent-blue);
+        }
+
+        .slide-dot.completed {
+            background: var(--accent-green);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+
+            .canvas-panel {
+                min-height: 400px;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .slide-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-content {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Example Cards */
+        .example-cards {
+            display: grid;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .example-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .example-card.active {
+            border-color: var(--accent-blue);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
+        }
+
+        .example-card h5 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .example-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .example-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
         }
     </style>
 </head>
 
 <body>
-
-    <header class="course-header">
-        <div class="course-badge">CSC 375</div>
-        <div class="course-title">Computer Modeling & Simulation <span>// Interactive Module</span></div>
-        <div class="chapter-tag">Chapter 1: Vectors</div>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </a>
+            <div class="chapter-badge">Chapter 1</div>
+            <div class="chapter-title">Vectors</div>
+        </div>
+        <div class="progress-container">
+            <span class="progress-text" id="progressText">1 / 7</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 14%"></div>
+            </div>
+        </div>
     </header>
 
-    <div class="container">
-        <div class="sidebar">
-            <div>
-                <div class="sidebar-header">Progress</div>
-                <div class="step-indicator" id="dots">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
-
-                <h1 id="title">1. The Vector Object</h1>
-
-                <div id="gameSelector" style="display:none; margin-bottom: 15px;">
-                    <div class="sidebar-header">Select Scenario</div>
-                    <div class="game-controls">
-                        <button class="game-btn active" onclick="setGameMode(0)">Flight (Add)</button>
-                        <button class="game-btn" onclick="setGameMode(1)">Jump (Grav)</button>
-                        <button class="game-btn" onclick="setGameMode(2)">AI (Sub)</button>
-                    </div>
-                </div>
-
-                <div id="explanation" class="explanation"></div>
-                <div id="code" class="code-box"></div>
+    <!-- Main Content -->
+    <main>
+        <!-- Left: Content Panel -->
+        <div class="content-panel">
+            <div class="slide-dots" id="slideDots"></div>
+            <div class="slide-number" id="slideNumber">SLIDE 01</div>
+            <h1 class="slide-title" id="slideTitle">What is a Vector?</h1>
+            
+            <div class="slide-content" id="slideContent">
+                <!-- Dynamic content loaded here -->
             </div>
 
-            <div>
-                <button class="nav-btn" onclick="nextStep()" id="btnNext">Next Step: Addition</button>
-                <button class="nav-btn" onclick="prevStep()" id="btnPrev"
-                    style="background: transparent; border: 1px solid var(--border-color); box-shadow: none; margin-top:8px;">←
-                    Back</button>
+            <div class="nav-controls">
+                <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Previous
+                </button>
+                <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
+                    Next
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
-        <div class="content-area">
-            <canvas id="vectorCanvas"></canvas>
-            <div id="overlay" class="overlay-instruction">Move mouse to interact</div>
+        <!-- Right: Canvas Panel -->
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <span class="canvas-title" id="canvasTitle">Interactive Visualization</span>
+                <span class="canvas-hint" id="canvasHint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4M12 8h.01"/>
+                    </svg>
+                    Move your mouse to interact
+                </span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                    <span id="overlayText">Move mouse to draw vector</span>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-blue)"></div>
+                    <span class="stat-label">X</span>
+                    <span class="stat-value" id="statX">0</span>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-cyan)"></div>
+                    <span class="stat-label">Y</span>
+                    <span class="stat-value" id="statY">0</span>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-green)"></div>
+                    <span class="stat-label">Magnitude</span>
+                    <span class="stat-value" id="statMag">0</span>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        const canvas = document.getElementById('vectorCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // --- STATE MANAGEMENT ---
-        let step = 0;
-        let gameMode = 0; // 0=Wind, 1=Platformer, 2=AI
-        const totalSteps = 4;
-        let width, height, cx, cy;
-        let animProgress = 0; // For transitions
-
-        // --- SIMULATION OBJECTS ---
-        let dronePos = { x: 0, y: 0 };
-        let playerPos = { x: 0, y: 0, vx: 0, vy: 0 }; // Platformer
-        let enemyPos = { x: 50, y: 50 }; // AI
-
-        // --- CONTENT DATA ---
+        // ============ SLIDE DATA ============
         const slides = [
             {
-                title: "1. The Vector Object",
-                text: `In game engines (like Unity, Godot, or p5.js), a Vector describes an arrow in space. <br><br>
-                   It holds an <b>X</b> and a <b>Y</b>, but represents <b>Magnitude</b> (Speed) and <b>Heading</b> (Direction).`,
-                code: `let v = createVector(x, y);
-// v.mag() = Length
-// v.heading() = Angle`
+                number: "SLIDE 01",
+                title: "What is a Vector?",
+                canvasTitle: "Vector Basics",
+                hint: "Move your mouse to create a vector",
+                overlay: "Drag from origin to any point",
+                content: `
+                    <p class="slide-text">
+                        A <strong>vector</strong> is a mathematical object that has both <strong>magnitude</strong> (size/length) and <strong>direction</strong>. Unlike regular numbers (scalars), vectors tell us not just "how much" but also "which way."
+                    </p>
+                    <p class="slide-text">
+                        Think of it as an arrow pointing from one place to another. In games and simulations, vectors describe movement, forces, and positions.
+                    </p>
+                    <div class="highlight-box">
+                        <h4>Key Concept</h4>
+                        <p>A vector is defined by two values: <strong>X</strong> (horizontal) and <strong>Y</strong> (vertical). Together, they create an arrow in 2D space.</p>
+                    </div>
+                    <div class="code-block">
+                        <pre><span class="comment">// Creating a vector in code</span>
+<span class="keyword">let</span> velocity = <span class="function">createVector</span>(<span class="number">3</span>, <span class="number">4</span>);
+<span class="comment">// This points 3 units right, 4 units down</span></pre>
+                    </div>
+                `,
+                draw: drawVectorBasics
             },
             {
-                title: "2. Vector Addition",
-                text: `To combine forces, we add vectors using the <b>Head-to-Tail</b> rule.<br><br>
-                   We don't add them numerically in our heads. We visualize walking along the first arrow, then walking along the second.`,
-                code: `// Finding the destination
-let result = p5.Vector.add(v1, v2);`
+                number: "SLIDE 02",
+                title: "Visualizing in Space",
+                canvasTitle: "2D Coordinate System",
+                hint: "Watch how X and Y form the vector",
+                overlay: "Components shown as dotted lines",
+                content: `
+                    <p class="slide-text">
+                        In a 2D coordinate system, every vector can be broken down into its <strong>X component</strong> (horizontal) and <strong>Y component</strong> (vertical).
+                    </p>
+                    <p class="slide-text">
+                        These components are like instructions: "Go this far right, then this far up." The vector is the direct path from start to finish.
+                    </p>
+                    <div class="formula-box">
+                        <div class="formula">
+                            <span class="var">v</span> = (<span class="var">x</span>, <span class="var">y</span>) → magnitude = √(<span class="var">x</span>² + <span class="var">y</span>²)
+                        </div>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Pythagorean Theorem</h4>
+                        <p>The vector's length (magnitude) is the hypotenuse of a right triangle formed by X and Y components.</p>
+                    </div>
+                `,
+                draw: drawComponents
             },
             {
-                title: "3. The Result",
-                text: `The red dotted line shows the <b>Resultant Vector</b>.<br><br>
-                   This is the shortcut from the <b>Start</b> directly to the <b>End</b>. This is how games calculate where you end up after all forces are applied.`,
-                code: `position.add(velocity);`
+                number: "SLIDE 03",
+                title: "Vector Addition",
+                canvasTitle: "Adding Vectors",
+                hint: "Two forces combine into one result",
+                overlay: "Watch vectors add head-to-tail",
+                content: `
+                    <p class="slide-text">
+                        When you <strong>add</strong> two vectors, you place them <strong>head-to-tail</strong>. The result goes from the start of the first to the end of the second.
+                    </p>
+                    <p class="slide-text">
+                        This is how games combine multiple forces—like a player's movement plus wind, or velocity plus acceleration.
+                    </p>
+                    <div class="formula-box">
+                        <div class="formula">
+                            <span class="var">A</span> <span class="op">+</span> <span class="var">B</span> = (<span class="var">Ax</span> + <span class="var">Bx</span>, <span class="var">Ay</span> + <span class="var">By</span>)
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <pre><span class="comment">// Adding vectors</span>
+<span class="keyword">let</span> result = <span class="function">p5.Vector.add</span>(vectorA, vectorB);
+<span class="comment">// Or: vectorA.add(vectorB)</span></pre>
+                    </div>
+                `,
+                draw: drawAddition
             },
             {
-                title: "4. Real Game Use Cases",
-                text: "Select a scenario above to see how vectors drive different game mechanics.", // Dynamic text based on mode
-                code: "" // Dynamic code
+                number: "SLIDE 04",
+                title: "Vector Subtraction",
+                canvasTitle: "Subtracting Vectors",
+                hint: "Find the direction from one point to another",
+                overlay: "Move mouse to see B - A",
+                content: `
+                    <p class="slide-text">
+                        <strong>Subtraction</strong> finds the vector that points <strong>from one position to another</strong>. If you want to know how to get from A to B, calculate <strong>B - A</strong>.
+                    </p>
+                    <p class="slide-text">
+                        This is essential for AI targeting, camera following, and any "look at" behavior in games.
+                    </p>
+                    <div class="formula-box">
+                        <div class="formula">
+                            <span class="var">B</span> <span class="op">-</span> <span class="var">A</span> = (<span class="var">Bx</span> - <span class="var">Ax</span>, <span class="var">By</span> - <span class="var">Ay</span>)
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <pre><span class="comment">// Finding direction to target</span>
+<span class="keyword">let</span> direction = <span class="function">p5.Vector.sub</span>(target, myPos);
+<span class="comment">// Now direction points from me to target!</span></pre>
+                    </div>
+                `,
+                draw: drawSubtraction
+            },
+            {
+                number: "SLIDE 05",
+                title: "Scalar Multiplication",
+                canvasTitle: "Scaling Vectors",
+                hint: "Drag left/right to change the scalar",
+                overlay: "Scalar changes length, not direction",
+                content: `
+                    <p class="slide-text">
+                        A <strong>scalar</strong> is just a regular number. When you multiply a vector by a scalar, you <strong>scale</strong> its length without changing its direction.
+                    </p>
+                    <p class="slide-text">
+                        Multiply by 2 to double the speed. Multiply by 0.5 to halve it. Multiply by -1 to reverse direction!
+                    </p>
+                    <div class="formula-box">
+                        <div class="formula">
+                            <span class="var">v</span> <span class="op">×</span> <span class="number">2</span> = (<span class="var">x</span> × 2, <span class="var">y</span> × 2)
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <pre><span class="comment">// Scaling a vector</span>
+velocity.<span class="function">mult</span>(<span class="number">2</span>);     <span class="comment">// Double speed</span>
+velocity.<span class="function">mult</span>(<span class="number">0.5</span>);   <span class="comment">// Half speed</span>
+velocity.<span class="function">mult</span>(<span class="number">-1</span>);    <span class="comment">// Reverse!</span></pre>
+                    </div>
+                `,
+                draw: drawScalar
+            },
+            {
+                number: "SLIDE 06",
+                title: "Normalizing Vectors",
+                canvasTitle: "Unit Vectors",
+                hint: "Any vector can become length 1",
+                overlay: "Normalized = direction only",
+                content: `
+                    <p class="slide-text">
+                        <strong>Normalizing</strong> a vector means scaling it to have a length of exactly <strong>1</strong>. This gives you a pure direction vector (called a <strong>unit vector</strong>).
+                    </p>
+                    <p class="slide-text">
+                        This is incredibly useful when you want consistent speed regardless of distance—like making an enemy always move at 5 units/second toward the player.
+                    </p>
+                    <div class="code-block">
+                        <pre><span class="comment">// Normalize then scale to desired speed</span>
+<span class="keyword">let</span> dir = <span class="function">p5.Vector.sub</span>(target, myPos);
+dir.<span class="function">normalize</span>();       <span class="comment">// Now length = 1</span>
+dir.<span class="function">mult</span>(<span class="number">5</span>);            <span class="comment">// Now length = 5</span></pre>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Common Pattern</h4>
+                        <p><strong>Normalize → Multiply</strong> is the standard way to move toward something at a fixed speed.</p>
+                    </div>
+                `,
+                draw: drawNormalize
+            },
+            {
+                number: "SLIDE 07",
+                title: "Real Examples",
+                canvasTitle: "Game Physics Demo",
+                hint: "Click the cards to switch examples",
+                overlay: "See vectors in action!",
+                content: `
+                    <p class="slide-text">
+                        Now let's see how vectors power real game mechanics! Click an example below to see it in action.
+                    </p>
+                    <div class="example-cards" id="exampleCards">
+                        <div class="example-card active" onclick="setExample(0)">
+                            <h5>
+                                <span class="example-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green)">🚀</span>
+                                Velocity + Wind
+                            </h5>
+                            <p>A drone flying through wind. Two vectors (thrust + wind) add together.</p>
+                        </div>
+                        <div class="example-card" onclick="setExample(1)">
+                            <h5>
+                                <span class="example-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--accent-red)">⬇️</span>
+                                Gravity & Jumping
+                            </h5>
+                            <p>Click to jump! Gravity constantly adds downward velocity.</p>
+                        </div>
+                        <div class="example-card" onclick="setExample(2)">
+                            <h5>
+                                <span class="example-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple)">🎯</span>
+                                AI Targeting
+                            </h5>
+                            <p>Enemy chases your mouse using subtraction to find direction.</p>
+                        </div>
+                    </div>
+                `,
+                draw: drawExamples
             }
         ];
 
-        const gameModesInfo = [
-            {
-                text: "<b>Scenario: Wind/Flight</b><br>Basic Vector Addition.<br>The drone wants to go Green, but the Wind (Red) pushes it off course.",
-                code: `// 1. Apply Engine
-pos.add(velocity);
-// 2. Apply Wind
-pos.add(wind);`
-            },
-            {
-                text: "<b>Scenario: Platformer Gravity</b><br>Acceleration is a vector pointing DOWN.<br>We add Gravity to Velocity every frame.",
-                code: `// 1. Add Gravity to Velocity
-velocity.add(gravity);
-// 2. Add Velocity to Position
-position.add(velocity);`
-            },
-            {
-                text: "<b>Scenario: AI Homing Missile</b><br>Vector Subtraction.<br>To find the player, the enemy calculates: <br><code>Target - Me = Direction</code>",
-                code: `// Get vector pointing to player
-let dir = p5.Vector.sub(player, me);
-dir.setMag(speed); // Normalize & Scale
-position.add(dir);`
-            }
-        ];
+        // ============ STATE ============
+        let currentSlide = 0;
+        let mx = 0, my = 0;
+        let scalar = 1.5;
+        let exampleMode = 0;
+        let animFrame = 0;
 
-        // --- INIT ---
+        // Example state
+        let drone = { x: 0, y: 0 };
+        let player = { x: 100, y: 0, vy: 0 };
+        let enemy = { x: 50, y: 50 };
+
+        // Canvas
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, cx, cy;
+
+        // ============ INITIALIZATION ============
+        function init() {
+            resize();
+            updateUI();
+            generateDots();
+            animate();
+        }
+
         function resize() {
-            width = canvas.width = canvas.offsetWidth;
-            height = canvas.height = canvas.offsetHeight;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            width = canvas.width = rect.width;
+            height = canvas.height = rect.height;
             cx = width / 2;
             cy = height / 2;
-            resetSims();
+            resetExamples();
         }
-        window.addEventListener('resize', resize);
 
-        // Mouse tracking
-        let mx = 0, my = 0;
+        function resetExamples() {
+            drone = { x: 50, y: cy };
+            player = { x: 100, y: height - 80, vy: 0 };
+            enemy = { x: 50, y: 50 };
+        }
+
+        window.addEventListener('resize', resize);
         canvas.addEventListener('mousemove', e => {
             const rect = canvas.getBoundingClientRect();
             mx = e.clientX - rect.left;
             my = e.clientY - rect.top;
-        });
-        canvas.addEventListener('mousedown', () => {
-            // Jump for platformer
-            if (step === 3 && gameMode === 1 && playerPos.y >= height - 100) {
-                playerPos.vy = -15;
+            
+            // Update scalar based on X position for slide 5
+            if (currentSlide === 4) {
+                scalar = ((mx / width) * 4) - 1; // -1 to 3
             }
         });
 
-        function resetSims() {
-            dronePos = { x: 50, y: cy };
-            playerPos = { x: 100, y: height - 100, vx: 5, vy: 0 };
-            enemyPos = { x: 50, y: 50 };
-        }
-        resize();
+        canvas.addEventListener('click', () => {
+            if (currentSlide === 6 && exampleMode === 1) {
+                if (player.y >= height - 100) {
+                    player.vy = -14;
+                }
+            }
+        });
 
-        // --- NAVIGATION ---
-        function nextStep() {
-            if (step < totalSteps - 1) {
-                step++;
-                animProgress = 0;
+        // ============ NAVIGATION ============
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
                 updateUI();
             }
         }
 
-        function prevStep() {
-            if (step > 0) {
-                step--;
-                animProgress = 0;
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
                 updateUI();
             }
         }
 
-        function setGameMode(mode) {
-            gameMode = mode;
-            resetSims();
-            // Update buttons
-            document.querySelectorAll('.game-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === mode);
-            });
+        function goToSlide(index) {
+            currentSlide = index;
             updateUI();
         }
 
+        function setExample(mode) {
+            exampleMode = mode;
+            resetExamples();
+            document.querySelectorAll('.example-card').forEach((card, i) => {
+                card.classList.toggle('active', i === mode);
+            });
+        }
+
         function updateUI() {
-            // Base Content
-            document.getElementById('title').innerText = slides[step].title;
-            document.getElementById('explanation').innerHTML = slides[step].text;
-            document.getElementById('code').innerText = slides[step].code;
-
-            // Step 4 Special Handling
-            const gameSelector = document.getElementById('gameSelector');
-            const overlay = document.getElementById('overlay');
-
-            if (step === 3) {
-                gameSelector.style.display = 'block';
-                document.getElementById('explanation').innerHTML = gameModesInfo[gameMode].text;
-                document.getElementById('code').innerText = gameModesInfo[gameMode].code;
-
-                if (gameMode === 0) overlay.innerText = "Watch the drone fight the wind";
-                if (gameMode === 1) overlay.innerText = "Click to JUMP";
-                if (gameMode === 2) overlay.innerText = "Move mouse to attract the Enemy";
-
-                document.getElementById('btnNext').innerText = "Finished";
-                document.getElementById('btnNext').disabled = true;
-            } else {
-                gameSelector.style.display = 'none';
-                overlay.innerText = "Move mouse to interact";
-                document.getElementById('btnNext').disabled = false;
-
-                if (step === 0) document.getElementById('btnNext').innerText = "Next: Addition";
-                else if (step === 1) document.getElementById('btnNext').innerText = "Next: The Result";
-                else if (step === 2) document.getElementById('btnNext').innerText = "Next: Game Examples";
-            }
-
+            const slide = slides[currentSlide];
+            
+            document.getElementById('slideNumber').textContent = slide.number;
+            document.getElementById('slideTitle').textContent = slide.title;
+            document.getElementById('slideContent').innerHTML = slide.content;
+            document.getElementById('canvasTitle').textContent = slide.canvasTitle;
+            document.getElementById('canvasHint').innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                ${slide.hint}
+            `;
+            document.getElementById('overlayText').textContent = slide.overlay;
+            
+            // Progress
+            document.getElementById('progressText').textContent = `${currentSlide + 1} / ${slides.length}`;
+            document.getElementById('progressFill').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+            
+            // Buttons
+            document.getElementById('btnPrev').disabled = currentSlide === 0;
+            document.getElementById('btnNext').disabled = currentSlide === slides.length - 1;
+            
             // Dots
-            document.querySelectorAll('.step-dot').forEach((d, i) => d.classList.toggle('active', i === step));
+            document.querySelectorAll('.slide-dot').forEach((dot, i) => {
+                dot.classList.remove('active', 'completed');
+                if (i === currentSlide) dot.classList.add('active');
+                else if (i < currentSlide) dot.classList.add('completed');
+            });
+
+            // Reset examples if on that slide
+            if (currentSlide === 6) {
+                resetExamples();
+            }
         }
 
-        // --- DRAWING UTILS ---
+        function generateDots() {
+            const container = document.getElementById('slideDots');
+            container.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            });
+        }
+
+        // ============ DRAWING UTILITIES ============
         function drawGrid() {
-            ctx.strokeStyle = '#1a1a1f';
+            ctx.strokeStyle = '#e2e8f0';
             ctx.lineWidth = 1;
-            for (let i = 0; i < width; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke(); }
-            for (let i = 0; i < height; i += 50) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke(); }
+            
+            // Grid lines
+            const step = 40;
+            for (let x = cx % step; x < width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = cy % step; y < height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
             // Axes
-            ctx.strokeStyle = '#2a2a30';
+            ctx.strokeStyle = '#cbd5e1';
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx, height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(width, cy);
+            ctx.stroke();
+            
+            // Origin dot
+            ctx.fillStyle = '#64748b';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        function drawArrow(fromX, fromY, toX, toY, color, label) {
-            const head = 10;
-            const dx = toX - fromX;
-            const dy = toY - fromY;
-            const angle = Math.atan2(dy, dx);
+        function drawArrow(x1, y1, x2, y2, color, label, dashed = false) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
             const len = Math.sqrt(dx * dx + dy * dy);
-
-            if (len < 1) return; // Don't draw tiny arrows
-
+            if (len < 2) return;
+            
+            const angle = Math.atan2(dy, dx);
+            const headLen = Math.min(12, len * 0.3);
+            
+            ctx.save();
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
             ctx.lineWidth = 3;
-
+            ctx.lineCap = 'round';
+            
+            if (dashed) {
+                ctx.setLineDash([8, 6]);
+            }
+            
+            // Line
             ctx.beginPath();
-            ctx.moveTo(fromX, fromY);
-            ctx.lineTo(toX, toY);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
             ctx.stroke();
-
+            
+            ctx.setLineDash([]);
+            
+            // Arrowhead
             ctx.beginPath();
-            ctx.lineTo(toX, toY);
-            ctx.lineTo(toX - head * Math.cos(angle - Math.PI / 6), toY - head * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(toX - head * Math.cos(angle + Math.PI / 6), toY - head * Math.sin(angle + Math.PI / 6));
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI/6), y2 - headLen * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI/6), y2 - headLen * Math.sin(angle + Math.PI/6));
+            ctx.closePath();
             ctx.fill();
-
+            
+            // Label
             if (label) {
-                ctx.save();
-                ctx.fillStyle = '#f4f4f5';
-                ctx.font = '600 11px JetBrains Mono, Consolas, monospace';
-                ctx.translate((fromX + toX) / 2, (fromY + toY) / 2);
-                // Keep text upright
-                if (Math.abs(angle) > Math.PI / 2) ctx.rotate(angle + Math.PI);
-                else ctx.rotate(angle);
-                ctx.fillText(label, 0, -8);
-                ctx.restore();
+                ctx.font = '600 13px Inter, sans-serif';
+                const labelX = (x1 + x2) / 2;
+                const labelY = (y1 + y2) / 2;
+                const offset = 16;
+                const perpX = -Math.sin(angle) * offset;
+                const perpY = Math.cos(angle) * offset;
+                ctx.fillText(label, labelX + perpX, labelY + perpY);
+            }
+            
+            ctx.restore();
+        }
+
+        function updateStats(x, y, mag) {
+            document.getElementById('statX').textContent = x.toFixed(0);
+            document.getElementById('statY').textContent = (-y).toFixed(0); // Flip Y for math convention
+            document.getElementById('statMag').textContent = mag.toFixed(1);
+        }
+
+        // ============ SLIDE DRAWINGS ============
+        function drawVectorBasics() {
+            drawGrid();
+            
+            const dx = mx - cx;
+            const dy = my - cy;
+            const mag = Math.sqrt(dx * dx + dy * dy);
+            
+            drawArrow(cx, cy, mx, my, '#3b82f6', 'v');
+            updateStats(dx, dy, mag);
+        }
+
+        function drawComponents() {
+            drawGrid();
+            
+            const dx = mx - cx;
+            const dy = my - cy;
+            const mag = Math.sqrt(dx * dx + dy * dy);
+            
+            // Components (dotted)
+            ctx.save();
+            ctx.setLineDash([6, 4]);
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(mx, cy);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.beginPath();
+            ctx.moveTo(mx, cy);
+            ctx.lineTo(mx, my);
+            ctx.stroke();
+            ctx.restore();
+            
+            // Labels
+            ctx.font = '600 12px JetBrains Mono, monospace';
+            ctx.fillStyle = '#f97316';
+            ctx.fillText(`x = ${dx.toFixed(0)}`, (cx + mx) / 2, cy - 10);
+            ctx.fillStyle = '#8b5cf6';
+            ctx.fillText(`y = ${(-dy).toFixed(0)}`, mx + 10, (cy + my) / 2);
+            
+            // Main vector
+            drawArrow(cx, cy, mx, my, '#3b82f6', 'v');
+            
+            updateStats(dx, dy, mag);
+        }
+
+        function drawAddition() {
+            drawGrid();
+            
+            // Fixed vector A
+            const ax = cx - 80, ay = cy + 40;
+            const aEndX = cx + 60, aEndY = cy - 20;
+            
+            // Vector B (mouse relative to A's end)
+            const bx = Math.min(Math.max(mx - aEndX, -150), 150);
+            const by = Math.min(Math.max(my - aEndY, -100), 100);
+            
+            // Draw A
+            drawArrow(ax, ay, aEndX, aEndY, '#3b82f6', 'A');
+            
+            // Draw B (from A's tip)
+            drawArrow(aEndX, aEndY, aEndX + bx, aEndY + by, '#f97316', 'B');
+            
+            // Draw Result (dashed)
+            drawArrow(ax, ay, aEndX + bx, aEndY + by, '#10b981', 'A + B', true);
+            
+            const dx = (aEndX - ax) + bx;
+            const dy = (aEndY - ay) + by;
+            updateStats(dx, dy, Math.sqrt(dx*dx + dy*dy));
+        }
+
+        function drawSubtraction() {
+            drawGrid();
+            
+            // Point A (fixed)
+            const ax = cx - 100, ay = cy + 50;
+            
+            // Point B (mouse)
+            const bx = mx, by = my;
+            
+            // Draw points
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(ax, ay, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = '600 14px Inter';
+            ctx.fillText('A', ax - 20, ay - 12);
+            
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(bx, by, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('B', bx + 12, by - 8);
+            
+            // Draw B - A (direction from A to B)
+            drawArrow(ax, ay, bx, by, '#10b981', 'B - A');
+            
+            const dx = bx - ax;
+            const dy = by - ay;
+            updateStats(dx, dy, Math.sqrt(dx*dx + dy*dy));
+        }
+
+        function drawScalar() {
+            drawGrid();
+            
+            // Base vector (fixed direction)
+            const baseLen = 80;
+            const angle = -Math.PI / 6;
+            
+            const vx = Math.cos(angle) * baseLen;
+            const vy = Math.sin(angle) * baseLen;
+            
+            // Original (faded)
+            ctx.globalAlpha = 0.3;
+            drawArrow(cx, cy, cx + vx, cy + vy, '#94a3b8', '');
+            ctx.globalAlpha = 1;
+            
+            // Scaled
+            const scaledX = vx * scalar;
+            const scaledY = vy * scalar;
+            const color = scalar < 0 ? '#ef4444' : '#10b981';
+            drawArrow(cx, cy, cx + scaledX, cy + scaledY, color, `v × ${scalar.toFixed(1)}`);
+            
+            // Scalar indicator
+            ctx.font = '500 14px Inter';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(`Scalar: ${scalar.toFixed(2)}`, 20, 30);
+            
+            const mag = Math.sqrt(scaledX * scaledX + scaledY * scaledY);
+            updateStats(scaledX, scaledY, mag);
+        }
+
+        function drawNormalize() {
+            drawGrid();
+            
+            const dx = mx - cx;
+            const dy = my - cy;
+            const mag = Math.sqrt(dx * dx + dy * dy);
+            
+            // Original (faded)
+            if (mag > 10) {
+                ctx.globalAlpha = 0.3;
+                drawArrow(cx, cy, mx, my, '#94a3b8', '');
+                ctx.globalAlpha = 1;
+                
+                // Normalized (length = 60 for visibility)
+                const nx = (dx / mag) * 60;
+                const ny = (dy / mag) * 60;
+                drawArrow(cx, cy, cx + nx, cy + ny, '#10b981', 'normalized');
+                
+                // Show magnitude = 1
+                ctx.font = '500 13px JetBrains Mono';
+                ctx.fillStyle = '#10b981';
+                ctx.fillText('length = 1', cx + nx + 15, cy + ny);
+            }
+            
+            updateStats(dx, dy, mag > 0 ? 1 : 0);
+        }
+
+        function drawExamples() {
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(0, 0, width, height);
+            
+            animFrame++;
+            
+            if (exampleMode === 0) {
+                // Wind example
+                const thrust = { x: 2.5, y: -0.5 };
+                const wind = { x: Math.sin(animFrame / 30) * 1.5 - 0.3, y: 0.2 };
+                
+                drone.x += thrust.x + wind.x;
+                drone.y += thrust.y + wind.y;
+                
+                if (drone.x > width + 20) drone.x = -20;
+                if (drone.y < -20) drone.y = height + 20;
+                if (drone.y > height + 20) drone.y = -20;
+                
+                // Drone
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.arc(drone.x, drone.y, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Vectors
+                drawArrow(drone.x, drone.y, drone.x + thrust.x * 30, drone.y + thrust.y * 30, '#10b981', 'thrust');
+                const tipX = drone.x + thrust.x * 30;
+                const tipY = drone.y + thrust.y * 30;
+                drawArrow(tipX, tipY, tipX + wind.x * 30, tipY + wind.y * 30, '#f97316', 'wind');
+                
+                updateStats(thrust.x + wind.x, thrust.y + wind.y, Math.sqrt((thrust.x+wind.x)**2 + (thrust.y+wind.y)**2) * 10);
+                
+            } else if (exampleMode === 1) {
+                // Gravity example
+                const gravity = 0.6;
+                player.vy += gravity;
+                player.x += 3;
+                player.y += player.vy;
+                
+                if (player.y > height - 60) {
+                    player.y = height - 60;
+                    player.vy = 0;
+                }
+                if (player.x > width + 20) player.x = -20;
+                
+                // Ground
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(0, height - 40, width, 40);
+                
+                // Player
+                ctx.fillStyle = '#3b82f6';
+                ctx.fillRect(player.x - 15, player.y - 30, 30, 30);
+                
+                // Velocity vector
+                drawArrow(player.x, player.y - 15, player.x + 3 * 15, player.y - 15 + player.vy * 8, '#10b981', 'velocity');
+                
+                // Gravity (constant)
+                drawArrow(player.x - 30, player.y - 50, player.x - 30, player.y - 20, '#ef4444', 'gravity');
+                
+                updateStats(3, player.vy, Math.sqrt(9 + player.vy * player.vy));
+                
+            } else if (exampleMode === 2) {
+                // AI targeting
+                const dx = mx - enemy.x;
+                const dy = my - enemy.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 5) {
+                    const speed = 3;
+                    enemy.x += (dx / dist) * speed;
+                    enemy.y += (dy / dist) * speed;
+                }
+                
+                // Target (mouse)
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(mx, my, 15, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(mx - 20, my);
+                ctx.lineTo(mx + 20, my);
+                ctx.moveTo(mx, my - 20);
+                ctx.lineTo(mx, my + 20);
+                ctx.stroke();
+                
+                // Enemy
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.moveTo(enemy.x, enemy.y - 15);
+                ctx.lineTo(enemy.x - 12, enemy.y + 12);
+                ctx.lineTo(enemy.x + 12, enemy.y + 12);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Direction vector
+                drawArrow(enemy.x, enemy.y, mx, my, '#8b5cf6', 'target - me');
+                
+                updateStats(dx, dy, dist);
             }
         }
 
-        // --- MAIN LOOP ---
+        // ============ MAIN LOOP ============
         function animate() {
             ctx.clearRect(0, 0, width, height);
-            drawGrid();
-
-            // ---------------- STEP 0: ANATOMY ----------------
-            if (step === 0) {
-                const dx = mx - cx;
-                const dy = my - cy;
-                // Origin
-                ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
-                // Arrow
-                drawArrow(cx, cy, mx, my, '#4ec9b0', 'v');
-                // Components
-                ctx.setLineDash([5, 5]);
-                ctx.strokeStyle = '#569cd6'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, cy); ctx.stroke();
-                ctx.strokeStyle = '#ce9178'; ctx.beginPath(); ctx.moveTo(mx, cy); ctx.lineTo(mx, my); ctx.stroke();
-                ctx.setLineDash([]);
-                // Stats
-                ctx.fillStyle = '#a1a1aa';
-                ctx.font = '13px JetBrains Mono, Consolas, monospace';
-                ctx.fillText(`magnitude: ${Math.round(Math.sqrt(dx * dx + dy * dy))}px`, 20, height - 20);
-            }
-
-            // ---------------- STEP 1 & 2: ADDITION ----------------
-            if (step === 1 || step === 2) {
-                const ax = cx - 120, ay = cy + 60; // Start
-                const bx = cx + 60, by = cy - 60;  // End of A
-
-                // Animating B into place
-                if (animProgress < 1) animProgress += 0.02;
-
-                // Vector B Targets
-                const bVecX = 120;
-                const bVecY = -20;
-
-                // Where B starts (floating) vs Where B ends (Tail to Head)
-                const floatStartX = cx - 100;
-                const floatStartY = cy - 100;
-
-                const curBX = floatStartX + (bx - floatStartX) * animProgress;
-                const curBY = floatStartY + (by - floatStartY) * animProgress;
-
-                // Draw A
-                drawArrow(ax, ay, bx, by, '#569cd6', 'A');
-
-                // Draw B
-                drawArrow(curBX, curBY, curBX + bVecX, curBY + bVecY, '#ce9178', 'B');
-
-                // Draw Result (Only Step 2)
-                if (step === 2 && animProgress >= 0.9) {
-                    ctx.setLineDash([5, 5]);
-                    drawArrow(ax, ay, bx + bVecX, by + bVecY, '#4ec9b0', 'A+B');
-                    ctx.setLineDash([]);
-                }
-            }
-
-            // ---------------- STEP 3: GAME MODES ----------------
-            if (step === 3) {
-
-                // --- MODE 0: WIND (ADDITION) ---
-                if (gameMode === 0) {
-                    const engineX = 2;
-                    const engineY = -1;
-                    const windX = Math.sin(Date.now() / 500) * 1.5 - 0.5; // Turbulent wind
-                    const windY = 0;
-
-                    dronePos.x += engineX + windX;
-                    dronePos.y += engineY + windY;
-                    if (dronePos.x > width) dronePos.x = 0;
-                    if (dronePos.y < 0) dronePos.y = height;
-
-                    // Draw Drone
-                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(dronePos.x, dronePos.y, 8, 0, Math.PI * 2); ctx.fill();
-
-                    // Vectors
-                    drawArrow(dronePos.x, dronePos.y, dronePos.x + engineX * 40, dronePos.y + engineY * 40, '#4ec9b0', 'Vel');
-                    const tipX = dronePos.x + engineX * 40;
-                    const tipY = dronePos.y + engineY * 40;
-                    drawArrow(tipX, tipY, tipX + windX * 40, tipY + windY * 40, '#ce9178', 'Wind');
-                }
-
-                // --- MODE 1: PLATFORMER (GRAVITY) ---
-                if (gameMode === 1) {
-                    // Physics
-                    playerPos.vy += 0.5; // Gravity
-                    playerPos.x += playerPos.vx;
-                    playerPos.y += playerPos.vy;
-
-                    // Ground collision
-                    if (playerPos.y > height - 50) {
-                        playerPos.y = height - 50;
-                        playerPos.vy = 0;
-                    }
-                    // Walls
-                    if (playerPos.x > width) playerPos.x = 0;
-
-                    // Draw Ground
-                    ctx.fillStyle = '#444'; ctx.fillRect(0, height - 50, width, 50);
-
-                    // Draw Player
-                    ctx.fillStyle = '#fff'; ctx.fillRect(playerPos.x - 10, playerPos.y - 20, 20, 20);
-
-                    // Draw Vectors
-                    // Velocity (Green)
-                    drawArrow(playerPos.x, playerPos.y - 10, playerPos.x + playerPos.vx * 10, playerPos.y - 10 + playerPos.vy * 10, '#4ec9b0', 'Vel');
-                    // Gravity (Red - Constant down)
-                    drawArrow(playerPos.x - 20, playerPos.y - 40, playerPos.x - 20, playerPos.y - 10, '#ce9178', 'Grav');
-                }
-
-                // --- MODE 2: AI (SUBTRACTION) ---
-                if (gameMode === 2) {
-                    // Calculate Vector to Target (Mouse)
-                    let dx = mx - enemyPos.x;
-                    let dy = my - enemyPos.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy);
-
-                    // Normalize and Scale (Speed = 3)
-                    if (dist > 0) {
-                        dx = (dx / dist) * 3;
-                        dy = (dy / dist) * 3;
-                    }
-
-                    // Move Enemy
-                    if (dist > 5) { // Stop if close
-                        enemyPos.x += dx;
-                        enemyPos.y += dy;
-                    }
-
-                    // Draw Target (Mouse)
-                    ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(mx, my, 10, 0, Math.PI * 2); ctx.stroke();
-
-                    // Draw Enemy
-                    ctx.fillStyle = '#ce9178';
-                    ctx.beginPath();
-                    ctx.moveTo(enemyPos.x, enemyPos.y - 10);
-                    ctx.lineTo(enemyPos.x - 10, enemyPos.y + 10);
-                    ctx.lineTo(enemyPos.x + 10, enemyPos.y + 10);
-                    ctx.fill();
-
-                    // Draw "Look At" Vector
-                    // We draw the arrow from enemy to mouse to show the Subtraction result
-                    drawArrow(enemyPos.x, enemyPos.y, mx, my, '#4ec9b0', 'Target - Me');
-                }
-            }
-
+            slides[currentSlide].draw();
             requestAnimationFrame(animate);
         }
 
-        updateUI();
-        animate();
-
+        // Start
+        init();
     </script>
 </body>
 

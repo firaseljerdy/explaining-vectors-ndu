@@ -7,21 +7,26 @@
     <title>CSC 375 – Computer Modeling & Simulation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent-cyan: #4ec9b0;
-            --accent-blue: #569cd6;
-            --accent-orange: #ce9178;
-            --accent-purple: #c586c0;
-            --bg-dark: #0a0a0d;
-            --bg-panel: #12121a;
-            --bg-card: #18181f;
-            --border-color: #2a2a35;
-            --text-primary: #f4f4f5;
-            --text-secondary: #8b8b96;
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
         * {
@@ -31,88 +36,36 @@
         }
 
         body {
-            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
-            background: var(--bg-dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Animated Background */
-        .bg-grid {
+        /* Subtle Background Pattern */
+        .bg-pattern {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image:
-                linear-gradient(rgba(78, 201, 176, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(78, 201, 176, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
-        }
-
-        .bg-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.4;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .bg-glow-1 {
-            top: -200px;
-            left: -100px;
-            background: radial-gradient(circle, rgba(78, 201, 176, 0.15) 0%, transparent 70%);
-            animation: float1 20s ease-in-out infinite;
-        }
-
-        .bg-glow-2 {
-            bottom: -300px;
-            right: -100px;
-            background: radial-gradient(circle, rgba(86, 156, 214, 0.12) 0%, transparent 70%);
-            animation: float2 25s ease-in-out infinite;
-        }
-
-        .bg-glow-3 {
-            top: 40%;
-            right: 20%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(197, 134, 192, 0.08) 0%, transparent 70%);
-            animation: float3 18s ease-in-out infinite;
-        }
-
-        @keyframes float1 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(50px, 30px); }
-        }
-
-        @keyframes float2 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(-40px, -50px); }
-        }
-
-        @keyframes float3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-30px, 20px) scale(1.1); }
         }
 
         /* Header */
         header {
             position: relative;
             z-index: 10;
-            padding: 20px 40px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(10, 10, 13, 0.8);
-            backdrop-filter: blur(20px);
         }
 
         .logo {
@@ -122,74 +75,82 @@
         }
 
         .logo-badge {
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            color: #000;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
             font-weight: 700;
             font-size: 13px;
             padding: 8px 14px;
-            border-radius: 6px;
-            letter-spacing: 1px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
         }
 
         .logo-text {
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .logo-text span {
             color: var(--text-secondary);
+            font-weight: 400;
         }
 
         .header-meta {
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            color: var(--text-secondary);
+            color: var(--text-muted);
+            background: var(--bg-subtle);
+            padding: 6px 14px;
+            border-radius: 20px;
         }
 
         /* Main Content */
         main {
             position: relative;
             z-index: 10;
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 80px 40px;
+            padding: 60px 40px 80px;
         }
 
         /* Hero Section */
         .hero {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 60px;
         }
 
         .hero-badge {
             display: inline-block;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
+            font-size: 12px;
             color: var(--accent-orange);
-            background: rgba(206, 145, 120, 0.1);
-            padding: 6px 16px;
+            background: rgba(249, 115, 22, 0.1);
+            padding: 8px 16px;
             border-radius: 20px;
-            border: 1px solid rgba(206, 145, 120, 0.25);
-            margin-bottom: 24px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .hero h1 {
-            font-size: clamp(36px, 6vw, 56px);
+            font-size: clamp(32px, 5vw, 48px);
             font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .hero p {
-            font-size: 18px;
+            font-size: 17px;
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 550px;
             margin: 0 auto;
             line-height: 1.7;
         }
@@ -198,36 +159,36 @@
         .chapters-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .chapters-header h2 {
             font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-secondary);
-            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .chapters-header::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, var(--border-color), transparent);
+            background: var(--border-light);
         }
 
         /* Chapter Cards */
         .chapters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
         }
 
         .chapter-card {
             position: relative;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
             border-radius: 16px;
             padding: 28px;
             text-decoration: none;
@@ -242,18 +203,16 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .chapter-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(78, 201, 176, 0.3);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.3),
-                0 0 60px rgba(78, 201, 176, 0.05);
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-xl);
         }
 
         .chapter-card:hover::before {
@@ -263,9 +222,10 @@
         .chapter-number {
             font-family: 'JetBrains Mono', monospace;
             font-size: 11px;
-            color: var(--accent-cyan);
+            color: var(--accent-blue);
             letter-spacing: 1px;
             margin-bottom: 12px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -273,17 +233,16 @@
 
         .chapter-number::before {
             content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--accent-cyan);
+            width: 8px;
+            height: 8px;
+            background: var(--accent-blue);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-cyan);
         }
 
         .chapter-card h3 {
             font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
             color: var(--text-primary);
         }
 
@@ -303,21 +262,21 @@
         .chapter-tag {
             font-family: 'JetBrains Mono', monospace;
             font-size: 10px;
-            padding: 4px 10px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: var(--bg-subtle);
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .chapter-arrow {
             position: absolute;
             bottom: 28px;
             right: 28px;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(78, 201, 176, 0.1);
+            background: var(--bg-subtle);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -325,18 +284,18 @@
         }
 
         .chapter-arrow svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--accent-cyan);
-            transition: transform 0.3s ease;
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            transition: all 0.3s ease;
         }
 
         .chapter-card:hover .chapter-arrow {
-            background: var(--accent-cyan);
+            background: var(--accent-blue);
         }
 
         .chapter-card:hover .chapter-arrow svg {
-            stroke: #000;
+            stroke: white;
             transform: translateX(2px);
         }
 
@@ -350,17 +309,22 @@
             display: none;
         }
 
+        .chapter-card.coming-soon .chapter-number::before {
+            background: var(--text-muted);
+        }
+
         .coming-soon-badge {
             position: absolute;
             top: 20px;
             right: 20px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 9px;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
-            background: rgba(139, 139, 150, 0.2);
-            color: var(--text-secondary);
+            background: var(--bg-subtle);
+            color: var(--text-muted);
             letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
         /* Footer */
@@ -368,20 +332,20 @@
             position: relative;
             z-index: 10;
             text-align: center;
-            padding: 40px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 60px;
+            padding: 32px 40px;
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-white);
         }
 
         footer p {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--text-secondary);
+            font-size: 13px;
+            color: var(--text-muted);
         }
 
         footer a {
-            color: var(--accent-cyan);
+            color: var(--accent-blue);
             text-decoration: none;
+            font-weight: 500;
         }
 
         footer a:hover {
@@ -391,17 +355,17 @@
         /* Responsive */
         @media (max-width: 768px) {
             header {
-                padding: 16px 20px;
-                flex-direction: column;
+                padding: 14px 20px;
+                flex-wrap: wrap;
                 gap: 12px;
             }
 
             main {
-                padding: 40px 20px;
+                padding: 40px 20px 60px;
             }
 
             .hero {
-                margin-bottom: 50px;
+                margin-bottom: 40px;
             }
 
             .chapters-grid {
@@ -413,7 +377,7 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(16px);
             }
             to {
                 opacity: 1;
@@ -422,35 +386,32 @@
         }
 
         .hero {
-            animation: fadeInUp 0.8s ease-out;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .chapter-card {
-            animation: fadeInUp 0.8s ease-out;
+            animation: fadeInUp 0.6s ease-out;
             animation-fill-mode: both;
         }
 
         .chapter-card:nth-child(1) { animation-delay: 0.1s; }
-        .chapter-card:nth-child(2) { animation-delay: 0.2s; }
-        .chapter-card:nth-child(3) { animation-delay: 0.3s; }
-        .chapter-card:nth-child(4) { animation-delay: 0.4s; }
+        .chapter-card:nth-child(2) { animation-delay: 0.15s; }
+        .chapter-card:nth-child(3) { animation-delay: 0.2s; }
+        .chapter-card:nth-child(4) { animation-delay: 0.25s; }
     </style>
 </head>
 
 <body>
-    <!-- Background Effects -->
-    <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-    <div class="bg-glow bg-glow-3"></div>
+    <!-- Background Pattern -->
+    <div class="bg-pattern"></div>
 
     <!-- Header -->
     <header>
         <div class="logo">
             <div class="logo-badge">CSC 375</div>
-            <div class="logo-text">Computer Modeling & Simulation <span>// NDU</span></div>
+            <div class="logo-text">Computer Modeling & Simulation <span>/ NDU</span></div>
         </div>
-        <div class="header-meta">Interactive Learning Modules</div>
+        <div class="header-meta">Interactive Modules</div>
     </header>
 
     <!-- Main Content -->
@@ -458,8 +419,8 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-badge">Spring 2026</div>
-            <h1>Interactive Course Modules</h1>
-            <p>Explore the fundamentals of computer modeling and simulation through hands-on, visual learning experiences. Each chapter builds upon the last.</p>
+            <h1>Interactive <span>Course Modules</span></h1>
+            <p>Explore the fundamentals of computer modeling and simulation through hands-on, visual learning experiences.</p>
         </section>
 
         <!-- Chapters Section -->
@@ -473,12 +434,13 @@
                 <a href="chapter-1-vectors.html" class="chapter-card">
                     <div class="chapter-number">CHAPTER 01</div>
                     <h3>Vectors</h3>
-                    <p>Learn how vectors describe motion, force, and direction in game engines. Explore addition, subtraction, and real-world applications.</p>
+                    <p>Learn what vectors are, how to visualize them in space, and master addition, subtraction, and scalar operations.</p>
                     <div class="chapter-tags">
                         <span class="chapter-tag">Magnitude</span>
                         <span class="chapter-tag">Direction</span>
                         <span class="chapter-tag">Addition</span>
-                        <span class="chapter-tag">Game Physics</span>
+                        <span class="chapter-tag">Subtraction</span>
+                        <span class="chapter-tag">Scalars</span>
                     </div>
                     <div class="chapter-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -492,7 +454,7 @@
                     <span class="coming-soon-badge">COMING SOON</span>
                     <div class="chapter-number">CHAPTER 02</div>
                     <h3>Forces & Motion</h3>
-                    <p>Dive into Newton's laws and learn how to simulate realistic physics with acceleration, friction, and drag forces.</p>
+                    <p>Dive into Newton's laws and learn how to simulate realistic physics with acceleration, friction, and drag.</p>
                     <div class="chapter-tags">
                         <span class="chapter-tag">Newton's Laws</span>
                         <span class="chapter-tag">Acceleration</span>
@@ -504,7 +466,7 @@
                     <span class="coming-soon-badge">COMING SOON</span>
                     <div class="chapter-number">CHAPTER 03</div>
                     <h3>Oscillation</h3>
-                    <p>Explore trigonometric functions, waves, and harmonic motion to create natural, organic movement patterns.</p>
+                    <p>Explore trigonometric functions, waves, and harmonic motion to create natural movement patterns.</p>
                     <div class="chapter-tags">
                         <span class="chapter-tag">Sine/Cosine</span>
                         <span class="chapter-tag">Waves</span>
@@ -529,7 +491,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>Built for CSC 375 at <a href="#">Notre Dame University</a> — Interactive Learning Platform</p>
+        <p>Built for CSC 375 at <a href="#">Notre Dame University</a></p>
     </footer>
 </body>
 

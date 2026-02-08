@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 1: Vectors – Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --bg-warm: #fefce8;
+            --bg-aside: #f0fdf4;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .chapter-badge {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Tabs */
+        .header-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .tab-link {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab-link.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        /* Reading Progress */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            z-index: 200;
+            transition: width 0.1s linear;
+        }
+
+        /* Article Layout */
+        .article-container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px 120px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 48px;
+        }
+
+        .toc h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-list li {
+            margin-bottom: 0;
+        }
+
+        .toc-list a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            margin: 0 -12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+
+        .toc-list a:hover {
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+        }
+
+        .toc-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent-blue);
+            width: 24px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-blue);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        .section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        /* Prose */
+        .prose {
+            font-size: 16.5px;
+            line-height: 1.85;
+            color: var(--text-secondary);
+        }
+
+        .prose p {
+            margin-bottom: 20px;
+        }
+
+        .prose strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .prose em {
+            font-family: 'Lora', Georgia, serif;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .prose ul, .prose ol {
+            margin-bottom: 20px;
+            padding-left: 24px;
+        }
+
+        .prose li {
+            margin-bottom: 8px;
+        }
+
+        .prose a {
+            color: var(--accent-blue);
+            text-decoration: underline;
+            text-decoration-color: rgba(59, 130, 246, 0.3);
+            text-underline-offset: 2px;
+        }
+
+        .prose a:hover {
+            text-decoration-color: var(--accent-blue);
+        }
+
+        /* Inline Code */
+        .prose code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            background: var(--bg-canvas);
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: var(--accent-purple);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #1e293b;
+            border-radius: 12px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .code-block pre {
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #e2e8f0;
+            margin: 0;
+            overflow-x: auto;
+        }
+
+        .code-block .kw { color: #c084fc; }
+        .code-block .fn { color: #67e8f9; }
+        .code-block .num { color: #fbbf24; }
+        .code-block .cm { color: #64748b; }
+        .code-block .str { color: #86efac; }
+        .code-block .prop { color: #93c5fd; }
+
+        /* Callout Boxes */
+        .callout {
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 28px 0;
+            border-left: 4px solid;
+        }
+
+        .callout-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .callout p {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        .callout p + p {
+            margin-top: 12px;
+        }
+
+        .callout.think {
+            background: rgba(249, 115, 22, 0.06);
+            border-color: var(--accent-orange);
+        }
+
+        .callout.think .callout-title {
+            color: var(--accent-orange);
+        }
+
+        .callout.key {
+            background: rgba(59, 130, 246, 0.06);
+            border-color: var(--accent-blue);
+        }
+
+        .callout.key .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout.aha {
+            background: rgba(16, 185, 129, 0.06);
+            border-color: var(--accent-green);
+        }
+
+        .callout.aha .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout.warn {
+            background: rgba(245, 158, 11, 0.06);
+            border-color: var(--accent-amber);
+        }
+
+        .callout.warn .callout-title {
+            color: var(--accent-amber);
+        }
+
+        /* Formula */
+        .formula-block {
+            background: var(--bg-white);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .formula-block .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .formula-block .formula .v { color: var(--accent-blue); font-weight: 600; }
+        .formula-block .formula .op { color: var(--accent-orange); font-weight: 600; }
+
+        .formula-block .caption {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        /* Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 14px;
+        }
+
+        .comparison-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--bg-canvas);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .comparison-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            background: var(--bg-canvas);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-purple);
+        }
+
+        /* Divider */
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 56px 0;
+        }
+
+        /* Back to top */
+        .back-to-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+            margin-top: 24px;
+        }
+
+        .back-to-top:hover {
+            background: var(--bg-white);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 0 20px;
+            }
+
+            .article-container {
+                padding: 32px 16px 80px;
+            }
+
+            .section h2 {
+                font-size: 24px;
+            }
+
+            .toc {
+                padding: 20px 24px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .article-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Reading Progress -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 1</div>
+                <div class="chapter-title">Vectors</div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-1-vectors.html" class="tab-link">Slides</a>
+            <a href="chapter-1-notes.html" class="tab-link active">Notes</a>
+        </div>
+    </header>
+
+    <!-- Article -->
+    <div class="article-container">
+
+        <!-- Table of Contents -->
+        <nav class="toc" id="toc">
+            <h3>In this chapter</h3>
+            <ol class="toc-list">
+                <li><a href="#why-vectors"><span class="toc-number">01</span> Why Should I Care About Vectors?</a></li>
+                <li><a href="#what-is-vector"><span class="toc-number">02</span> What Even Is a Vector?</a></li>
+                <li><a href="#vectors-in-code"><span class="toc-number">03</span> Vectors in p5.js</a></li>
+                <li><a href="#addition"><span class="toc-number">04</span> Vector Addition</a></li>
+                <li><a href="#subtraction"><span class="toc-number">05</span> Vector Subtraction</a></li>
+                <li><a href="#multiplication"><span class="toc-number">06</span> Scalar Multiplication & Division</a></li>
+                <li><a href="#magnitude"><span class="toc-number">07</span> Vector Magnitude</a></li>
+                <li><a href="#normalizing"><span class="toc-number">08</span> Normalizing Vectors</a></li>
+                <li><a href="#motion"><span class="toc-number">09</span> Motion with Vectors</a></li>
+                <li><a href="#acceleration"><span class="toc-number">10</span> Acceleration</a></li>
+                <li><a href="#static-methods"><span class="toc-number">11</span> Static vs. Nonstatic Methods</a></li>
+                <li><a href="#interactive-motion"><span class="toc-number">12</span> Accelerating Toward a Target</a></li>
+            </ol>
+        </nav>
+
+        <!-- Section 1: Why Vectors -->
+        <section class="section" id="why-vectors">
+            <div class="section-label">SECTION 01</div>
+            <h2>Why Should I Care About Vectors?</h2>
+            <div class="prose">
+                <p>Okay so before we get into the math, let me just explain <em>why</em> vectors matter. Because honestly, when I first heard "vectors" I thought of those arrow diagrams from physics class that I never really vibed with. But here's the thing—<strong>every single moving object in a game or simulation uses vectors</strong>. Every. Single. One.</p>
+
+                <p>Think about a simple bouncing ball. Without vectors, you'd write something like this:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> x = <span class="num">100</span>;
+<span class="kw">let</span> y = <span class="num">100</span>;
+<span class="kw">let</span> xspeed = <span class="num">2.5</span>;
+<span class="kw">let</span> yspeed = <span class="num">2</span>;</pre>
+                </div>
+
+                <p>That's four variables just for position and speed. Now imagine you also need acceleration, wind, friction, a target position... suddenly you're drowning in <code>xWhatever</code> and <code>yWhatever</code> variables. In 3D? Triple everything. It becomes a nightmare to manage.</p>
+
+                <p>With vectors, that same thing becomes:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> position = <span class="fn">createVector</span>(<span class="num">100</span>, <span class="num">100</span>);
+<span class="kw">let</span> velocity = <span class="fn">createVector</span>(<span class="num">2.5</span>, <span class="num">2</span>);</pre>
+                </div>
+
+                <p>Two variables. Clean. Readable. And the vector object gives us built-in math operations for free. That's the whole pitch. It doesn't give us new superpowers right away—it just organizes everything so that when things <em>do</em> get complex (and they will), we're not fighting our own code.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">My Takeaway</div>
+                    <p>Vectors aren't about doing new things. They're about doing the <strong>same things cleaner</strong>, so when you add more physics later, you don't drown in variables. The payoff really hits in Chapter 2 with forces.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 2: What Is a Vector -->
+        <section class="section" id="what-is-vector">
+            <div class="section-label">SECTION 02</div>
+            <h2>What Even Is a Vector?</h2>
+            <div class="prose">
+                <p>A <strong>vector</strong> is something that has both <strong>magnitude</strong> (how big) and <strong>direction</strong> (which way). That's it. That's the whole definition. Compare that to a <strong>scalar</strong>, which is just a plain number—like 5, or 3.7, or -42. A scalar tells you "how much" but not "which way."</p>
+
+                <p>The way I like to think about it: <em>a vector is an arrow</em>. It starts somewhere and points somewhere else. The length of the arrow is the magnitude. The way it's pointing is the direction.</p>
+
+                <p>Mathematically, in 2D, a vector is just a pair of numbers: an <strong>x</strong> and a <strong>y</strong>. Those numbers are the "instructions" for the arrow—go this far horizontally, then this far vertically.</p>
+
+                <div class="callout key">
+                    <div class="callout-title">Key Distinction</div>
+                    <p><strong>Scalar</strong> = a single number (speed, temperature, mass)<br>
+                    <strong>Vector</strong> = magnitude + direction (velocity, force, acceleration)</p>
+                    <p>Speed is a scalar. <em>Velocity</em> is a vector—because velocity includes direction.</p>
+                </div>
+
+                <p>One thing that confused me at first: <strong>position is also a vector</strong>. I was like "but position is just a point, not a direction." True—but if you think of position as "the path from the origin (0,0) to where I am now," it becomes a vector. The origin is the tail, your current spot is the head. That mental model works.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 3: Vectors in Code -->
+        <section class="section" id="vectors-in-code">
+            <div class="section-label">SECTION 03</div>
+            <h2>Vectors in p5.js</h2>
+            <div class="prose">
+                <p>p5.js gives us a built-in <code>p5.Vector</code> class. You don't have to write your own (though it's good to understand what's happening under the hood). You create vectors using <code>createVector()</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> position = <span class="fn">createVector</span>(<span class="num">100</span>, <span class="num">100</span>);
+<span class="kw">let</span> velocity = <span class="fn">createVector</span>(<span class="num">1</span>, <span class="num">3.3</span>);
+
+<span class="cm">// Access components with dot notation</span>
+<span class="fn">circle</span>(position.<span class="prop">x</span>, position.<span class="prop">y</span>, <span class="num">48</span>);</pre>
+                </div>
+
+                <div class="callout warn">
+                    <div class="callout-title">Watch Out</div>
+                    <p>You can't use <code>createVector()</code> outside of <code>setup()</code> or <code>draw()</code>. The p5 library hasn't loaded yet at the global level. Declare the variable globally, but assign it inside <code>setup()</code>.</p>
+                </div>
+
+                <p>Under the hood, a vector is just an object with <code>x</code>, <code>y</code>, and <code>z</code> properties plus a bunch of methods. If we were building it ourselves it'd look like:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">class</span> <span class="fn">Vector</span> {
+  <span class="fn">constructor</span>(x, y) {
+    <span class="kw">this</span>.<span class="prop">x</span> = x;
+    <span class="kw">this</span>.<span class="prop">y</span> = y;
+  }
+}</pre>
+                </div>
+
+                <p>That's the core of it—just a wrapper around two numbers. But the methods it provides (<code>add()</code>, <code>sub()</code>, <code>mult()</code>, <code>mag()</code>, <code>normalize()</code>, etc.) are what make it so powerful. You're not reinventing arithmetic every time; you just call the method.</p>
+
+                <p>Important: even with vectors, you'll still sometimes need to pull out individual <code>.x</code> and <code>.y</code> values. Functions like <code>circle()</code> don't accept vector objects—they want separate numbers. That's normal. The point isn't to never use x and y again; it's to <em>organize</em> them together.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 4: Addition -->
+        <section class="section" id="addition">
+            <div class="section-label">SECTION 04</div>
+            <h2>Vector Addition</h2>
+            <div class="prose">
+                <p>This is the bread and butter operation. Adding two vectors means combining them—component by component:</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        <span class="v">w</span> = <span class="v">u</span> <span class="op">+</span> <span class="v">v</span> = (<span class="v">u<sub>x</sub></span> + <span class="v">v<sub>x</sub></span>, <span class="v">u<sub>y</sub></span> + <span class="v">v<sub>y</sub></span>)
+                    </div>
+                    <div class="caption">Add the x's together, add the y's together. That's it.</div>
+                </div>
+
+                <p>Visually, there's the <strong>head-to-tail</strong> rule: place the second vector's tail at the first vector's head. The result (called the <strong>resultant</strong>) goes from the very start to the very end. It's the "shortcut" arrow.</p>
+
+                <p>Why does this matter? Because <strong>this is literally how motion works</strong>. Every frame of a simulation, you do this:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre>position.<span class="fn">add</span>(velocity);</pre>
+                </div>
+
+                <p>That one line says: "wherever I am now, move me by my velocity." The position vector gets updated. The ball moves. That's it. That's motion.</p>
+
+                <p>And when you have multiple forces—like a player moving right while wind pushes left—you just add all the vectors together. The final resultant is where the object actually ends up. The engine (literally, a game engine) adds them all up for you.</p>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Click Moment</div>
+                    <p>What really made addition click for me: it's not just a math operation. It's a <strong>physical simulation primitive</strong>. Every time something moves in a game, vector addition is happening. <code>position += velocity</code> is the most fundamental line in all of game physics.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 5: Subtraction -->
+        <section class="section" id="subtraction">
+            <div class="section-label">SECTION 05</div>
+            <h2>Vector Subtraction</h2>
+            <div class="prose">
+                <p>Subtraction is just addition with the second vector flipped. Negating a vector means flipping its direction: if <strong>v</strong> = (3, 4), then <strong>-v</strong> = (-3, -4). Same length, opposite direction.</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        <span class="v">w</span> = <span class="v">u</span> <span class="op">-</span> <span class="v">v</span> = (<span class="v">u<sub>x</sub></span> - <span class="v">v<sub>x</sub></span>, <span class="v">u<sub>y</sub></span> - <span class="v">v<sub>y</sub></span>)
+                    </div>
+                </div>
+
+                <p>But here's when subtraction becomes genuinely interesting: <strong>when you want to find the direction from one point to another</strong>.</p>
+
+                <p>Say you have an enemy at position A and the player at position B. How does the enemy know which way to move? Calculate <code>B - A</code> and you get a vector that points from A to B. That's the "look at" direction. It's used everywhere—AI targeting, camera follow, homing missiles, you name it.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> mouse = <span class="fn">createVector</span>(mouseX, mouseY);
+<span class="kw">let</span> center = <span class="fn">createVector</span>(width / <span class="num">2</span>, height / <span class="num">2</span>);
+mouse.<span class="fn">sub</span>(center);
+<span class="cm">// mouse now points FROM center TO cursor</span></pre>
+                </div>
+
+                <p>After that subtraction, <code>mouse</code> is no longer a position—it's a direction vector pointing from the center of the canvas to wherever the mouse is. This is a super common pattern.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">How I Remember It</div>
+                    <p><strong>Target - Me = Direction to Target.</strong> That's the formula. If I'm the enemy, and the player is the target: <code>player.pos - enemy.pos = which way to chase</code>. Always subtract "where I am" from "where I want to go."</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 6: Multiplication & Division -->
+        <section class="section" id="multiplication">
+            <div class="section-label">SECTION 06</div>
+            <h2>Scalar Multiplication & Division</h2>
+            <div class="prose">
+                <p>When we "multiply a vector," we don't mean multiplying two vectors together (that's a different, more advanced thing). We mean multiplying a vector by a <strong>scalar</strong>—a regular number. This <strong>scales</strong> the vector: changes its length without changing its direction.</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        <span class="v">w</span> = <span class="v">u</span> <span class="op">×</span> n = (<span class="v">u<sub>x</sub></span> × n, <span class="v">u<sub>y</sub></span> × n)
+                    </div>
+                    <div class="caption">Multiply each component by the scalar. Direction stays the same.</div>
+                </div>
+
+                <p>Practical examples:</p>
+                <ul>
+                    <li><code>velocity.mult(2)</code> — double the speed</li>
+                    <li><code>velocity.mult(0.5)</code> — half the speed (same as dividing by 2)</li>
+                    <li><code>velocity.mult(-1)</code> — reverse direction completely</li>
+                    <li><code>velocity.mult(0)</code> — stop entirely (zero vector)</li>
+                </ul>
+
+                <p>Division works exactly the same way but with <code>div()</code>. Multiplying by 0.5 and dividing by 2 produce identical results. Use whichever reads better in context.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> u = <span class="fn">createVector</span>(<span class="num">-3</span>, <span class="num">7</span>);
+u.<span class="fn">mult</span>(<span class="num">3</span>);
+<span class="cm">// u is now (-9, 21) — 3 times longer, same direction</span>
+
+<span class="kw">let</span> v = <span class="fn">createVector</span>(<span class="num">8</span>, <span class="num">-4</span>);
+v.<span class="fn">div</span>(<span class="num">2</span>);
+<span class="cm">// v is now (4, -2) — half the length</span></pre>
+                </div>
+
+                <p>The key insight: <strong>scaling doesn't rotate the vector</strong>. It keeps pointing the same way (or flips 180° if the scalar is negative). This is exactly what you want when adjusting speed—you want to go faster or slower in the same direction.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 7: Magnitude -->
+        <section class="section" id="magnitude">
+            <div class="section-label">SECTION 07</div>
+            <h2>Vector Magnitude</h2>
+            <div class="prose">
+                <p>The <strong>magnitude</strong> of a vector is its length. If the vector is (3, 4), how long is the arrow? This is where our old friend <strong>Pythagoras</strong> shows up.</p>
+
+                <p>Since a vector's x and y components form a right triangle with the vector itself as the hypotenuse:</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        ||<span class="v">v</span>|| = √(<span class="v">x</span>² + <span class="v">y</span>²)
+                    </div>
+                    <div class="caption">e.g. magnitude of (3, 4) = √(9 + 16) = √25 = 5</div>
+                </div>
+
+                <p>In p5.js you just call <code>v.mag()</code> and it does the Pythagorean theorem for you. The magnitude is always positive, even if the components are negative (because they get squared).</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> v = <span class="fn">createVector</span>(<span class="num">3</span>, <span class="num">4</span>);
+<span class="kw">let</span> m = v.<span class="fn">mag</span>();
+<span class="cm">// m = 5</span></pre>
+                </div>
+
+                <p>Why do we care about magnitude? Because it tells us <strong>speed</strong> (if the vector is velocity), <strong>distance</strong> (if it's a position difference), or <strong>strength</strong> (if it's a force). You'll use <code>mag()</code> constantly to check things like "is this object moving too fast?" or "how far apart are these two things?"</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 8: Normalizing -->
+        <section class="section" id="normalizing">
+            <div class="section-label">SECTION 08</div>
+            <h2>Normalizing Vectors</h2>
+            <div class="prose">
+                <p>Normalizing is one of those things that sounds fancy but is actually dead simple: <strong>make the vector's length exactly 1</strong>, while keeping its direction the same. The result is called a <strong>unit vector</strong>.</p>
+
+                <p>How? Divide each component by the magnitude:</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        <span class="v">û</span> = <span class="v">v</span> / ||<span class="v">v</span>||
+                    </div>
+                    <div class="caption">Divide each component by the vector's length. Now its length is 1.</div>
+                </div>
+
+                <p>For example, a vector (3, 4) has magnitude 5. Normalized: (3/5, 4/5) = (0.6, 0.8). Check: √(0.36 + 0.64) = √1 = 1. Boom, unit vector.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> v = <span class="fn">createVector</span>(<span class="num">3</span>, <span class="num">4</span>);
+v.<span class="fn">normalize</span>();
+<span class="cm">// v is now (0.6, 0.8) — length = 1</span></pre>
+                </div>
+
+                <p>But why would I want a length-1 vector? Because <strong>it isolates the direction</strong>. Once you have pure direction, you can scale it to whatever speed you want by multiplying:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">let</span> dir = <span class="fn">p5.Vector.sub</span>(target, myPos);
+dir.<span class="fn">normalize</span>();  <span class="cm">// pure direction, length = 1</span>
+dir.<span class="fn">mult</span>(<span class="num">5</span>);       <span class="cm">// now length = 5 (my desired speed)</span></pre>
+                </div>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Pattern</div>
+                    <p><strong>Normalize → Multiply</strong> is THE standard pattern for "move toward something at a fixed speed." You'll see this combo literally everywhere in game dev. It's also available as a single function: <code>setMag(speed)</code>.</p>
+                </div>
+
+                <p>Small gotcha: what if the vector's magnitude is 0? You can't divide by zero. p5.js handles this gracefully—<code>normalize()</code> checks for zero-length vectors and just does nothing. But it's good to be aware of it.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 9: Motion -->
+        <section class="section" id="motion">
+            <div class="section-label">SECTION 09</div>
+            <h2>Motion with Vectors</h2>
+            <div class="prose">
+                <p>Now let's bring it all together. The absolute core of motion simulation is two steps:</p>
+
+                <ol>
+                    <li><strong>Add velocity to position</strong></li>
+                    <li><strong>Draw the object at its new position</strong></li>
+                </ol>
+
+                <p>That's it. That's what Shiffman calls "Motion 101." And now that we have vectors, we can encapsulate this in a class:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="kw">class</span> <span class="fn">Mover</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>.<span class="prop">position</span> = <span class="fn">createVector</span>(<span class="fn">random</span>(width), <span class="fn">random</span>(height));
+    <span class="kw">this</span>.<span class="prop">velocity</span> = <span class="fn">createVector</span>(<span class="fn">random</span>(<span class="num">-2</span>, <span class="num">2</span>), <span class="fn">random</span>(<span class="num">-2</span>, <span class="num">2</span>));
+  }
+
+  <span class="fn">update</span>() {
+    <span class="kw">this</span>.<span class="prop">position</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">velocity</span>);
+  }
+
+  <span class="fn">show</span>() {
+    <span class="fn">circle</span>(<span class="kw">this</span>.<span class="prop">position</span>.<span class="prop">x</span>, <span class="kw">this</span>.<span class="prop">position</span>.<span class="prop">y</span>, <span class="num">48</span>);
+  }
+}</pre>
+                </div>
+
+                <p>The beauty here: the <code>Mover</code> class holds <code>p5.Vector</code> objects as its data. An object containing objects. That's totally normal in OOP—you'll see this pattern everywhere. Later, a <code>ParticleSystem</code> will contain <code>Particle</code> objects, and each <code>Particle</code> will contain <code>p5.Vector</code> objects. It's turtles (well, vectors) all the way down.</p>
+
+                <p>The problem with this basic setup: the ball just moves in a straight line forever. No speeding up, no slowing down, no turning. To get interesting motion, we need one more ingredient.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 10: Acceleration -->
+        <section class="section" id="acceleration">
+            <div class="section-label">SECTION 10</div>
+            <h2>Acceleration</h2>
+            <div class="prose">
+                <p><strong>Acceleration is the rate of change of velocity.</strong> Just like velocity is the rate of change of position. It's a trickle-down chain:</p>
+
+                <div class="formula-block">
+                    <div class="formula">
+                        acceleration → velocity → position
+                    </div>
+                    <div class="caption">Acceleration changes velocity. Velocity changes position.</div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre>velocity.<span class="fn">add</span>(acceleration);
+position.<span class="fn">add</span>(velocity);</pre>
+                </div>
+
+                <p>Two lines. That's the entire physics engine in its most basic form. Here's the rule Shiffman sets for himself (and that I think is really smart): <strong>never directly change velocity or position</strong>. Instead, only change acceleration, and let it trickle down. This forces you to think about motion in terms of forces, which is how the real world works.</p>
+
+                <p>Three approaches to acceleration:</p>
+
+                <h3>1. Constant Acceleration</h3>
+                <p>Set acceleration to a fixed vector like <code>(-0.001, 0.01)</code>. The object gradually speeds up in that direction. These values are tiny because they accumulate ~30 times per second. Use <code>velocity.limit(10)</code> to cap the speed so it doesn't fly off screen.</p>
+
+                <h3>2. Random Acceleration</h3>
+                <p>Use <code>p5.Vector.random2D()</code> to get a random unit vector each frame, then scale it. This creates a jittery, organic motion—way smoother than a random walker because the velocity has continuity. The randomness affects the <em>acceleration</em> (change in velocity), not the velocity directly.</p>
+
+                <h3>3. Acceleration Toward a Target</h3>
+                <p>This is where things get really cool. Calculate the direction to the mouse (subtraction!), normalize it, scale it, and set that as the acceleration. The object steers toward the cursor. More on this below.</p>
+
+                <div class="callout key">
+                    <div class="callout-title">Important Nuance</div>
+                    <p>Acceleration doesn't just mean "speeding up." It means <strong>any change in velocity</strong>—speeding up, slowing down, or turning. A car turning a corner at constant speed is still accelerating because the direction of its velocity is changing.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 11: Static Methods -->
+        <section class="section" id="static-methods">
+            <div class="section-label">SECTION 11</div>
+            <h2>Static vs. Nonstatic Methods</h2>
+            <div class="prose">
+                <p>This tripped me up at first so I want to make it really clear. <code>p5.Vector</code> has two versions of most math methods:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Syntax</th>
+                            <th>What happens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nonstatic</strong></td>
+                            <td><code>v.add(u)</code></td>
+                            <td>Changes <code>v</code> in place. <code>u</code> is unchanged.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Static</strong></td>
+                            <td><code>p5.Vector.add(v, u)</code></td>
+                            <td>Returns a <strong>new</strong> vector. Both <code>v</code> and <code>u</code> are unchanged.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>The nonstatic version <strong>modifies the original</strong>. The static version <strong>creates a new result</strong> and leaves the originals alone. It's the difference between "add B onto A" vs "what is A + B?"</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="cm">// NONSTATIC: modifies v</span>
+<span class="kw">let</span> v = <span class="fn">createVector</span>(<span class="num">1</span>, <span class="num">2</span>);
+<span class="kw">let</span> u = <span class="fn">createVector</span>(<span class="num">3</span>, <span class="num">4</span>);
+v.<span class="fn">add</span>(u);
+<span class="cm">// v is now (4, 6), u is still (3, 4)</span>
+
+<span class="cm">// STATIC: creates new vector</span>
+<span class="kw">let</span> v = <span class="fn">createVector</span>(<span class="num">1</span>, <span class="num">2</span>);
+<span class="kw">let</span> u = <span class="fn">createVector</span>(<span class="num">3</span>, <span class="num">4</span>);
+<span class="kw">let</span> w = <span class="fn">p5.Vector.add</span>(v, u);
+<span class="cm">// w is (4, 6), v is still (1, 2), u is still (3, 4)</span></pre>
+                </div>
+
+                <div class="callout warn">
+                    <div class="callout-title">Common Mistake</div>
+                    <p>Writing <code>let w = v.add(u);</code> and expecting <code>w</code> to be the result. Nope—<code>add()</code> doesn't return anything. It changes <code>v</code> in place and you've accidentally mutated your original vector. Use the static version when you need a fresh result.</p>
+                </div>
+
+                <p>This applies to <code>add()</code>, <code>sub()</code>, <code>mult()</code>, and <code>div()</code>. In general: use the nonstatic version when you <em>want</em> to modify an object (like updating position), and the static version when you need to calculate something without side effects (like finding a direction).</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 12: Interactive Motion -->
+        <section class="section" id="interactive-motion">
+            <div class="section-label">SECTION 12</div>
+            <h2>Accelerating Toward a Target</h2>
+            <div class="prose">
+                <p>This is where everything comes together. Let's make an object that steers toward the mouse. The algorithm:</p>
+
+                <ol>
+                    <li><strong>Find the direction</strong> — Subtract my position from the target: <code>target - me</code></li>
+                    <li><strong>Normalize</strong> — Make it a unit vector (length 1)</li>
+                    <li><strong>Scale</strong> — Multiply by desired acceleration strength</li>
+                    <li><strong>Apply</strong> — Set it as the object's acceleration</li>
+                </ol>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="code-dot" style="background: #ef4444"></div>
+                        <div class="code-dot" style="background: #f59e0b"></div>
+                        <div class="code-dot" style="background: #22c55e"></div>
+                    </div>
+                    <pre><span class="fn">update</span>() {
+  <span class="kw">let</span> mouse = <span class="fn">createVector</span>(mouseX, mouseY);
+  <span class="kw">let</span> dir = <span class="fn">p5.Vector.sub</span>(mouse, <span class="kw">this</span>.<span class="prop">position</span>); <span class="cm">// Step 1</span>
+  dir.<span class="fn">normalize</span>();                               <span class="cm">// Step 2</span>
+  dir.<span class="fn">mult</span>(<span class="num">0.2</span>);                                  <span class="cm">// Step 3</span>
+  <span class="kw">this</span>.<span class="prop">acceleration</span> = dir;                       <span class="cm">// Step 4</span>
+
+  <span class="kw">this</span>.<span class="prop">velocity</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">acceleration</span>);
+  <span class="kw">this</span>.<span class="prop">velocity</span>.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">topSpeed</span>);
+  <span class="kw">this</span>.<span class="prop">position</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">velocity</span>);
+}</pre>
+                </div>
+
+                <p>See how every concept from this chapter comes together? Subtraction to find direction. Normalization to get a consistent unit. Scalar multiplication to control strength. Addition to apply velocity and acceleration. It's all one pipeline.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">Why It Overshoots</div>
+                    <p>If you run this, you'll notice the object orbits around the mouse instead of stopping at it. That's because the object has no concept of "I'm close enough, time to brake." It keeps accelerating at the same rate regardless of distance. Fixing this requires <strong>arrival behavior</strong>—which we'll get to later. For now, the overshoot is actually useful; it shows the object is doing real physics, not just teleporting.</p>
+                </div>
+
+                <p>And honestly? This is already dangerously close to gravitational attraction. The only difference is that real gravity's strength is inversely proportional to distance (closer = stronger). We're using a constant strength here. Chapter 2 covers forces properly, and this pattern is the foundation for everything that comes next.</p>
+
+                <hr class="section-divider">
+
+                <p>That's Chapter 1. The whole thing boils down to: <strong>use vectors to represent position, velocity, and acceleration. Add them in order. Everything else is just variations on that theme.</strong></p>
+
+                <p>The math isn't hard—it's addition, subtraction, multiplication, and one square root. The power comes from combining these simple operations into a system that produces complex, natural-looking motion. And from here on out, everything builds on top of this foundation.</p>
+
+                <a href="#toc" class="back-to-top">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                    Back to top
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 32px 24px; border-top: 1px solid var(--border-light); margin-top: 0;">
+        <p style="font-size: 13px; color: var(--text-muted);">Written by <strong style="color: var(--text-secondary);">Firas El Jerdy</strong> for CSC 375 at Notre Dame University</p>
+        <p style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">Last updated: February 4, 2026</p>
+    </footer>
+
+    <script>
+        // Reading progress bar
+        window.addEventListener('scroll', () => {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPos = window.scrollY;
+            const progress = (scrollPos / docHeight) * 100;
+            document.getElementById('readingProgress').style.width = progress + '%';
+        });
+    </script>
+</body>
+
+</html>

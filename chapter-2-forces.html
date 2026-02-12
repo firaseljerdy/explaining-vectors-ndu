@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 2: Forces</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+
+        /* Header */
+        header { background:var(--bg-white); border-bottom:1px solid var(--border-light); padding:0 32px; position:sticky; top:0; z-index:100; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; padding:8px 12px; border-radius:8px; transition:all .2s; }
+        .back-btn:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .back-btn svg { width:16px; height:16px; }
+        .chapter-badge { background:linear-gradient(135deg,var(--accent-orange),var(--accent-red)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
+        .chapter-title { font-size:16px; font-weight:600; }
+        .header-tabs { display:flex; gap:0; }
+        .tab-link { padding:12px 24px; font-size:14px; font-weight:500; color:var(--text-muted); text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; }
+        .tab-link:hover { color:var(--text-secondary); }
+        .tab-link.active { color:var(--accent-blue); border-bottom-color:var(--accent-blue); }
+        .progress-container { display:flex; align-items:center; gap:12px; }
+        .progress-text { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-secondary); }
+        .progress-bar { width:120px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent-orange),var(--accent-red)); border-radius:2px; transition:width .3s ease; }
+
+        /* Main Layout */
+        main { max-width:1400px; margin:0 auto; padding:40px; display:grid; grid-template-columns:1fr 1fr; gap:40px; min-height:calc(100vh - 100px); }
+
+        /* Content Panel */
+        .content-panel { display:flex; flex-direction:column; }
+        .slide-number { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-orange); font-weight:500; margin-bottom:8px; letter-spacing:.5px; }
+        .slide-title { font-size:30px; font-weight:700; margin-bottom:24px; line-height:1.2; }
+        .slide-content { flex:1; }
+        .slide-text { font-size:16.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:20px; }
+        .slide-text strong { color:var(--text-primary); font-weight:600; }
+        .highlight-box { background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(239,68,68,.08)); border:1px solid rgba(249,115,22,.2); border-radius:12px; padding:20px 24px; margin:20px 0; }
+        .highlight-box h4 { font-size:13px; font-weight:600; color:var(--accent-orange); margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .highlight-box p { font-size:15px; line-height:1.6; color:var(--text-primary); }
+        .code-block { background:#1e293b; border-radius:12px; padding:20px 24px; margin:20px 0; overflow-x:auto; }
+        .code-block pre { font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:#e2e8f0; margin:0; }
+        .code-block .kw { color:#c084fc; } .code-block .fn { color:#67e8f9; } .code-block .num { color:#fbbf24; }
+        .code-block .cm { color:#64748b; } .code-block .str { color:#86efac; } .code-block .prop { color:#93c5fd; }
+        .formula-box { background:var(--bg-white); border:2px solid var(--border-light); border-radius:12px; padding:24px; margin:20px 0; text-align:center; }
+        .formula { font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--text-primary); letter-spacing:1px; }
+        .formula .var { color:var(--accent-blue); font-weight:600; } .formula .op { color:var(--accent-orange); }
+
+        /* Nav Controls */
+        .nav-controls { display:flex; gap:12px; margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light); }
+        .nav-btn { flex:1; padding:14px 24px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .nav-btn svg { width:18px; height:18px; }
+        .nav-btn.primary { background:linear-gradient(135deg,var(--accent-orange),var(--accent-red)); color:white; border:none; box-shadow:var(--shadow-md); }
+        .nav-btn.primary:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+        .nav-btn.secondary { background:var(--bg-white); color:var(--text-secondary); border:1px solid var(--border-medium); }
+        .nav-btn.secondary:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .nav-btn:disabled { opacity:.4; cursor:not-allowed; transform:none!important; }
+
+        /* Canvas Panel */
+        .canvas-panel { background:var(--bg-white); border-radius:20px; border:1px solid var(--border-light); box-shadow:var(--shadow-lg); overflow:hidden; display:flex; flex-direction:column; }
+        .canvas-header { padding:16px 24px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; }
+        .canvas-title { font-size:13px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+        .canvas-hint { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .canvas-hint svg { width:16px; height:16px; }
+        .canvas-wrapper { flex:1; position:relative; background:#1e293b; }
+        canvas { display:block; width:100%; height:100%; }
+        .canvas-overlay { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.95); padding:10px 20px; border-radius:30px; box-shadow:var(--shadow-md); font-size:13px; color:var(--text-secondary); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+        .canvas-overlay svg { width:16px; height:16px; color:var(--accent-orange); }
+        .stats-bar { padding:12px 24px; background:var(--bg-white); border-top:1px solid var(--border-light); display:flex; gap:24px; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:8px; }
+        .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .stat-value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--text-primary); }
+        .stat-dot { width:8px; height:8px; border-radius:50%; }
+
+        /* Slide Dots */
+        .slide-dots { display:flex; gap:8px; margin-bottom:24px; }
+        .slide-dot { width:32px; height:4px; background:var(--border-light); border-radius:2px; cursor:pointer; transition:all .2s; }
+        .slide-dot:hover { background:var(--border-medium); }
+        .slide-dot.active { background:var(--accent-orange); }
+        .slide-dot.completed { background:var(--accent-green); }
+
+        /* Responsive */
+        @media (max-width:1024px) { main { grid-template-columns:1fr; padding:24px; } .canvas-panel { min-height:400px; order:-1; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:24px; } }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .slide-content { animation:fadeIn .4s ease; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 2</div>
+                <div class="chapter-title">Forces</div>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text" id="progressText">1 / 8</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12.5%"></div></div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-2-forces.html" class="tab-link active">Slides</a>
+            <a href="chapter-2-notes.html" class="tab-link">Notes</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-panel">
+            <div class="slide-dots" id="slideDots"></div>
+            <div class="slide-number" id="slideNumber">SLIDE 01</div>
+            <h1 class="slide-title" id="slideTitle">What is a Force?</h1>
+            <div class="slide-content" id="slideContent"></div>
+            <div class="nav-controls">
+                <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous
+                </button>
+                <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
+                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <span class="canvas-title" id="canvasTitle">Interactive Demo</span>
+                <span class="canvas-hint" id="canvasHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Watch the simulation</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span id="overlayText">Forces visualized as arrows</span>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-green)"></div><span class="stat-label">Velocity</span><span class="stat-value" id="statVel">0</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-orange)"></div><span class="stat-label">Accel</span><span class="stat-value" id="statAcc">0</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-blue)"></div><span class="stat-label">Mass</span><span class="stat-value" id="statMass">1.0</span></div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align:center; padding:20px 32px; border-top:1px solid var(--border-light); background:var(--bg-white);">
+        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Last updated: February 4, 2026</p>
+    </footer>
+
+    <script>
+    // ============ PHYSICS HELPERS ============
+    class Vec { constructor(x,y){this.x=x;this.y=y;} copy(){return new Vec(this.x,this.y)} add(v){this.x+=v.x;this.y+=v.y;return this} sub(v){this.x-=v.x;this.y-=v.y;return this} mult(n){this.x*=n;this.y*=n;return this} div(n){if(n!==0){this.x/=n;this.y/=n}return this} mag(){return Math.sqrt(this.x*this.x+this.y*this.y)} normalize(){let m=this.mag();if(m>0)this.div(m);return this} setMag(m){this.normalize();this.mult(m);return this} limit(max){if(this.mag()>max)this.setMag(max);return this} static add(a,b){return new Vec(a.x+b.x,a.y+b.y)} static sub(a,b){return new Vec(a.x-b.x,a.y-b.y)} static mult(a,n){return new Vec(a.x*n,a.y*n)} static div(a,n){return n!==0?new Vec(a.x/n,a.y/n):new Vec(0,0)} }
+
+    // ============ MOVER CLASS ============
+    class Mover {
+        constructor(x,y,m) { this.pos=new Vec(x,y); this.vel=new Vec(0,0); this.acc=new Vec(0,0); this.mass=m; this.r=Math.sqrt(m)*16; }
+        applyForce(f) { let a=Vec.div(f,this.mass); this.acc.add(a); }
+        update() { this.vel.add(this.acc); this.pos.add(this.vel); this.acc.mult(0); }
+        checkEdges(w,h) {
+            if(this.pos.y>h-this.r){this.vel.y*=-0.9;this.pos.y=h-this.r;}
+            if(this.pos.x>w-this.r){this.vel.x*=-1;this.pos.x=w-this.r;}
+            if(this.pos.x<this.r){this.vel.x*=-1;this.pos.x=this.r;}
+        }
+    }
+
+    // ============ LIQUID CLASS ============
+    class Liquid {
+        constructor(x,y,w,h,c){this.x=x;this.y=y;this.w=w;this.h=h;this.c=c;}
+        contains(mover){let p=mover.pos;return p.x>this.x&&p.x<this.x+this.w&&p.y>this.y&&p.y<this.y+this.h;}
+        calcDrag(mover){let speed=mover.vel.mag();let dragMag=this.c*speed*speed;let drag=mover.vel.copy();drag.mult(-1);drag.normalize();drag.mult(dragMag);return drag;}
+    }
+
+    // ============ SLIDE DATA ============
+    const slides = [
+        { number:"SLIDE 01", title:"What is a Force?", canvasTitle:"Newton's Laws", hint:"Objects at rest stay at rest...", overlay:"Watch forces push objects",
+            content:`<p class="slide-text">A <strong>force</strong> is a vector that causes an object with mass to accelerate. That's Newton's definition. Forces have both <strong>magnitude</strong> (how strong) and <strong>direction</strong> (which way they push).</p>
+            <p class="slide-text">Newton gave us three laws of motion that govern how forces work:</p>
+            <div class="highlight-box"><h4>Newton's Three Laws</h4>
+            <p><strong>1st Law:</strong> An object stays at rest or in motion unless acted upon by a force.<br>
+            <strong>2nd Law:</strong> F = M × A — Force equals mass times acceleration.<br>
+            <strong>3rd Law:</strong> For every action, there's an equal and opposite reaction.</p></div>
+            <p class="slide-text">In our p5.js world, the <strong>2nd law</strong> is the most important. It tells us: if we know the force and the mass, we can calculate the acceleration.</p>`,
+            draw: drawNewtonIntro },
+
+        { number:"SLIDE 02", title:"F = M × A", canvasTitle:"Newton's Second Law", hint:"Same force, different masses", overlay:"Bigger mass = less acceleration",
+            content:`<p class="slide-text">Newton's second law, rearranged: <strong>A = F / M</strong>. Acceleration equals force divided by mass.</p>
+            <div class="formula-box"><div class="formula"><span class="var">A</span> <span class="op">=</span> <span class="var">F</span> / <span class="var">M</span></div></div>
+            <p class="slide-text">This means: the <strong>harder</strong> you push, the faster it accelerates. But the <strong>heavier</strong> an object is, the less a force affects it. A bowling ball and a tennis ball pushed with the same force? The tennis ball flies.</p>
+            <div class="code-block"><pre><span class="fn">applyForce</span>(force) {
+  <span class="kw">let</span> f = <span class="fn">p5.Vector.div</span>(force, <span class="kw">this</span>.<span class="prop">mass</span>);
+  <span class="kw">this</span>.<span class="prop">acc</span>.<span class="fn">add</span>(f);
+}</pre></div>`,
+            draw: drawFMA },
+
+        { number:"SLIDE 03", title:"Force Accumulation", canvasTitle:"Adding Forces Together", hint:"Multiple forces combine", overlay:"Gravity + Wind = Net Force",
+            content:`<p class="slide-text">What happens when an object has <strong>multiple forces</strong> acting on it? Gravity pulling down AND wind pushing sideways? We <strong>accumulate</strong> (add) them all together.</p>
+            <p class="slide-text">Each call to <code>applyForce()</code> adds the force to the acceleration. At the end of each frame, we <strong>reset acceleration to zero</strong>—forces are instantaneous pushes, not permanent settings.</p>
+            <div class="code-block"><pre><span class="cm">// Each frame:</span>
+mover.<span class="fn">applyForce</span>(gravity);  <span class="cm">// adds to acc</span>
+mover.<span class="fn">applyForce</span>(wind);     <span class="cm">// adds to acc</span>
+mover.<span class="fn">update</span>();             <span class="cm">// vel += acc, pos += vel</span>
+                             <span class="cm">// acc = 0 (reset!)</span></pre></div>
+            <div class="highlight-box"><h4>Critical Rule</h4><p><code>this.acc.mult(0)</code> at the end of <code>update()</code>. Without this, forces from previous frames keep stacking forever!</p></div>`,
+            draw: drawAccumulation },
+
+        { number:"SLIDE 04", title:"The Mover Class", canvasTitle:"Object-Oriented Physics", hint:"Encapsulating motion logic", overlay:"Position + Velocity + Acceleration",
+            content:`<p class="slide-text">Here's our complete <strong>Mover</strong> class with forces. It has position, velocity, acceleration, and mass—the full physics pipeline:</p>
+            <div class="code-block"><pre><span class="kw">class</span> <span class="fn">Mover</span> {
+  <span class="fn">constructor</span>(m) {
+    <span class="kw">this</span>.<span class="prop">pos</span> = <span class="fn">createVector</span>(<span class="fn">random</span>(width), <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">vel</span> = <span class="fn">createVector</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">acc</span> = <span class="fn">createVector</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">mass</span> = m;
+    <span class="kw">this</span>.<span class="prop">r</span> = <span class="fn">sqrt</span>(<span class="kw">this</span>.<span class="prop">mass</span>) * <span class="num">10</span>;
+  }
+}</pre></div>
+            <p class="slide-text">The radius uses <code>sqrt(mass)</code> because mass relates to <strong>area</strong> (πr²), not radius directly. This prevents heavy objects from looking like giant balloons.</p>`,
+            draw: drawMoverClass },
+
+        { number:"SLIDE 05", title:"Gravity & Wind", canvasTitle:"Exercise: Gravity + Wind", hint:"Click & hold to apply wind!", overlay:"Click anywhere to push with wind",
+            content:`<p class="slide-text">Now let's put it together! A ball falls under <strong>gravity</strong>, and when you click, <strong>wind</strong> pushes it sideways.</p>
+            <p class="slide-text">For realistic gravity, we <strong>scale by mass</strong> so all objects fall at the same rate (like Galileo showed). Without scaling, lighter objects fall faster—"cartoon physics."</p>
+            <div class="code-block"><pre><span class="cm">// Real-world: scale gravity by mass</span>
+<span class="kw">let</span> weight = <span class="fn">p5.Vector.mult</span>(gravity, mover.<span class="prop">mass</span>);
+mover.<span class="fn">applyForce</span>(weight);
+
+<span class="cm">// Wind only when mouse pressed</span>
+<span class="kw">if</span> (mouseIsPressed) {
+  mover.<span class="fn">applyForce</span>(wind);
+}</pre></div>`,
+            draw: drawGravityWind },
+
+        { number:"SLIDE 06", title:"Mass Matters", canvasTitle:"Multiple Objects, Different Masses", hint:"Click for wind — watch the difference!", overlay:"Small ball = more acceleration",
+            content:`<p class="slide-text">Here's where mass gets interesting. Three objects with <strong>different masses</strong> fall under the same gravity. Click to apply wind.</p>
+            <p class="slide-text">Notice: they all fall at the <strong>same speed</strong> (gravity scaled by mass cancels out). But wind affects the <strong>small ones more</strong> because wind force is NOT scaled by mass—so A = F/M gives a bigger acceleration to lighter objects.</p>
+            <div class="highlight-box"><h4>The Galileo Insight</h4><p>A feather and a bowling ball dropped in a vacuum fall at the same rate. It's air resistance (a force!) that makes the feather slow. In our sim, scaling gravity by mass recreates this.</p></div>`,
+            draw: drawMassDifference },
+
+        { number:"SLIDE 07", title:"Friction", canvasTitle:"Friction Force", hint:"Watch the ball slow down", overlay:"Friction opposes motion",
+            content:`<p class="slide-text"><strong>Friction</strong> is a dissipative force—it always opposes the direction of motion. The formula:</p>
+            <div class="formula-box"><div class="formula"><span class="var">f</span> <span class="op">=</span> -μN<span class="var">v̂</span></div></div>
+            <p class="slide-text">In practice, we simplify: take the velocity direction, flip it, and scale by a friction coefficient. Friction doesn't speed things up or reverse them—it only <strong>slows them down</strong>.</p>
+            <div class="code-block"><pre><span class="kw">let</span> friction = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+friction.<span class="fn">normalize</span>();
+friction.<span class="fn">mult</span>(<span class="num">-1</span>);       <span class="cm">// opposite direction</span>
+friction.<span class="fn">mult</span>(c);         <span class="cm">// scale by coefficient</span>
+mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
+            draw: drawFriction },
+
+        { number:"SLIDE 08", title:"Drag & Fluid Resistance", canvasTitle:"Exercise: Falling Into Liquid", hint:"Click to reset the ball", overlay:"Watch it slow in the blue liquid!",
+            content:`<p class="slide-text">When an object enters a liquid, it experiences <strong>drag</strong>—a force that depends on the <strong>speed squared</strong>. The faster you go, the harder it pushes back.</p>
+            <div class="formula-box"><div class="formula"><span class="var">F<sub>d</sub></span> <span class="op">=</span> -½ρv²AC<sub>d</sub><span class="var">v̂</span></div></div>
+            <p class="slide-text">Simplified: magnitude = <code>c × speed²</code>, direction = opposite velocity. This is our final class exercise—<strong>gravity + friction + drag</strong> all working together.</p>
+            <div class="code-block"><pre><span class="cm">// Inside Liquid class</span>
+<span class="fn">calculateDrag</span>(mover) {
+  <span class="kw">let</span> speed = mover.<span class="prop">vel</span>.<span class="fn">mag</span>();
+  <span class="kw">let</span> dragMag = <span class="kw">this</span>.<span class="prop">c</span> * speed * speed;
+  <span class="kw">let</span> drag = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+  drag.<span class="fn">mult</span>(<span class="num">-1</span>);
+  drag.<span class="fn">setMag</span>(dragMag);
+  <span class="kw">return</span> drag;
+}</pre></div>`,
+            draw: drawDragLiquid }
+    ];
+
+    // ============ STATE ============
+    let currentSlide = 0;
+    let mouseDown = false;
+    let frame = 0;
+
+    // Sim objects (reinitialized per slide)
+    let movers = [];
+    let liquid = null;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    // ============ INIT ============
+    function init() { resize(); updateUI(); generateDots(); animate(); }
+    function resize() { const r=canvas.parentElement.getBoundingClientRect(); W=canvas.width=r.width; H=canvas.height=r.height; resetSim(); }
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousedown', ()=>mouseDown=true);
+    canvas.addEventListener('mouseup', ()=>mouseDown=false);
+    canvas.addEventListener('mouseleave', ()=>mouseDown=false);
+    canvas.addEventListener('click', ()=>{ if(currentSlide===7) resetSim(); });
+
+    function resetSim() {
+        movers = [];
+        frame = 0;
+        if (currentSlide===0||currentSlide===1) {
+            movers.push(new Mover(W*0.3, H*0.5, 1));
+            movers.push(new Mover(W*0.7, H*0.5, 4));
+        } else if (currentSlide===2||currentSlide===3) {
+            movers.push(new Mover(W*0.5, 50, 2));
+        } else if (currentSlide===4) {
+            movers.push(new Mover(W*0.5, 50, 2.5));
+        } else if (currentSlide===5) {
+            movers.push(new Mover(W*0.25, 30, 0.5));
+            movers.push(new Mover(W*0.5, 30, 2));
+            movers.push(new Mover(W*0.75, 30, 5));
+        } else if (currentSlide===6) {
+            let m = new Mover(80, H*0.5, 2);
+            m.vel = new Vec(4, -2);
+            movers.push(m);
+        } else if (currentSlide===7) {
+            movers.push(new Mover(W*0.3, 40, 0.8));
+            movers.push(new Mover(W*0.5, 40, 2));
+            movers.push(new Mover(W*0.7, 40, 4));
+            liquid = new Liquid(0, H*0.55, W, H*0.45, 0.08);
+        }
+    }
+
+    // ============ NAVIGATION ============
+    function nextSlide(){if(currentSlide<slides.length-1){currentSlide++;resetSim();updateUI();}}
+    function prevSlide(){if(currentSlide>0){currentSlide--;resetSim();updateUI();}}
+    function goToSlide(i){currentSlide=i;resetSim();updateUI();}
+    function updateUI(){
+        const s=slides[currentSlide];
+        document.getElementById('slideNumber').textContent=s.number;
+        document.getElementById('slideTitle').textContent=s.title;
+        document.getElementById('slideContent').innerHTML=s.content;
+        document.getElementById('canvasTitle').textContent=s.canvasTitle;
+        document.getElementById('canvasHint').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>${s.hint}`;
+        document.getElementById('overlayText').textContent=s.overlay;
+        document.getElementById('progressText').textContent=`${currentSlide+1} / ${slides.length}`;
+        document.getElementById('progressFill').style.width=`${((currentSlide+1)/slides.length)*100}%`;
+        document.getElementById('btnPrev').disabled=currentSlide===0;
+        document.getElementById('btnNext').disabled=currentSlide===slides.length-1;
+        document.querySelectorAll('.slide-dot').forEach((d,i)=>{d.classList.remove('active','completed');if(i===currentSlide)d.classList.add('active');else if(i<currentSlide)d.classList.add('completed');});
+    }
+    function generateDots(){const c=document.getElementById('slideDots');c.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='slide-dot'+(i===0?' active':'');d.onclick=()=>goToSlide(i);c.appendChild(d);});}
+
+    // ============ DRAWING ============
+    function clearCanvas(bg='#1e293b') { ctx.fillStyle=bg; ctx.fillRect(0,0,W,H); }
+    function drawArrow(x1,y1,x2,y2,color,label,lw=3) {
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy); if(len<2)return;
+        const angle=Math.atan2(dy,dx),headLen=Math.min(10,len*0.3);
+        ctx.save(); ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-headLen*Math.cos(angle-Math.PI/6),y2-headLen*Math.sin(angle-Math.PI/6)); ctx.lineTo(x2-headLen*Math.cos(angle+Math.PI/6),y2-headLen*Math.sin(angle+Math.PI/6)); ctx.closePath(); ctx.fill();
+        if(label){ctx.font='600 11px Inter,sans-serif';const lx=(x1+x2)/2,ly=(y1+y2)/2;const perpX=-Math.sin(angle)*14,perpY=Math.cos(angle)*14;ctx.fillText(label,lx+perpX,ly+perpY);}
+        ctx.restore();
+    }
+    function drawBall(x,y,r,color='rgba(255,255,255,0.85)',stroke='#fff') {
+        ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+        ctx.fillStyle=color; ctx.fill();
+        ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke();
+    }
+    function drawGround() { ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(0,H-4,W,4); }
+    function updateStats(vel,acc,mass) {
+        document.getElementById('statVel').textContent=(typeof vel==='number'?vel:vel.mag()).toFixed(2);
+        document.getElementById('statAcc').textContent=(typeof acc==='number'?acc:acc.mag()).toFixed(3);
+        document.getElementById('statMass').textContent=(typeof mass==='number'?mass:0).toFixed(1);
+    }
+
+    // ============ SLIDE DRAWINGS ============
+    function drawNewtonIntro() {
+        clearCanvas(); drawGround(); frame++;
+        // Show two objects: one at rest, one moving with constant velocity
+        const restX=W*0.25, restY=H*0.5;
+        drawBall(restX,restY,20,'rgba(100,200,255,0.6)','#67e8f9');
+        ctx.font='500 12px Inter'; ctx.fillStyle='#94a3b8'; ctx.fillText('At rest (no force)',restX-45,restY+35);
+        // Moving object
+        const moveX=(W*0.3+frame*0.8)%W, moveY=H*0.35;
+        drawBall(moveX,moveY,20,'rgba(249,115,22,0.6)','#f97316');
+        drawArrow(moveX,moveY,moveX+40,moveY,'#f97316','velocity',2);
+        ctx.fillStyle='#94a3b8'; ctx.fillText('Constant velocity (no net force)',moveX-70,moveY+35);
+        // Pushed object
+        const pushY=H*0.7;
+        const ax=Math.sin(frame*0.03)*0.05;
+        if(!this._pushObj) this._pushObj={x:W*0.5,vx:0};
+        this._pushObj.vx+=ax; this._pushObj.vx*=0.99; this._pushObj.x+=this._pushObj.vx;
+        if(this._pushObj.x>W-20||this._pushObj.x<20)this._pushObj.vx*=-1;
+        drawBall(this._pushObj.x,pushY,20,'rgba(16,185,129,0.6)','#10b981');
+        drawArrow(this._pushObj.x,pushY,this._pushObj.x+ax*800,pushY,'#ef4444','force',2);
+        ctx.fillStyle='#94a3b8'; ctx.fillText('Accelerating (force applied)',this._pushObj.x-65,pushY+35);
+        updateStats(0,0,0);
+    }
+
+    function drawFMA() {
+        clearCanvas(); drawGround(); frame++;
+        // Two objects, same force, different mass
+        const forceStrength=0.04;
+        movers.forEach(m=>{
+            let f=new Vec(forceStrength,0);
+            m.applyForce(f);
+            m.update();
+            if(m.pos.x>W-m.r){m.pos.x=m.r;m.vel.mult(0);}
+            if(m.pos.x<m.r){m.pos.x=m.r;m.vel.mult(0);}
+            drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.15)','rgba(255,255,255,0.5)');
+            // Force arrow (same for both)
+            drawArrow(m.pos.x,m.pos.y,m.pos.x+60,m.pos.y,'#f97316','F',2);
+            // Mass label
+            ctx.font='600 13px JetBrains Mono'; ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
+            ctx.fillText(`m=${m.mass}`,m.pos.x,m.pos.y+m.r+20); ctx.textAlign='left';
+        });
+        // Reset when they go too far
+        if(frame%200===0){movers.forEach(m=>{m.pos.x=m===movers[0]?W*0.3:W*0.7;m.vel.mult(0);});}
+        updateStats(movers[0].vel,movers[0].acc,movers[0].mass);
+    }
+
+    function drawAccumulation() {
+        clearCanvas(); drawGround(); frame++;
+        let m=movers[0]; if(!m)return;
+        let grav=new Vec(0,0.15);
+        let wind=mouseDown?new Vec(0.2,0):new Vec(0,0);
+        let weight=Vec.mult(grav,m.mass);
+        m.applyForce(weight);
+        if(mouseDown) m.applyForce(wind);
+        m.update(); m.checkEdges(W,H);
+        drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.15)','rgba(255,255,255,0.5)');
+        // Draw force arrows
+        const s=60;
+        drawArrow(m.pos.x,m.pos.y,m.pos.x,m.pos.y+weight.mag()*s,'#ef4444','gravity',2);
+        if(mouseDown) drawArrow(m.pos.x,m.pos.y,m.pos.x+wind.x*s*3,m.pos.y,'#06b6d4','wind',2);
+        // Net force
+        let net=Vec.add(weight,wind);
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+net.x*s*3,m.pos.y+net.y*s,'#10b981','net',2);
+        updateStats(m.vel,m.acc,m.mass);
+    }
+
+    function drawMoverClass() {
+        clearCanvas(); drawGround(); frame++;
+        let m=movers[0]; if(!m)return;
+        let grav=new Vec(0,0.1);
+        let weight=Vec.mult(grav,m.mass);
+        m.applyForce(weight);
+        m.update(); m.checkEdges(W,H);
+        drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.15)','rgba(255,255,255,0.5)');
+        // Show internal state as labels
+        ctx.font='500 11px JetBrains Mono'; ctx.fillStyle='#94a3b8';
+        ctx.fillText(`pos: (${m.pos.x.toFixed(0)}, ${m.pos.y.toFixed(0)})`,20,25);
+        ctx.fillText(`vel: (${m.vel.x.toFixed(2)}, ${m.vel.y.toFixed(2)})`,20,42);
+        ctx.fillText(`acc: (${m.acc.x.toFixed(3)}, ${m.acc.y.toFixed(3)})`,20,59);
+        ctx.fillText(`mass: ${m.mass}`,20,76);
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*10,m.pos.y+m.vel.y*10,'#10b981','vel',2);
+        updateStats(m.vel,m.acc,m.mass);
+    }
+
+    function drawGravityWind() {
+        clearCanvas(); drawGround(); frame++;
+        let m=movers[0]; if(!m)return;
+        let grav=new Vec(0,0.1);
+        let wind=new Vec(0.1,0);
+        let weight=Vec.mult(grav,m.mass);
+        m.applyForce(weight);
+        if(mouseDown) m.applyForce(wind);
+        m.update(); m.checkEdges(W,H);
+        drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.15)','rgba(255,255,255,0.5)');
+        drawArrow(m.pos.x,m.pos.y,m.pos.x,m.pos.y+40,'#ef4444','gravity',2);
+        if(mouseDown) drawArrow(m.pos.x,m.pos.y,m.pos.x+50,m.pos.y,'#06b6d4','wind',2);
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*8,m.pos.y+m.vel.y*8,'#10b981','vel',2);
+        updateStats(m.vel,m.acc,m.mass);
+    }
+
+    function drawMassDifference() {
+        clearCanvas(); drawGround(); frame++;
+        let grav=new Vec(0,0.1);
+        let wind=new Vec(0.08,0);
+        movers.forEach(m=>{
+            let weight=Vec.mult(grav,m.mass);
+            m.applyForce(weight);
+            if(mouseDown) m.applyForce(wind);
+            m.update(); m.checkEdges(W,H);
+            const alpha=0.3+m.mass*0.12;
+            drawBall(m.pos.x,m.pos.y,m.r,`rgba(255,255,255,${alpha})`,'rgba(255,255,255,0.5)');
+            drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*6,m.pos.y+m.vel.y*6,'#10b981','',2);
+            ctx.font='600 11px JetBrains Mono'; ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
+            ctx.fillText(`m=${m.mass}`,m.pos.x,m.pos.y-m.r-8); ctx.textAlign='left';
+        });
+        if(movers[0]) updateStats(movers[0].vel,movers[0].acc,movers[0].mass);
+    }
+
+    function drawFriction() {
+        clearCanvas(); frame++;
+        // Ground with friction zone
+        ctx.fillStyle='rgba(249,115,22,0.1)'; ctx.fillRect(0,H*0.5-2,W,H*0.5+2);
+        ctx.fillStyle='rgba(249,115,22,0.3)'; ctx.font='500 11px Inter'; ctx.fillText('friction zone',10,H*0.5+15);
+        drawGround();
+        let m=movers[0]; if(!m)return;
+        let grav=new Vec(0,0.2);
+        let weight=Vec.mult(grav,m.mass);
+        m.applyForce(weight);
+        // Apply friction when touching "ground" area
+        if(m.pos.y>H*0.5-m.r) {
+            let friction=m.vel.copy(); friction.normalize(); friction.mult(-1);
+            let c=0.03; friction.mult(c);
+            if(m.vel.mag()>0.01) m.applyForce(friction);
+        }
+        m.update(); m.checkEdges(W,H);
+        drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.15)','rgba(255,255,255,0.5)');
+        // Show friction arrow
+        if(m.vel.mag()>0.1 && m.pos.y>H*0.5-m.r) {
+            let fDir=m.vel.copy(); fDir.normalize(); fDir.mult(-30);
+            drawArrow(m.pos.x,m.pos.y,m.pos.x+fDir.x,m.pos.y+fDir.y,'#f97316','friction',2);
+        }
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*8,m.pos.y+m.vel.y*8,'#10b981','vel',2);
+        updateStats(m.vel,m.acc,m.mass);
+    }
+
+    function drawDragLiquid() {
+        clearCanvas(); frame++;
+        // Draw liquid
+        if(liquid) {
+            ctx.fillStyle='rgba(59,130,246,0.15)'; ctx.fillRect(liquid.x,liquid.y,liquid.w,liquid.h);
+            ctx.fillStyle='rgba(59,130,246,0.5)'; ctx.font='500 12px Inter'; ctx.fillText('LIQUID (drag zone)',10,liquid.y+20);
+            // Surface line
+            ctx.strokeStyle='rgba(59,130,246,0.4)'; ctx.lineWidth=2;
+            ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(0,liquid.y); ctx.lineTo(W,liquid.y); ctx.stroke(); ctx.setLineDash([]);
+        }
+        drawGround();
+        let grav=new Vec(0,0.1);
+        movers.forEach(m=>{
+            let weight=Vec.mult(grav,m.mass);
+            m.applyForce(weight);
+            // Air friction
+            if(m.vel.mag()>0.01){let fr=m.vel.copy();fr.normalize();fr.mult(-0.01);m.applyForce(fr);}
+            // Liquid drag
+            if(liquid&&liquid.contains(m)){let drag=liquid.calcDrag(m);m.applyForce(drag);}
+            m.update(); m.checkEdges(W,H);
+            const inLiq=liquid&&liquid.contains(m);
+            const col=inLiq?'rgba(100,180,255,0.4)':'rgba(255,255,255,0.15)';
+            drawBall(m.pos.x,m.pos.y,m.r,col,'rgba(255,255,255,0.5)');
+            drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*6,m.pos.y+m.vel.y*6,'#10b981','',2);
+            ctx.font='600 10px JetBrains Mono'; ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
+            ctx.fillText(`m=${m.mass.toFixed(1)}`,m.pos.x,m.pos.y-m.r-8); ctx.textAlign='left';
+        });
+        if(movers[0]) updateStats(movers[0].vel,movers[0].acc,movers[0].mass);
+    }
+
+    // ============ MAIN LOOP ============
+    function animate() { ctx.clearRect(0,0,W,H); slides[currentSlide].draw(); requestAnimationFrame(animate); }
+    init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 2: Forces – Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-main:#f8fafc;--bg-white:#fff;--bg-canvas:#f1f5f9;--text-primary:#1e293b;--text-secondary:#475569;--text-muted:#94a3b8;--accent-blue:#3b82f6;--accent-cyan:#06b6d4;--accent-green:#10b981;--accent-orange:#f97316;--accent-purple:#8b5cf6;--accent-red:#ef4444;--accent-amber:#f59e0b;--border-light:#e2e8f0;--border-medium:#cbd5e1;--shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-main);color:var(--text-primary);min-height:100vh}
+        header{background:var(--bg-white);border-bottom:1px solid var(--border-light);padding:0 32px;position:sticky;top:0;z-index:100}
+        .header-top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+        .header-left{display:flex;align-items:center;gap:16px}
+        .back-btn{display:flex;align-items:center;gap:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .2s}
+        .back-btn:hover{background:var(--bg-canvas);color:var(--text-primary)}
+        .back-btn svg{width:16px;height:16px}
+        .chapter-badge{background:linear-gradient(135deg,var(--accent-orange),var(--accent-red));color:white;font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px}
+        .chapter-title{font-size:16px;font-weight:600}
+        .header-tabs{display:flex;gap:0}
+        .tab-link{padding:12px 24px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;border-bottom:2px solid transparent;transition:all .2s}
+        .tab-link:hover{color:var(--text-secondary)}
+        .tab-link.active{color:var(--accent-blue);border-bottom-color:var(--accent-blue)}
+        .reading-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent-orange),var(--accent-red));z-index:200;transition:width .1s linear}
+        .article-container{max-width:760px;margin:0 auto;padding:48px 24px 120px;animation:fadeIn .5s ease-out}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .toc{background:var(--bg-white);border:1px solid var(--border-light);border-radius:16px;padding:28px 32px;margin-bottom:48px}
+        .toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:16px;font-weight:600}
+        .toc-list{list-style:none}
+        .toc-list a{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:0 -12px;color:var(--text-secondary);text-decoration:none;font-size:15px;border-radius:8px;transition:all .15s}
+        .toc-list a:hover{background:var(--bg-canvas);color:var(--text-primary)}
+        .toc-number{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--accent-orange);width:24px;text-align:right;flex-shrink:0}
+        .section{margin-bottom:56px}
+        .section-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent-orange);font-weight:500;letter-spacing:.5px;margin-bottom:8px}
+        .section h2{font-size:28px;font-weight:700;margin-bottom:24px;line-height:1.3}
+        .section h3{font-size:20px;font-weight:600;margin-top:32px;margin-bottom:16px}
+        .prose{font-size:16.5px;line-height:1.85;color:var(--text-secondary)}
+        .prose p{margin-bottom:20px}
+        .prose strong{color:var(--text-primary);font-weight:600}
+        .prose em{font-family:'Lora',Georgia,serif;font-style:italic;color:var(--text-primary)}
+        .prose ul,.prose ol{margin-bottom:20px;padding-left:24px}
+        .prose li{margin-bottom:8px}
+        .prose code{font-family:'JetBrains Mono',monospace;font-size:.88em;background:var(--bg-canvas);padding:2px 7px;border-radius:4px;color:var(--accent-purple)}
+        .code-block{background:#1e293b;border-radius:12px;margin:24px 0;overflow:hidden}
+        .code-header{padding:10px 20px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:8px}
+        .code-dot{width:8px;height:8px;border-radius:50%}
+        .code-block pre{padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;color:#e2e8f0;margin:0;overflow-x:auto}
+        .code-block .kw{color:#c084fc}.code-block .fn{color:#67e8f9}.code-block .num{color:#fbbf24}.code-block .cm{color:#64748b}.code-block .str{color:#86efac}.code-block .prop{color:#93c5fd}
+        .callout{border-radius:12px;padding:20px 24px;margin:28px 0;border-left:4px solid}
+        .callout-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+        .callout p{font-size:15px;line-height:1.7;margin-bottom:0}
+        .callout p+p{margin-top:12px}
+        .callout.think{background:rgba(249,115,22,.06);border-color:var(--accent-orange)}.callout.think .callout-title{color:var(--accent-orange)}
+        .callout.key{background:rgba(59,130,246,.06);border-color:var(--accent-blue)}.callout.key .callout-title{color:var(--accent-blue)}
+        .callout.aha{background:rgba(16,185,129,.06);border-color:var(--accent-green)}.callout.aha .callout-title{color:var(--accent-green)}
+        .callout.warn{background:rgba(245,158,11,.06);border-color:var(--accent-amber)}.callout.warn .callout-title{color:var(--accent-amber)}
+        .formula-block{background:var(--bg-white);border:2px solid var(--border-light);border-radius:12px;padding:24px;margin:28px 0;text-align:center}
+        .formula-block .formula{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--text-primary)}
+        .formula-block .formula .v{color:var(--accent-blue);font-weight:600}.formula-block .formula .op{color:var(--accent-orange);font-weight:600}
+        .formula-block .caption{font-size:13px;color:var(--text-muted);margin-top:10px}
+        .section-divider{border:none;border-top:1px solid var(--border-light);margin:56px 0}
+        .back-to-top{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:8px;border:1px solid var(--border-light);transition:all .2s;margin-top:24px}
+        .back-to-top:hover{background:var(--bg-white);color:var(--text-secondary)}
+        @media(max-width:768px){header{padding:0 20px}.article-container{padding:32px 16px 80px}.section h2{font-size:24px}.toc{padding:20px 24px}}
+    </style>
+</head>
+
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</a>
+                <div class="chapter-badge">Chapter 2</div>
+                <div class="chapter-title">Forces</div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-2-forces.html" class="tab-link">Slides</a>
+            <a href="chapter-2-notes.html" class="tab-link active">Notes</a>
+        </div>
+    </header>
+
+    <div class="article-container">
+
+        <nav class="toc" id="toc">
+            <h3>In this chapter</h3>
+            <ol class="toc-list">
+                <li><a href="#what-is-force"><span class="toc-number">01</span> What is a Force?</a></li>
+                <li><a href="#newton-laws"><span class="toc-number">02</span> Newton's Three Laws</a></li>
+                <li><a href="#second-law"><span class="toc-number">03</span> F = M × A (The Big One)</a></li>
+                <li><a href="#accumulation"><span class="toc-number">04</span> Force Accumulation</a></li>
+                <li><a href="#mass"><span class="toc-number">05</span> Factoring In Mass</a></li>
+                <li><a href="#gravity-wind"><span class="toc-number">06</span> Exercise: Gravity & Wind</a></li>
+                <li><a href="#friction"><span class="toc-number">07</span> Friction</a></li>
+                <li><a href="#drag"><span class="toc-number">08</span> Drag & Fluid Resistance</a></li>
+                <li><a href="#exercise-drag"><span class="toc-number">09</span> Exercise: The Full Simulation</a></li>
+            </ol>
+        </nav>
+
+        <!-- Section 1 -->
+        <section class="section" id="what-is-force">
+            <div class="section-label">SECTION 01</div>
+            <h2>What is a Force?</h2>
+            <div class="prose">
+                <p>In Chapter 1, we figured out that acceleration is the key to motion. Change the acceleration and everything else (velocity, position) follows. But we left a question unanswered: <em>where does acceleration come from?</em></p>
+                <p>The answer: <strong>forces</strong>. A force is a vector that causes an object with mass to accelerate. That's Newton's definition. It has magnitude (how strong) and direction (which way). Gravity pulls down. Wind pushes sideways. Friction opposes motion. They're all forces, and they all produce acceleration.</p>
+                <p>So if Chapter 1 was about the "how" of motion (position += velocity, velocity += acceleration), Chapter 2 is about the <strong>"why"</strong>. Why is something accelerating? Because forces are acting on it.</p>
+                <div class="callout think">
+                    <div class="callout-title">My Takeaway</div>
+                    <p>Forces are where it all begins. Acceleration was just the middle step. The chain is: <strong>Force → Acceleration → Velocity → Position</strong>. Control the forces, and you control the world.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 2 -->
+        <section class="section" id="newton-laws">
+            <div class="section-label">SECTION 02</div>
+            <h2>Newton's Three Laws</h2>
+            <div class="prose">
+                <h3>First Law: Inertia</h3>
+                <p><em>"An object at rest stays at rest, and an object in motion stays in motion at constant speed and direction, unless acted upon by an unbalanced force."</em></p>
+                <p>The important part is "unless acted upon." Before Newton, people thought you needed a force to keep something moving. Nope. You need a force to <strong>change</strong> motion. A ball in space keeps going forever. On Earth, it stops because of friction and air resistance—those are forces acting on it.</p>
+                <p>In p5.js terms: don't touch the velocity unless you're applying a force through acceleration.</p>
+
+                <h3>Second Law: F = M × A</h3>
+                <p>This is the big one. I'll go deep on this in the next section.</p>
+
+                <h3>Third Law: Action & Reaction</h3>
+                <p><em>"For every action, there's an equal and opposite reaction."</em></p>
+                <p>Push a wall, the wall pushes back on you. The forces are equal in magnitude and opposite in direction, but they act on <strong>different objects</strong>. That's why they don't cancel out.</p>
+                <p>In our simulations, we don't always bother with this. If wind pushes a ball, we don't model the ball pushing back on the wind. It's fine—we're going for "good enough," not NASA-level accuracy.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 3 -->
+        <section class="section" id="second-law">
+            <div class="section-label">SECTION 03</div>
+            <h2>F = M × A (The Big One)</h2>
+            <div class="prose">
+                <p>Rearranged: <strong>A = F / M</strong>. This is everything. It tells us:</p>
+                <ul>
+                    <li>Bigger force → more acceleration</li>
+                    <li>Bigger mass → less acceleration</li>
+                </ul>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">A</span> <span class="op">=</span> <span class="v">F</span> / <span class="v">M</span></div>
+                    <div class="caption">Acceleration is directly proportional to force, inversely proportional to mass.</div>
+                </div>
+
+                <p>If we set mass to 1 (which we did initially for simplicity), then A = F. Acceleration just equals force. That's a perfectly valid starting point.</p>
+
+                <p>In code, the <code>applyForce()</code> method implements this law directly:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">applyForce</span>(force) {
+  <span class="kw">let</span> f = <span class="fn">p5.Vector.div</span>(force, <span class="kw">this</span>.<span class="prop">mass</span>);
+  <span class="kw">this</span>.<span class="prop">acc</span>.<span class="fn">add</span>(f);
+}</pre>
+                </div>
+
+                <div class="callout key">
+                    <div class="callout-title">Why We Use the Static div()</div>
+                    <p>We use <code>p5.Vector.div(force, this.mass)</code> (static) instead of <code>force.div(this.mass)</code> (nonstatic) because the nonstatic version would <strong>mutate the original force vector</strong>. If two objects share the same wind force, the first object would accidentally divide it before the second one sees it. The static version creates a safe copy.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 4 -->
+        <section class="section" id="accumulation">
+            <div class="section-label">SECTION 04</div>
+            <h2>Force Accumulation</h2>
+            <div class="prose">
+                <p>Here's the thing that tripped me up at first. What if there are <strong>multiple forces</strong>? You can't just write <code>this.acc = force</code> because the second force would overwrite the first. Instead, you <strong>add</strong> each force to the acceleration:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="cm">// Every frame, apply all forces:</span>
+mover.<span class="fn">applyForce</span>(gravity);   <span class="cm">// acc += gravity/mass</span>
+mover.<span class="fn">applyForce</span>(wind);      <span class="cm">// acc += wind/mass</span>
+mover.<span class="fn">applyForce</span>(friction);  <span class="cm">// acc += friction/mass</span>
+mover.<span class="fn">update</span>();</pre>
+                </div>
+
+                <p>The net force is the sum of all individual forces. Newton's second law is actually: <strong>Net Force = M × A</strong>. As long as we add them all up, the math works out.</p>
+
+                <div class="callout warn">
+                    <div class="callout-title">Critical: Reset Acceleration Every Frame</div>
+                    <p>At the end of <code>update()</code>, you MUST reset acceleration to zero: <code>this.acc.mult(0)</code>. Forces are instantaneous pushes. If you don't reset, last frame's forces stick around and keep stacking. Wind stops blowing? Too bad, the old wind acceleration is still in there.</p>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">update</span>() {
+  <span class="kw">this</span>.<span class="prop">vel</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">acc</span>);
+  <span class="kw">this</span>.<span class="prop">pos</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">vel</span>);
+  <span class="kw">this</span>.<span class="prop">acc</span>.<span class="fn">mult</span>(<span class="num">0</span>);  <span class="cm">// ← THIS LINE IS EVERYTHING</span>
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 5 -->
+        <section class="section" id="mass">
+            <div class="section-label">SECTION 05</div>
+            <h2>Factoring In Mass</h2>
+            <div class="prose">
+                <p>Mass is a scalar (a single number). In our p5.js world, mass doesn't have real units—it's just a number we assign. But it has real consequences because of <code>A = F / M</code>.</p>
+
+                <p>For visualization, we tie mass to the size of the circle. But here's a subtle thing: mass should relate to <strong>area</strong>, not radius. The area of a circle is πr². So the radius should be <code>sqrt(mass)</code>, not mass directly:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">this</span>.<span class="prop">r</span> = <span class="fn">sqrt</span>(<span class="kw">this</span>.<span class="prop">mass</span>) * <span class="num">10</span>;
+<span class="cm">// Without sqrt(), a mass-10 object would look</span>
+<span class="cm">// 10x the radius—that's 100x the area. Way too big.</span></pre>
+                </div>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Galileo Thing</div>
+                    <p>Drop a bowling ball and a tennis ball from a tower—they hit the ground at the same time (ignoring air resistance). Why? Because gravity force <em>scales with mass</em>: heavier objects get pulled harder. But when you divide by mass to get acceleration (A = F/M), it cancels out. So we scale gravity by mass in our code: <code>let weight = p5.Vector.mult(gravity, mover.mass)</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 6: Class Exercise 1 -->
+        <section class="section" id="gravity-wind">
+            <div class="section-label">SECTION 06</div>
+            <h2>Exercise: Gravity & Wind</h2>
+            <div class="prose">
+                <p>This is the first exercise we built in class. A single Mover falls under gravity, and clicking the mouse applies wind. Here's the complete code:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">let</span> mover;
+
+<span class="kw">function</span> <span class="fn">setup</span>() {
+  <span class="fn">createCanvas</span>(<span class="num">640</span>, <span class="num">360</span>);
+  mover = <span class="kw">new</span> <span class="fn">Mover</span>(<span class="fn">random</span>(<span class="num">1</span>, <span class="num">5</span>));
+}
+
+<span class="kw">function</span> <span class="fn">draw</span>() {
+  <span class="fn">background</span>(<span class="num">50</span>);
+
+  <span class="kw">let</span> gravity = <span class="fn">createVector</span>(<span class="num">0</span>, <span class="num">0.1</span>);
+  <span class="kw">let</span> wind = <span class="fn">createVector</span>(<span class="num">0.1</span>, <span class="num">0</span>);
+
+  <span class="cm">// Real World: scale gravity by mass</span>
+  <span class="kw">let</span> weight = <span class="fn">p5.Vector.mult</span>(gravity, mover.<span class="prop">mass</span>);
+  mover.<span class="fn">applyForce</span>(weight);
+
+  <span class="kw">if</span> (mouseIsPressed) {
+    mover.<span class="fn">applyForce</span>(wind);
+  }
+
+  mover.<span class="fn">update</span>();
+  mover.<span class="fn">display</span>();
+  mover.<span class="fn">checkEdges</span>();
+}</pre>
+                </div>
+
+                <p>Key decisions in this code:</p>
+                <ul>
+                    <li><strong>Gravity is scaled by mass</strong> (<code>p5.Vector.mult(gravity, mover.mass)</code>) so all objects fall at the same rate—the Galileo model.</li>
+                    <li><strong>Wind is NOT scaled by mass</strong>, so lighter objects get blown more. This is realistic—wind has a fixed force regardless of what it's pushing.</li>
+                    <li><strong>Bouncing uses velocity reversal</strong>: <code>this.vel.y *= -1</code> for the floor, <code>this.vel.x *= -1</code> for the walls.</li>
+                </ul>
+
+                <div class="callout think">
+                    <div class="callout-title">Option A vs Option B</div>
+                    <p><strong>Option A (Real World):</strong> Scale gravity by mass → all objects fall equally.<br>
+                    <strong>Option B (Cartoon World):</strong> Don't scale → lighter objects accelerate faster under gravity, which looks "wrong" physically but can be a deliberate stylistic choice.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 7 -->
+        <section class="section" id="friction">
+            <div class="section-label">SECTION 07</div>
+            <h2>Friction</h2>
+            <div class="prose">
+                <p>Friction is a <strong>dissipative force</strong>—it converts kinetic energy into heat and slows things down. The formula:</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">f</span> <span class="op">=</span> -μN<span class="v">v̂</span></div>
+                    <div class="caption">μ = coefficient of friction, N = normal force, v̂ = velocity unit vector</div>
+                </div>
+
+                <p>Breaking that down:</p>
+                <ul>
+                    <li><strong>Direction:</strong> opposite to velocity. Take <code>vel.copy()</code>, normalize it, multiply by -1.</li>
+                    <li><strong>Magnitude:</strong> μ × N. We simplify N to 1 for now, so it's just the coefficient μ.</li>
+                </ul>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">if</span> (mover.<span class="prop">vel</span>.<span class="fn">mag</span>() > <span class="num">0</span>) {
+  <span class="kw">let</span> friction = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+  friction.<span class="fn">normalize</span>();
+  friction.<span class="fn">mult</span>(<span class="num">-1</span>);
+  <span class="kw">let</span> c = <span class="num">0.01</span>; <span class="cm">// coefficient</span>
+  friction.<span class="fn">mult</span>(c);
+  mover.<span class="fn">applyForce</span>(friction);
+}</pre>
+                </div>
+
+                <p>Important: friction only <strong>slows down</strong>, it never reverses direction or speeds things up. If velocity is zero, don't apply friction (you'd get weird results). Also, we check <code>vel.mag() > 0</code> before applying.</p>
+
+                <div class="callout key">
+                    <div class="callout-title">The Coefficient</div>
+                    <p>The friction coefficient (c or μ) determines how "grippy" a surface is. Ice = low c (0.001). Sandpaper = high c (0.1). You pick it based on what feels right for your simulation.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 8 -->
+        <section class="section" id="drag">
+            <div class="section-label">SECTION 08</div>
+            <h2>Drag & Fluid Resistance</h2>
+            <div class="prose">
+                <p>Drag is similar to friction but depends on <strong>speed squared</strong>. The faster you go, the harder the fluid pushes back. The full formula is gnarly:</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">F<sub>d</sub></span> <span class="op">=</span> -½ρv²AC<sub>d</sub><span class="v">v̂</span></div>
+                    <div class="caption">ρ = density, v = speed, A = surface area, C<sub>d</sub> = drag coefficient</div>
+                </div>
+
+                <p>But we simplify massively. Ignore ρ, A, and the ½. We're left with:</p>
+                <ul>
+                    <li><strong>Magnitude:</strong> <code>c × speed × speed</code> (where c is the drag coefficient)</li>
+                    <li><strong>Direction:</strong> opposite to velocity (same as friction)</li>
+                </ul>
+
+                <p>To implement this, we create a <strong>Liquid</strong> class that knows its position, size, and drag coefficient. It has two key methods:</p>
+                <ul>
+                    <li><code>contains(mover)</code> — is the mover inside the liquid?</li>
+                    <li><code>calculateDrag(mover)</code> — compute and return the drag force vector</li>
+                </ul>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">calculateDrag</span>(mover) {
+  <span class="kw">let</span> speed = mover.<span class="prop">vel</span>.<span class="fn">mag</span>();
+  <span class="kw">let</span> dragMagnitude = <span class="kw">this</span>.<span class="prop">c</span> * speed * speed;
+
+  <span class="kw">let</span> dragForce = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+  dragForce.<span class="fn">mult</span>(<span class="num">-1</span>);
+  dragForce.<span class="fn">normalize</span>();
+  dragForce.<span class="fn">mult</span>(dragMagnitude);
+  <span class="kw">return</span> dragForce;
+}</pre>
+                </div>
+
+                <div class="callout aha">
+                    <div class="callout-title">Why Speed Squared?</div>
+                    <p>The v² term means drag gets exponentially stronger at high speeds. A car going 60 mph experiences <strong>4 times</strong> the drag of a car going 30 mph (60² / 30² = 4). This is why terminal velocity exists—at some speed, drag perfectly balances gravity and you stop accelerating.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 9: Class Exercise 2 -->
+        <section class="section" id="exercise-drag">
+            <div class="section-label">SECTION 09</div>
+            <h2>Exercise: The Full Simulation</h2>
+            <div class="prose">
+                <p>This is the big exercise from class—everything combined. A mover falls through air (with friction) into a liquid (with drag). <strong>Three forces working together:</strong> gravity + air friction + liquid drag.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">let</span> mover;
+<span class="kw">let</span> liquid;
+
+<span class="kw">function</span> <span class="fn">setup</span>() {
+  <span class="fn">createCanvas</span>(<span class="num">640</span>, <span class="num">360</span>);
+  liquid = <span class="kw">new</span> <span class="fn">Liquid</span>(<span class="num">0</span>, height/<span class="num">2</span>, width, height/<span class="num">2</span>, <span class="num">0.09</span>);
+  mover = <span class="kw">new</span> <span class="fn">Mover</span>(<span class="fn">random</span>(width), <span class="num">0</span>, <span class="fn">random</span>(<span class="num">0.5</span>, <span class="num">3</span>));
+}
+
+<span class="kw">function</span> <span class="fn">draw</span>() {
+  <span class="fn">background</span>(<span class="num">50</span>);
+  liquid.<span class="fn">display</span>();
+
+  <span class="cm">// 1. Gravity (scaled by mass)</span>
+  <span class="kw">let</span> gravity = <span class="fn">createVector</span>(<span class="num">0</span>, <span class="num">0.1</span> * mover.<span class="prop">mass</span>);
+  mover.<span class="fn">applyForce</span>(gravity);
+
+  <span class="cm">// 2. Air friction</span>
+  <span class="kw">if</span> (mover.<span class="prop">vel</span>.<span class="fn">mag</span>() > <span class="num">0</span>) {
+    <span class="kw">let</span> friction = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+    friction.<span class="fn">normalize</span>();
+    friction.<span class="fn">mult</span>(<span class="num">-1</span>);
+    friction.<span class="fn">mult</span>(<span class="num">0.01</span>);
+    mover.<span class="fn">applyForce</span>(friction);
+  }
+
+  <span class="cm">// 3. Liquid drag</span>
+  <span class="kw">if</span> (liquid.<span class="fn">contains</span>(mover)) {
+    <span class="kw">let</span> dragForce = liquid.<span class="fn">calculateDrag</span>(mover);
+    mover.<span class="fn">applyForce</span>(dragForce);
+  }
+
+  mover.<span class="fn">update</span>();
+  mover.<span class="fn">display</span>();
+  mover.<span class="fn">checkEdges</span>();
+}</pre>
+                </div>
+
+                <p>Notice the pattern: every frame we apply forces <em>conditionally</em>. Gravity always applies. Friction applies if moving. Drag applies only if inside the liquid. Then update, draw, check edges. Same pipeline every time.</p>
+
+                <p>The <strong>Liquid</strong> class handles its own physics:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">class</span> <span class="fn">Liquid</span> {
+  <span class="fn">constructor</span>(x, y, w, h, c) {
+    <span class="kw">this</span>.<span class="prop">x</span> = x; <span class="kw">this</span>.<span class="prop">y</span> = y;
+    <span class="kw">this</span>.<span class="prop">w</span> = w; <span class="kw">this</span>.<span class="prop">h</span> = h;
+    <span class="kw">this</span>.<span class="prop">c</span> = c; <span class="cm">// drag coefficient</span>
+  }
+
+  <span class="fn">contains</span>(mover) {
+    <span class="kw">let</span> p = mover.<span class="prop">pos</span>;
+    <span class="kw">return</span> p.<span class="prop">x</span> > <span class="kw">this</span>.<span class="prop">x</span> && p.<span class="prop">x</span> < <span class="kw">this</span>.<span class="prop">x</span> + <span class="kw">this</span>.<span class="prop">w</span> &&
+           p.<span class="prop">y</span> > <span class="kw">this</span>.<span class="prop">y</span> && p.<span class="prop">y</span> < <span class="kw">this</span>.<span class="prop">y</span> + <span class="kw">this</span>.<span class="prop">h</span>;
+  }
+
+  <span class="fn">calculateDrag</span>(mover) {
+    <span class="kw">let</span> speed = mover.<span class="prop">vel</span>.<span class="fn">mag</span>();
+    <span class="kw">let</span> dragMag = <span class="kw">this</span>.<span class="prop">c</span> * speed * speed;
+    <span class="kw">let</span> drag = mover.<span class="prop">vel</span>.<span class="fn">copy</span>();
+    drag.<span class="fn">mult</span>(<span class="num">-1</span>);
+    drag.<span class="fn">normalize</span>();
+    drag.<span class="fn">mult</span>(dragMag);
+    <span class="kw">return</span> drag;
+  }
+}</pre>
+                </div>
+
+                <p>And the bounce uses <strong>dampening</strong>—<code>this.vel.y *= -0.90</code> instead of <code>*= -1</code>. That 0.9 means 10% of the energy is lost on each bounce, simulating an inelastic collision. The ball gradually loses height until it settles.</p>
+
+                <hr class="section-divider">
+
+                <p>That's Chapter 2. The whole thing boils down to: <strong>forces are vectors that cause acceleration. Accumulate them, divide by mass, and let the trickle-down do its thing.</strong> The pattern is always the same—calculate the force's direction, calculate its magnitude, apply it. Whether it's gravity, wind, friction, or drag, the pipeline is identical.</p>
+
+                <p>Next up: oscillation, where we bring trigonometry into the mix. But the force framework we built here? It carries forward into every single chapter that follows.</p>
+
+                <a href="#toc" class="back-to-top">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    Back to top
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <footer style="text-align:center; padding:32px 24px; border-top:1px solid var(--border-light);">
+        <p style="font-size:13px; color:var(--text-muted);">Written by <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> for CSC 375 at Notre Dame University</p>
+        <p style="margin-top:6px; font-size:11px; color:var(--text-muted);">Last updated: February 4, 2026</p>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll',()=>{const d=document.documentElement.scrollHeight-window.innerHeight;const s=window.scrollY;document.getElementById('readingProgress').style.width=(s/d)*100+'%';});
+    </script>
+</body>
+</html>

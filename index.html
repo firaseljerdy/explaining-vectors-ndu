@@ -505,6 +505,34 @@
         <p>Built for CSC 375 at <a href="#">Notre Dame University</a> by Firas El Jerdy</p>
         <p style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">Last updated: February 12, 2026</p>
     </footer>
+
+    <!-- Vercel Web Analytics -->
+    <script>
+        window.va = window.va || function () {
+            (window.vaq = window.vaq || []).push(arguments);
+        };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>
+        document.querySelectorAll('a.chapter-card').forEach((card) => {
+            card.addEventListener('click', () => {
+                const chapterNumber = card.querySelector('.chapter-number')?.textContent?.trim() || 'unknown';
+                const chapterTitle = card.querySelector('h3')?.textContent?.trim() || 'unknown';
+                const chapterHref = card.getAttribute('href') || 'unknown';
+
+                if (typeof window.va === 'function') {
+                    window.va('event', {
+                        name: 'chapter_card_click',
+                        data: {
+                            chapter_number: chapterNumber,
+                            chapter_title: chapterTitle,
+                            chapter_href: chapterHref
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

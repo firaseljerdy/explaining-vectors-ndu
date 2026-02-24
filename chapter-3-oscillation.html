@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 3: Oscillation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+
+        /* Header */
+        header { background:var(--bg-white); border-bottom:1px solid var(--border-light); padding:0 32px; position:sticky; top:0; z-index:100; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; padding:8px 12px; border-radius:8px; transition:all .2s; }
+        .back-btn:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .back-btn svg { width:16px; height:16px; }
+        .chapter-badge { background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
+        .chapter-title { font-size:16px; font-weight:600; }
+        .header-tabs { display:flex; gap:0; }
+        .tab-link { padding:12px 24px; font-size:14px; font-weight:500; color:var(--text-muted); text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; }
+        .tab-link:hover { color:var(--text-secondary); }
+        .tab-link.active { color:var(--accent-blue); border-bottom-color:var(--accent-blue); }
+        .progress-container { display:flex; align-items:center; gap:12px; }
+        .progress-text { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-secondary); }
+        .progress-bar { width:120px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); border-radius:2px; transition:width .3s ease; }
+
+        /* Main Layout */
+        main { max-width:1400px; margin:0 auto; padding:40px; display:grid; grid-template-columns:1fr 1fr; gap:40px; min-height:calc(100vh - 100px); }
+
+        /* Content Panel */
+        .content-panel { display:flex; flex-direction:column; }
+        .slide-number { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-purple); font-weight:500; margin-bottom:8px; letter-spacing:.5px; }
+        .slide-title { font-size:30px; font-weight:700; margin-bottom:24px; line-height:1.2; }
+        .slide-content { flex:1; }
+        .slide-text { font-size:16.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:20px; }
+        .slide-text strong { color:var(--text-primary); font-weight:600; }
+        .highlight-box { background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.08)); border:1px solid rgba(139,92,246,.2); border-radius:12px; padding:20px 24px; margin:20px 0; }
+        .highlight-box h4 { font-size:13px; font-weight:600; color:var(--accent-purple); margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .highlight-box p { font-size:15px; line-height:1.6; color:var(--text-primary); }
+        .code-block { background:#1e293b; border-radius:12px; padding:20px 24px; margin:20px 0; overflow-x:auto; }
+        .code-block pre { font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:#e2e8f0; margin:0; }
+        .code-block .kw { color:#c084fc; } .code-block .fn { color:#67e8f9; } .code-block .num { color:#fbbf24; }
+        .code-block .cm { color:#64748b; } .code-block .str { color:#86efac; } .code-block .prop { color:#93c5fd; }
+        .formula-box { background:var(--bg-white); border:2px solid var(--border-light); border-radius:12px; padding:24px; margin:20px 0; text-align:center; }
+        .formula { font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--text-primary); letter-spacing:1px; }
+        .formula .var { color:var(--accent-blue); font-weight:600; } .formula .op { color:var(--accent-purple); }
+
+        /* Nav Controls */
+        .nav-controls { display:flex; gap:12px; margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light); }
+        .nav-btn { flex:1; padding:14px 24px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .nav-btn svg { width:18px; height:18px; }
+        .nav-btn.primary { background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); color:white; border:none; box-shadow:var(--shadow-md); }
+        .nav-btn.primary:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+        .nav-btn.secondary { background:var(--bg-white); color:var(--text-secondary); border:1px solid var(--border-medium); }
+        .nav-btn.secondary:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .nav-btn:disabled { opacity:.4; cursor:not-allowed; transform:none!important; }
+
+        /* Canvas Panel */
+        .canvas-panel { background:var(--bg-white); border-radius:20px; border:1px solid var(--border-light); box-shadow:var(--shadow-lg); overflow:hidden; display:flex; flex-direction:column; }
+        .canvas-header { padding:16px 24px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; }
+        .canvas-title { font-size:13px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+        .canvas-hint { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .canvas-hint svg { width:16px; height:16px; }
+        .canvas-wrapper { flex:1; position:relative; background:#1e293b; }
+        canvas { display:block; width:100%; height:100%; }
+        .canvas-overlay { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.95); padding:10px 20px; border-radius:30px; box-shadow:var(--shadow-md); font-size:13px; color:var(--text-secondary); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+        .canvas-overlay svg { width:16px; height:16px; color:var(--accent-purple); }
+        .stats-bar { padding:12px 24px; background:var(--bg-white); border-top:1px solid var(--border-light); display:flex; gap:24px; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:8px; }
+        .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .stat-value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--text-primary); }
+        .stat-dot { width:8px; height:8px; border-radius:50%; }
+
+        /* Slide Dots */
+        .slide-dots { display:flex; gap:8px; margin-bottom:24px; }
+        .slide-dot { width:32px; height:4px; background:var(--border-light); border-radius:2px; cursor:pointer; transition:all .2s; }
+        .slide-dot:hover { background:var(--border-medium); }
+        .slide-dot.active { background:var(--accent-purple); }
+        .slide-dot.completed { background:var(--accent-green); }
+
+        /* Responsive */
+        @media (max-width:1024px) { main { grid-template-columns:1fr; padding:24px; } .canvas-panel { min-height:400px; order:-1; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:24px; } }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .slide-content { animation:fadeIn .4s ease; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 3</div>
+                <div class="chapter-title">Oscillation</div>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text" id="progressText">1 / 6</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:16.66%"></div></div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-3-oscillation.html" class="tab-link active">Slides</a>
+            <a href="chapter-3-notes.html" class="tab-link">Notes</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-panel">
+            <div class="slide-dots" id="slideDots"></div>
+            <div class="slide-number" id="slideNumber">SLIDE 01</div>
+            <h1 class="slide-title" id="slideTitle">What Are Radians?</h1>
+            <div class="slide-content" id="slideContent"></div>
+            <div class="nav-controls">
+                <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous
+                </button>
+                <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
+                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <span class="canvas-title" id="canvasTitle">Interactive Demo</span>
+                <span class="canvas-hint" id="canvasHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Move mouse to change angle</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span id="overlayText">A full circle = 2π radians</span>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-purple)"></div><span class="stat-label">Angle (rad)</span><span class="stat-value" id="statRad">0.00</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-blue)"></div><span class="stat-label">Angle (deg)</span><span class="stat-value" id="statDeg">0.0</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-green)"></div><span class="stat-label">Angular Vel</span><span class="stat-value" id="statVel">0.000</span></div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align:center; padding:20px 32px; border-top:1px solid var(--border-light); background:var(--bg-white);">
+        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Last updated: February 24, 2026</p>
+    </footer>
+
+    <script>
+    const TWO_PI = Math.PI * 2;
+    const PI = Math.PI;
+    const HALF_PI = Math.PI / 2;
+
+    // ============ SLIDE DATA ============
+    const slides = [
+        { number:"SLIDE 01", title:"What Are Radians?", canvasTitle:"Unit Circle", hint:"Move mouse to sweep the arc", overlay:"A full circle = 2π radians",
+            content:`<p class="slide-text">A <strong>radian</strong> measures an angle by how far you travel along the arc of a unit circle. One full revolution = 2π radians, because the circumference of a circle with radius 1 is 2π.</p>
+            <p class="slide-text">Unlike degrees (which divide a circle into 360 arbitrary slices), radians connect angle directly to <strong>arc length</strong>. This makes them the natural unit for any math involving circles, rotation, or trigonometry.</p>
+            <div class="formula-box"><div class="formula"><span class="var">θ</span> (radians) <span class="op">=</span> <span class="var">arc length</span> / <span class="var">radius</span></div></div>
+            <div class="highlight-box"><h4>Key Equivalences</h4><p><strong>Full circle:</strong> 2π ≈ 6.28 rad = 360°<br><strong>Half circle:</strong> π ≈ 3.14 rad = 180°<br><strong>Quarter circle:</strong> π/2 ≈ 1.57 rad = 90°</p></div>`,
+            draw: drawRadianIntro },
+
+        { number:"SLIDE 02", title:"Why Radians in Code?", canvasTitle:"sin() & cos() Visualized", hint:"Watch the projections update", overlay:"Radians make trig work natively",
+            content:`<p class="slide-text"><strong>p5.js uses radians by default.</strong> Every rotation function—<code>rotate()</code>, <code>sin()</code>, <code>cos()</code>, <code>atan2()</code>—expects radians. This isn't arbitrary; it's because radians make the math cleaner.</p>
+            <p class="slide-text">With radians, the derivative of <code>sin(x)</code> is simply <code>cos(x)</code>. With degrees, you'd need an extra conversion factor (π/180) in every formula. When you're updating angular velocity 60 times per second, that adds up fast.</p>
+            <div class="code-block"><pre><span class="cm">// p5.js uses radians by default</span>
+<span class="fn">rotate</span>(<span class="num">PI</span>);        <span class="cm">// 180 degrees</span>
+<span class="fn">rotate</span>(<span class="num">HALF_PI</span>);   <span class="cm">// 90 degrees</span>
+<span class="fn">rotate</span>(<span class="num">TWO_PI</span>);    <span class="cm">// full circle</span>
+
+<span class="cm">// Or convert manually:</span>
+<span class="fn">radians</span>(<span class="num">90</span>);       <span class="cm">// returns PI/2</span></pre></div>
+            <div class="highlight-box"><h4>Bottom Line</h4><p>Radians keep your simulation code free of conversion constants. Every angular formula "just works" without multiplying by π/180 every frame.</p></div>`,
+            draw: drawTrigCircle },
+
+        { number:"SLIDE 03", title:"Class Demo: Mouse → Rotation", canvasTitle:"Rotation with map()", hint:"Move mouse left/right to rotate", overlay:"angle = map(mouseX, 0, width, 0, TWO_PI)",
+            content:`<p class="slide-text">This is the exact code from class. We map <code>mouseX</code> from <code>0</code> to <code>width</code> onto an angle from <code>0</code> to <code>TWO_PI</code>, then rotate a square. A red arm line makes the rotation obvious.</p>
+            <p class="slide-text">The <code>push()</code> / <code>pop()</code> pattern isolates the transformation—without it, everything drawn after would also be rotated. <code>translate()</code> moves the origin to center, and <code>rectMode(CENTER)</code> draws the square around that origin.</p>
+            <div class="code-block"><pre><span class="fn">push</span>();
+<span class="fn">translate</span>(width/<span class="num">2</span>, height/<span class="num">2</span>);
+<span class="fn">rectMode</span>(<span class="num">CENTER</span>);
+
+<span class="kw">let</span> angle = <span class="fn">map</span>(mouseX, <span class="num">0</span>, width, <span class="num">0</span>, <span class="num">TWO_PI</span>);
+<span class="fn">rotate</span>(angle);
+
+<span class="fn">fill</span>(<span class="num">120</span>);
+<span class="fn">square</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">100</span>);
+<span class="fn">stroke</span>(<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>);
+<span class="fn">line</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">100</span>, <span class="num">0</span>);
+<span class="fn">pop</span>();</pre></div>
+            <div class="highlight-box"><h4>Why translate + rotate?</h4><p>Without <code>translate()</code>, <code>rotate()</code> spins around (0,0)—the top-left corner. By translating to center first, we rotate around the middle. Always translate <em>before</em> rotating.</p></div>`,
+            draw: drawMouseRotation },
+
+        { number:"SLIDE 04", title:"Angular Motion Variables", canvasTitle:"Acceleration → Velocity → Angle", hint:"Watch the arm speed up over time", overlay:"Same pipeline as linear motion",
+            content:`<p class="slide-text">Angular motion follows the <strong>exact same pattern</strong> as linear motion from Chapter 1. Instead of position, velocity, and acceleration vectors, we use scalar values: <strong>angle</strong>, <strong>angular velocity</strong>, and <strong>angular acceleration</strong>.</p>
+            <div class="formula-box"><div class="formula"><span class="var">angularVelocity</span> <span class="op">+=</span> <span class="var">angularAcceleration</span><br><span class="var">angle</span> <span class="op">+=</span> <span class="var">angularVelocity</span></div></div>
+            <p class="slide-text">This is the trickle-down effect again: acceleration changes velocity, velocity changes angle. Just like Chapter 1's <code>vel += acc; pos += vel;</code> but for rotation.</p>
+            <div class="code-block"><pre><span class="kw">let</span> angle = <span class="num">0</span>;
+<span class="kw">let</span> angleVelocity = <span class="num">0</span>;
+<span class="kw">let</span> angleAcceleration = <span class="num">0.01</span>;
+
+<span class="cm">// Each frame:</span>
+angleVelocity <span class="op">+=</span> angleAcceleration;
+angle <span class="op">+=</span> angleVelocity;
+
+<span class="fn">rotate</span>(angle);</pre></div>`,
+            draw: drawAngularMotion },
+
+        { number:"SLIDE 05", title:"Class Demo: Wind-Driven Baton", canvasTitle:"Mouse = Wind Force", hint:"Move mouse to push the baton", overlay:"Damping keeps spin controlled",
+            content:`<p class="slide-text">This is the second class demo. <strong>Wind</strong> from the mouse drives angular acceleration. Move left to blow counterclockwise, right to blow clockwise.</p>
+            <p class="slide-text">The critical addition is <strong>damping</strong>: multiplying angular velocity by 0.95 each frame. Without it, the baton would accelerate forever. The 0.95 simulates air resistance, making the baton gradually settle when you center the mouse.</p>
+            <div class="code-block"><pre><span class="kw">let</span> windStrength = <span class="fn">map</span>(mouseX, <span class="num">0</span>, width, <span class="num">-0.05</span>, <span class="num">0.05</span>);
+angleAcceleration = windStrength;
+
+angleVelocity <span class="op">+=</span> angleAcceleration;
+angleVelocity <span class="op">*=</span> <span class="num">0.95</span>;  <span class="cm">// damping</span>
+angle <span class="op">+=</span> angleVelocity;
+angleAcceleration = <span class="num">0</span>;   <span class="cm">// reset each frame</span></pre></div>
+            <div class="highlight-box"><h4>Why Reset Acceleration?</h4><p>Same reason as Chapter 2's forces: acceleration is recalculated each frame from scratch. If you don't zero it out, last frame's wind stays applied on top of this frame's wind.</p></div>`,
+            draw: drawWindBaton },
+
+        { number:"SLIDE 06", title:"From Rotation to Oscillation", canvasTitle:"Rotation → Sine Wave", hint:"Watch the wave trace from the arm", overlay:"Projecting rotation = oscillation",
+            content:`<p class="slide-text">Here's the chain we've built today:</p>
+            <p class="slide-text"><strong>1)</strong> Angles are measured in <strong>radians</strong> (full circle = 2π).<br><strong>2)</strong> <code>rotate()</code> in p5.js works in radians by default.<br><strong>3)</strong> Angular motion uses the same acc → vel → position pipeline as linear motion.<br><strong>4)</strong> <strong>Damping</strong> prevents infinite spin, just like friction prevents infinite sliding.</p>
+            <div class="highlight-box"><h4>What's Coming Next</h4><p>Rotation is just the beginning. When we project a rotating point onto one axis, we get a <strong>sine wave</strong>—and that's oscillation. Pendulums, springs, waves, and harmonic motion all build directly on what we learned today.</p></div>
+            <p class="slide-text">The rotating arm on the right is tracing a sine wave in real-time. That's the bridge between rotation and oscillation.</p>`,
+            draw: drawSineConnection }
+    ];
+
+    // ============ STATE ============
+    let currentSlide = 0;
+    let frame = 0;
+    let mx = 0, my = 0;
+
+    let angMotAngle = 0, angMotVel = 0;
+    let batonAngle = 0, batonVel = 0, batonAcc = 0;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    // ============ INIT ============
+    function init() { resize(); updateUI(); generateDots(); animate(); }
+    function resize() { const r=canvas.parentElement.getBoundingClientRect(); W=canvas.width=r.width; H=canvas.height=r.height; resetSim(); }
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousemove', (e) => { const r=canvas.getBoundingClientRect(); mx=e.clientX-r.left; my=e.clientY-r.top; });
+
+    function resetSim() {
+        frame = 0;
+        if(currentSlide===3) { angMotAngle=0; angMotVel=0; }
+        if(currentSlide===4) { batonAngle=0; batonVel=0; batonAcc=0; }
+    }
+
+    // ============ NAVIGATION ============
+    function nextSlide(){if(currentSlide<slides.length-1){currentSlide++;resetSim();updateUI();}}
+    function prevSlide(){if(currentSlide>0){currentSlide--;resetSim();updateUI();}}
+    function goToSlide(i){currentSlide=i;resetSim();updateUI();}
+    function updateUI(){
+        const s=slides[currentSlide];
+        document.getElementById('slideNumber').textContent=s.number;
+        document.getElementById('slideTitle').textContent=s.title;
+        document.getElementById('slideContent').innerHTML=s.content;
+        document.getElementById('canvasTitle').textContent=s.canvasTitle;
+        document.getElementById('canvasHint').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>${s.hint}`;
+        document.getElementById('overlayText').textContent=s.overlay;
+        document.getElementById('progressText').textContent=`${currentSlide+1} / ${slides.length}`;
+        document.getElementById('progressFill').style.width=`${((currentSlide+1)/slides.length)*100}%`;
+        document.getElementById('btnPrev').disabled=currentSlide===0;
+        document.getElementById('btnNext').disabled=currentSlide===slides.length-1;
+        document.querySelectorAll('.slide-dot').forEach((d,i)=>{d.classList.remove('active','completed');if(i===currentSlide)d.classList.add('active');else if(i<currentSlide)d.classList.add('completed');});
+    }
+    function generateDots(){const c=document.getElementById('slideDots');c.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='slide-dot'+(i===0?' active':'');d.onclick=()=>goToSlide(i);c.appendChild(d);});}
+
+    // ============ DRAWING HELPERS ============
+    function mapVal(v,a1,a2,b1,b2){return b1+((v-a1)/(a2-a1))*(b2-b1);}
+    function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+    function clearCanvas(bg='#1e293b'){ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);}
+    function drawArrow(x1,y1,x2,y2,color,label,lw=3){
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);if(len<2)return;
+        const angle=Math.atan2(dy,dx),headLen=Math.min(10,len*0.3);
+        ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-headLen*Math.cos(angle-PI/6),y2-headLen*Math.sin(angle-PI/6));ctx.lineTo(x2-headLen*Math.cos(angle+PI/6),y2-headLen*Math.sin(angle+PI/6));ctx.closePath();ctx.fill();
+        if(label){ctx.font='600 11px Inter,sans-serif';const lx=(x1+x2)/2,ly=(y1+y2)/2;const perpX=-Math.sin(angle)*14,perpY=Math.cos(angle)*14;ctx.fillText(label,lx+perpX,ly+perpY);}
+        ctx.restore();
+    }
+    function updateStats(rad,vel){
+        document.getElementById('statRad').textContent=rad.toFixed(2);
+        document.getElementById('statDeg').textContent=(rad*180/PI).toFixed(1);
+        document.getElementById('statVel').textContent=vel.toFixed(3);
+    }
+
+    // ============ SLIDE DRAWINGS ============
+    function drawRadianIntro() {
+        clearCanvas(); frame++;
+        const cx=W/2,cy=H/2,r=Math.min(W,H)*0.28;
+        const a=mapVal(clamp(mx,0,W),0,W,0,TWO_PI);
+
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(cx,cy,r,0,TWO_PI);ctx.stroke();
+
+        const markers=[{a:HALF_PI,label:'π/2'},{a:PI,label:'π'},{a:PI*1.5,label:'3π/2'},{a:0,label:'0'}];
+        markers.forEach(m=>{
+            const lx=cx+Math.cos(m.a)*(r+22),ly=cy+Math.sin(m.a)*(r+22);
+            ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+            ctx.fillText(m.label,lx,ly);
+            ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+            ctx.beginPath();ctx.moveTo(cx+Math.cos(m.a)*(r-5),cy+Math.sin(m.a)*(r-5));ctx.lineTo(cx+Math.cos(m.a)*(r+5),cy+Math.sin(m.a)*(r+5));ctx.stroke();
+        });
+        ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('2π',cx+r+22,cy-12);
+
+        ctx.strokeStyle='#8b5cf6';ctx.lineWidth=4;
+        ctx.beginPath();ctx.arc(cx,cy,r,0,a);ctx.stroke();
+
+        ctx.strokeStyle='#06b6d4';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(cx,cy,r*0.25,0,a);ctx.stroke();
+
+        ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r,cy);ctx.stroke();
+
+        ctx.strokeStyle='rgba(139,92,246,0.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.stroke();
+
+        ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),5,0,TWO_PI);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(cx,cy,4,0,TWO_PI);ctx.fill();
+
+        if(a>0.3){const midA=a/2,labelR=r*0.25+16;ctx.fillStyle='#06b6d4';ctx.font='500 11px Inter,sans-serif';ctx.textAlign='center';ctx.fillText('arc',cx+labelR*Math.cos(midA),cy+labelR*Math.sin(midA));}
+
+        ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='600 14px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`θ = ${a.toFixed(2)} rad`,16,20);
+        ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='500 12px JetBrains Mono,monospace';
+        ctx.fillText(`  = ${(a*180/PI).toFixed(1)}°`,16,40);
+
+        updateStats(a,0);
+    }
+
+    function drawTrigCircle() {
+        clearCanvas(); frame++;
+        const cx=W*0.32,cy=H/2,r=Math.min(W,H)*0.25;
+        const a=(frame*0.02)%TWO_PI;
+
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.arc(cx,cy,r,0,TWO_PI);ctx.stroke();
+
+        ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(cx-r-20,cy);ctx.lineTo(cx+r+20,cy);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(cx,cy-r-20);ctx.lineTo(cx,cy+r+20);ctx.stroke();
+
+        const px=cx+r*Math.cos(a),py=cy+r*Math.sin(a);
+
+        ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+        ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px,cy);ctx.stroke();ctx.setLineDash([]);
+        ctx.strokeStyle='#3b82f6';ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,cy);ctx.stroke();
+
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+        ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(cx,py);ctx.stroke();ctx.setLineDash([]);
+        ctx.strokeStyle='#10b981';ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,py);ctx.stroke();
+
+        ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py,5,0,TWO_PI);ctx.fill();
+
+        ctx.font='600 12px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillStyle='#3b82f6';ctx.fillText(`cos(θ) = ${Math.cos(a).toFixed(2)}`,cx+r+30,cy-16);
+        ctx.fillStyle='#10b981';ctx.fillText(`sin(θ) = ${Math.sin(a).toFixed(2)}`,cx+r+30,cy+4);
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillText(`θ = ${a.toFixed(2)} rad`,cx+r+30,cy+28);
+
+        const waveX=W*0.62,waveW=W*0.34,waveH=r*0.8;
+        ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(waveX,cy);ctx.lineTo(waveX+waveW,cy);ctx.stroke();
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;ctx.beginPath();
+        for(let i=0;i<=waveW;i++){const t=(i/waveW)*TWO_PI*2;const y=cy+Math.sin(t+a)*waveH;if(i===0)ctx.moveTo(waveX+i,y);else ctx.lineTo(waveX+i,y);}
+        ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='500 11px Inter,sans-serif';ctx.textAlign='center';
+        ctx.fillText('sin wave',waveX+waveW/2,cy+r+20);
+
+        updateStats(a,0);
+    }
+
+    function drawMouseRotation() {
+        clearCanvas(); frame++;
+        const a=mapVal(clamp(mx,0,W),0,W,0,TWO_PI);
+
+        ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;
+        for(let i=0;i<W;i+=40){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();}
+        for(let i=0;i<H;i+=40){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
+
+        ctx.save();ctx.translate(W/2,H/2);ctx.rotate(a);
+        ctx.fillStyle='rgba(148,163,184,0.7)';ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;
+        ctx.fillRect(-50,-50,100,100);ctx.strokeRect(-50,-50,100,100);
+        ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(100,0);ctx.stroke();
+        ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(100,0,5,0,TWO_PI);ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='600 14px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`angle = ${a.toFixed(2)} rad`,16,20);
+        ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='500 11px JetBrains Mono,monospace';
+        ctx.fillText('map(mouseX, 0, width, 0, TWO_PI)',16,42);
+
+        updateStats(a,0);
+    }
+
+    function drawAngularMotion() {
+        clearCanvas(); frame++;
+        const ACC=0.003;
+        angMotVel+=ACC;angMotAngle+=angMotVel;
+        if(angMotVel>0.5){angMotVel=0;angMotAngle=0;}
+
+        const cx=W/2,cy=H*0.55,armLen=Math.min(W,H)*0.25;
+
+        for(let i=0;i<8;i++){const trailA=angMotAngle-i*0.15;const alpha=0.12-i*0.014;if(alpha<=0)continue;ctx.strokeStyle=`rgba(139,92,246,${alpha})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+armLen*Math.cos(trailA),cy+armLen*Math.sin(trailA));ctx.stroke();}
+
+        ctx.strokeStyle='#8b5cf6';ctx.lineWidth=3;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+armLen*Math.cos(angMotAngle),cy+armLen*Math.sin(angMotAngle));ctx.stroke();
+        ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc(cx+armLen*Math.cos(angMotAngle),cy+armLen*Math.sin(angMotAngle),6,0,TWO_PI);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.8)';ctx.beginPath();ctx.arc(cx,cy,4,0,TWO_PI);ctx.fill();
+
+        ctx.font='600 13px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillStyle='#f97316';ctx.fillText(`acc = ${ACC.toFixed(3)}`,16,20);
+        ctx.fillStyle='#10b981';ctx.fillText(`vel = ${angMotVel.toFixed(3)}`,16,42);
+        ctx.fillStyle='#8b5cf6';ctx.fillText(`angle = ${(angMotAngle%TWO_PI).toFixed(2)}`,16,64);
+        ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='500 11px Inter,sans-serif';
+        ctx.fillText('acc → vel → angle (same pipeline as linear)',16,88);
+
+        updateStats(angMotAngle%TWO_PI,angMotVel);
+    }
+
+    function drawWindBaton() {
+        clearCanvas(); frame++;
+        const windStrength=mapVal(clamp(mx,0,W),0,W,-0.05,0.05);
+        batonAcc=windStrength;batonVel+=batonAcc;batonVel*=0.95;batonAngle+=batonVel;batonAcc=0;
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='500 12px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`wind: ${windStrength.toFixed(3)}`,16,20);
+
+        const windArrowLen=windStrength*600;
+        if(Math.abs(windArrowLen)>3) drawArrow(W/2-windArrowLen,H*0.14,W/2+windArrowLen,H*0.14,'#06b6d4','wind',2);
+
+        const cx=W/2,cy=H/2,bLen=60;
+        ctx.save();ctx.translate(cx,cy);ctx.rotate(batonAngle);
+        ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(-bLen,0);ctx.lineTo(bLen,0);ctx.stroke();
+        ctx.fillStyle='rgba(180,180,180,0.9)';ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.arc(bLen,0,8,0,TWO_PI);ctx.fill();ctx.stroke();
+        ctx.beginPath();ctx.arc(-bLen,0,8,0,TWO_PI);ctx.fill();ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle='rgba(255,255,255,0.4)';ctx.beginPath();ctx.arc(cx,cy,3,0,TWO_PI);ctx.fill();
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='left';
+        ctx.fillText(`angVel: ${batonVel.toFixed(3)}`,16,H-34);
+        ctx.fillText('damping: × 0.95',16,H-16);
+
+        updateStats(batonAngle%TWO_PI,batonVel);
+    }
+
+    function drawSineConnection() {
+        clearCanvas(); frame++;
+        const cx=W*0.18,cy=H/2,r=Math.min(W*0.14,H*0.3);
+        const a=frame*0.025;
+
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.arc(cx,cy,r,0,TWO_PI);ctx.stroke();
+
+        const tipX=cx+r*Math.cos(a),tipY=cy+r*Math.sin(a);
+        ctx.strokeStyle='#8b5cf6';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(tipX,tipY);ctx.stroke();
+        ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc(tipX,tipY,5,0,TWO_PI);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.arc(cx,cy,3,0,TWO_PI);ctx.fill();
+
+        const waveStartX=W*0.32;
+        ctx.strokeStyle='rgba(139,92,246,0.35)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.moveTo(tipX,tipY);ctx.lineTo(waveStartX,tipY);ctx.stroke();ctx.setLineDash([]);
+
+        const waveW=W*0.64;
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;ctx.beginPath();
+        for(let i=0;i<=waveW;i++){const t=(i/waveW)*TWO_PI*2;const y=cy+r*Math.sin(a-t);if(i===0)ctx.moveTo(waveStartX+i,y);else ctx.lineTo(waveStartX+i,y);}
+        ctx.stroke();
+
+        ctx.fillStyle='#10b981';ctx.beginPath();ctx.arc(waveStartX,tipY,5,0,TWO_PI);ctx.fill();
+
+        ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='500 11px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+        ctx.fillText('rotation',cx,cy+r+18);
+        ctx.fillText('→ oscillation (sine wave)',waveStartX+waveW/2,cy+r+18);
+
+        updateStats(a%TWO_PI,0);
+    }
+
+    // ============ MAIN LOOP ============
+    function animate() { ctx.clearRect(0,0,W,H); slides[currentSlide].draw(); requestAnimationFrame(animate); }
+    init();
+    </script>
+</body>
+</html>

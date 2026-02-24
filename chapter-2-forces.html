@@ -123,8 +123,8 @@
                 <div class="chapter-title">Forces</div>
             </div>
             <div class="progress-container">
-                <span class="progress-text" id="progressText">1 / 8</span>
-                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12.5%"></div></div>
+                <span class="progress-text" id="progressText">1 / 9</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11.11%"></div></div>
             </div>
         </div>
         <div class="header-tabs">
@@ -196,6 +196,19 @@
         calcDrag(mover){let speed=mover.vel.mag();let dragMag=this.c*speed*speed;let drag=mover.vel.copy();drag.mult(-1);drag.normalize();drag.mult(dragMag);return drag;}
     }
 
+    // ============ ATTRACTOR CLASS ============
+    class Attractor {
+        constructor(x,y,mass=20,G=1){this.pos=new Vec(x,y);this.mass=mass;this.G=G;}
+        attract(mover){
+            let force=Vec.sub(this.pos,mover.pos);
+            let distance=force.mag();
+            distance=Math.min(25,Math.max(5,distance));
+            let strength=(this.G*this.mass*mover.mass)/(distance*distance);
+            force.setMag(strength);
+            return force;
+        }
+    }
+
     // ============ SLIDE DATA ============
     const slides = [
         { number:"SLIDE 01", title:"What is a Force?", canvasTitle:"Newton's Laws", hint:"Objects at rest stay at rest...", overlay:"Watch forces push objects",
@@ -262,7 +275,27 @@ mover.<span class="fn">applyForce</span>(weight);
             <div class="highlight-box"><h4>The Galileo Insight</h4><p>A feather and a bowling ball dropped in a vacuum fall at the same rate. It's air resistance (a force!) that makes the feather slow. In our sim, scaling gravity by mass recreates this.</p></div>`,
             draw: drawMassDifference },
 
-        { number:"SLIDE 07", title:"Friction", canvasTitle:"Friction Force", hint:"Watch the ball slow down", overlay:"Friction opposes motion",
+        { number:"SLIDE 07", title:"Gravitational Attraction", canvasTitle:"Attractor + Mover", hint:"Watch the mover curve toward center", overlay:"Inverse-square attraction in action",
+            content:`<p class="slide-text">This is the same <strong>gravitational attraction</strong> setup we wrote in class: one moving object (<code>Mover</code>) and one stationary center mass (<code>Attractor</code>).</p>
+            <p class="slide-text">The force points from mover to attractor, and the magnitude follows inverse-square behavior.</p>
+            <div class="formula-box"><div class="formula"><span class="var">F</span> <span class="op">=</span> <span class="var">(G × m<sub>1</sub> × m<sub>2</sub>)</span> / <span class="var">d²</span></div></div>
+            <div class="code-block"><pre><span class="kw">let</span> force = attractor.<span class="fn">attract</span>(mover);
+mover.<span class="fn">applyForce</span>(force);
+mover.<span class="fn">update</span>();
+
+<span class="kw">class</span> <span class="fn">Attractor</span> {
+  <span class="fn">attract</span>(mover) {
+    <span class="kw">let</span> force = p5.Vector.<span class="fn">sub</span>(<span class="kw">this</span>.pos, mover.pos);
+    <span class="kw">let</span> distance = force.<span class="fn">mag</span>();
+    distance = <span class="fn">constrain</span>(distance, <span class="num">5</span>, <span class="num">25</span>);
+    <span class="kw">let</span> strength = (<span class="kw">this</span>.G * <span class="kw">this</span>.mass * mover.mass) / (distance * distance);
+    force.<span class="fn">setMag</span>(strength);
+    <span class="kw">return</span> force;
+  }
+}</pre></div>`,
+            draw: drawGravitationalAttraction },
+
+        { number:"SLIDE 08", title:"Friction", canvasTitle:"Friction Force", hint:"Watch the ball slow down", overlay:"Friction opposes motion",
             content:`<p class="slide-text"><strong>Friction</strong> is a dissipative force—it always opposes the direction of motion. The formula:</p>
             <div class="formula-box"><div class="formula"><span class="var">f</span> <span class="op">=</span> -μN<span class="var">v̂</span></div></div>
             <p class="slide-text">In practice, we simplify: take the velocity direction, flip it, and scale by a friction coefficient. Friction doesn't speed things up or reverse them—it only <strong>slows them down</strong>.</p>
@@ -273,7 +306,7 @@ friction.<span class="fn">mult</span>(c);         <span class="cm">// scale by c
 mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
             draw: drawFriction },
 
-        { number:"SLIDE 08", title:"Drag & Fluid Resistance", canvasTitle:"Exercise: Falling Into Liquid", hint:"Click to reset the ball", overlay:"Watch it slow in the blue liquid!",
+        { number:"SLIDE 09", title:"Drag & Fluid Resistance", canvasTitle:"Exercise: Falling Into Liquid", hint:"Click to reset the ball", overlay:"Watch it slow in the blue liquid!",
             content:`<p class="slide-text">When an object enters a liquid, it experiences <strong>drag</strong>—a force that depends on the <strong>speed squared</strong>. The faster you go, the harder it pushes back.</p>
             <div class="formula-box"><div class="formula"><span class="var">F<sub>d</sub></span> <span class="op">=</span> -½ρv²AC<sub>d</sub><span class="var">v̂</span></div></div>
             <p class="slide-text">Simplified: magnitude = <code>c × speed²</code>, direction = opposite velocity. This is our final class exercise—<strong>gravity + friction + drag</strong> all working together.</p>
@@ -297,6 +330,7 @@ mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
     // Sim objects (reinitialized per slide)
     let movers = [];
     let liquid = null;
+    let attractor = null;
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -309,10 +343,12 @@ mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
     canvas.addEventListener('mousedown', ()=>mouseDown=true);
     canvas.addEventListener('mouseup', ()=>mouseDown=false);
     canvas.addEventListener('mouseleave', ()=>mouseDown=false);
-    canvas.addEventListener('click', ()=>{ if(currentSlide===7) resetSim(); });
+    canvas.addEventListener('click', ()=>{ if(currentSlide===8) resetSim(); });
 
     function resetSim() {
         movers = [];
+        liquid = null;
+        attractor = null;
         frame = 0;
         if (currentSlide===0||currentSlide===1) {
             movers.push(new Mover(W*0.3, H*0.5, 1));
@@ -326,10 +362,15 @@ mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
             movers.push(new Mover(W*0.5, 30, 2));
             movers.push(new Mover(W*0.75, 30, 5));
         } else if (currentSlide===6) {
+            let m = new Mover(W*0.5, H*0.2, 2);
+            m.vel = new Vec(1.8, 0);
+            movers.push(m);
+            attractor = new Attractor(W*0.5, H*0.5, 20, 1);
+        } else if (currentSlide===7) {
             let m = new Mover(80, H*0.5, 2);
             m.vel = new Vec(4, -2);
             movers.push(m);
-        } else if (currentSlide===7) {
+        } else if (currentSlide===8) {
             movers.push(new Mover(W*0.3, 40, 0.8));
             movers.push(new Mover(W*0.5, 40, 2));
             movers.push(new Mover(W*0.7, 40, 4));
@@ -496,6 +537,27 @@ mover.<span class="fn">applyForce</span>(friction);</pre></div>`,
             ctx.fillText(`m=${m.mass}`,m.pos.x,m.pos.y-m.r-8); ctx.textAlign='left';
         });
         if(movers[0]) updateStats(movers[0].vel,movers[0].acc,movers[0].mass);
+    }
+
+    function drawGravitationalAttraction() {
+        clearCanvas(); frame++;
+        let m=movers[0]; if(!m||!attractor)return;
+
+        let force=attractor.attract(m);
+        m.applyForce(force);
+        m.update();
+
+        if(m.pos.x<-m.r)m.pos.x=W+m.r;
+        if(m.pos.x>W+m.r)m.pos.x=-m.r;
+        if(m.pos.y<-m.r)m.pos.y=H+m.r;
+        if(m.pos.y>H+m.r)m.pos.y=-m.r;
+
+        drawBall(attractor.pos.x,attractor.pos.y,attractor.mass*2,'rgba(120,180,255,0.35)','rgba(120,180,255,0.9)');
+        drawBall(m.pos.x,m.pos.y,m.r,'rgba(255,255,255,0.25)','rgba(255,255,255,0.8)');
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+force.x*300,m.pos.y+force.y*300,'#f97316','gravity',2);
+        drawArrow(m.pos.x,m.pos.y,m.pos.x+m.vel.x*8,m.pos.y+m.vel.y*8,'#10b981','vel',2);
+
+        updateStats(m.vel,m.acc,m.mass);
     }
 
     function drawFriction() {

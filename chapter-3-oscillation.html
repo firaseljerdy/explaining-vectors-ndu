@@ -123,8 +123,8 @@
                 <div class="chapter-title">Oscillation</div>
             </div>
             <div class="progress-container">
-                <span class="progress-text" id="progressText">1 / 6</span>
-                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:16.66%"></div></div>
+                <span class="progress-text" id="progressText">1 / 10</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
             </div>
         </div>
         <div class="header-tabs">
@@ -251,7 +251,46 @@ angleAcceleration = <span class="num">0</span>;   <span class="cm">// reset each
             <p class="slide-text"><strong>1)</strong> Angles are measured in <strong>radians</strong> (full circle = 2π).<br><strong>2)</strong> <code>rotate()</code> in p5.js works in radians by default.<br><strong>3)</strong> Angular motion uses the same acc → vel → position pipeline as linear motion.<br><strong>4)</strong> <strong>Damping</strong> prevents infinite spin, just like friction prevents infinite sliding.</p>
             <div class="highlight-box"><h4>What's Coming Next</h4><p>Rotation is just the beginning. When we project a rotating point onto one axis, we get a <strong>sine wave</strong>—and that's oscillation. Pendulums, springs, waves, and harmonic motion all build directly on what we learned today.</p></div>
             <p class="slide-text">The rotating arm on the right is tracing a sine wave in real-time. That's the bridge between rotation and oscillation.</p>`,
-            draw: drawSineConnection }
+            draw: drawSineConnection },
+
+        { number:"SLIDE 07", title:"What Is a Spring?", canvasTitle:"Elastic Deformation", hint:"Move mouse to stretch the spring", overlay:"Extension = current length − rest length",
+            content:`<p class="slide-text">When a force is applied to an object, it can <strong>stretch</strong>, <strong>compress</strong>, or <strong>bend</strong>. If the object returns to its original shape when the force is removed, that's <strong>elastic deformation</strong>—like a rubber band snapping back.</p>
+            <p class="slide-text">A spring has a <strong>natural length</strong> (its rest state). When you pull it, the increase in length is called the <strong>extension</strong>. The spring fights back with a restoring force that always pulls toward its rest length.</p>
+            <div class="highlight-box"><h4>Two Types of Deformation</h4><p><strong>Elastic:</strong> Object returns to original shape (spring, rubber band).<br><strong>Inelastic (Plastic):</strong> Object stays permanently deformed (bent metal, clay).</p></div>
+            <p class="slide-text">In our simulations, we work with ideal elastic springs that always obey Hooke's Law—no permanent deformation, no breaking point.</p>`,
+            draw: drawSpringIntro },
+
+        { number:"SLIDE 08", title:"Hooke's Law: F = −kx", canvasTitle:"Force ∝ Extension", hint:"Drag mouse up and down", overlay:"Stronger pull = stronger restoring force",
+            content:`<p class="slide-text">Hooke's Law says the force of a spring is <strong>directly proportional to its extension</strong>. Pull twice as far, get twice the force pulling back.</p>
+            <div class="formula-box"><div class="formula"><span class="var">F</span><sub>spring</sub> <span class="op">=</span> <span class="op">−</span><span class="var">k</span> × <span class="var">x</span></div></div>
+            <p class="slide-text"><strong>k</strong> is the <strong>spring constant</strong>—how stiff the spring is. A high k (car suspension) is hard to stretch. A low k (slinky) stretches easily. <strong>x</strong> is the extension: current length minus rest length.</p>
+            <div class="code-block"><pre><span class="kw">let</span> force = p5.Vector.<span class="fn">sub</span>(bob.<span class="prop">pos</span>, anchor);
+<span class="kw">let</span> x = force.<span class="fn">mag</span>() - restLength;
+force.<span class="fn">setMag</span>(<span class="num">-1</span> * k * x);
+bob.<span class="fn">applyForce</span>(force);</pre></div>
+            <div class="highlight-box"><h4>The Negative Sign</h4><p>The −1 makes it a <strong>restoring force</strong>. Stretch down → force pulls up. Compress up → force pushes down. Always back toward equilibrium.</p></div>`,
+            draw: drawHookesLaw },
+
+        { number:"SLIDE 09", title:"Spring Force in Code", canvasTitle:"Spring + Gravity", hint:"Watch the bob oscillate under gravity", overlay:"Gravity + spring force = oscillation",
+            content:`<p class="slide-text">We separate the spring into two objects: a <strong>Spring</strong> (with anchor and rest length) and a <strong>Bob</strong> (a Mover with position, velocity, acceleration). The Spring calculates and applies the force to the Bob.</p>
+            <div class="code-block"><pre><span class="kw">class</span> <span class="fn">Spring</span> {
+  <span class="fn">connect</span>(bob) {
+    <span class="kw">let</span> force = p5.Vector.<span class="fn">sub</span>(bob.<span class="prop">pos</span>, <span class="kw">this</span>.<span class="prop">anchor</span>);
+    <span class="kw">let</span> stretch = force.<span class="fn">mag</span>() - <span class="kw">this</span>.<span class="prop">restLength</span>;
+    force.<span class="fn">setMag</span>(<span class="num">-1</span> * <span class="kw">this</span>.<span class="prop">k</span> * stretch);
+    bob.<span class="fn">applyForce</span>(force);
+  }
+}</pre></div>
+            <p class="slide-text">Each frame: calculate the spring force, apply gravity, update the bob. The spring pulls the bob back whenever it's displaced—creating <strong>oscillation</strong> naturally, with no sine function needed.</p>
+            <div class="highlight-box"><h4>Same Pipeline, New Force</h4><p>The bob still uses <code>applyForce()</code> from Chapter 2. Springs are just another force in the accumulation: gravity + spring + damping = realistic bouncing.</p></div>`,
+            draw: drawSpringCode },
+
+        { number:"SLIDE 10", title:"Springs Produce Oscillation", canvasTitle:"Spring = Sine Wave", hint:"Watch the trail trace a wave", overlay:"Spring motion is simple harmonic motion",
+            content:`<p class="slide-text">Here's the payoff: a bob on a spring <strong>naturally oscillates</strong> in a sine-wave pattern. No <code>sin()</code> function needed—the physics of Hooke's Law produces it automatically.</p>
+            <p class="slide-text">This is <strong>simple harmonic motion</strong>: the restoring force is proportional to displacement. The further the bob stretches, the harder the spring pulls back, overshooting equilibrium, then compressing, and repeating.</p>
+            <div class="highlight-box"><h4>The Full Circle</h4><p><strong>Rotation → Sine wave → Oscillation → Spring motion.</strong> They're all the same phenomenon. A rotating point projected onto one axis, a bob on a spring, and <code>sin()</code> all trace the exact same curve.</p></div>
+            <p class="slide-text">The trail on the right proves it: the bob's Y position over time draws a sine wave, closing the loop on everything in this chapter.</p>`,
+            draw: drawSpringOscillation }
     ];
 
     // ============ STATE ============
@@ -261,6 +300,9 @@ angleAcceleration = <span class="num">0</span>;   <span class="cm">// reset each
 
     let angMotAngle = 0, angMotVel = 0;
     let batonAngle = 0, batonVel = 0, batonAcc = 0;
+
+    let springBobY = 0, springBobVY = 0;
+    let springTrail = [];
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -276,6 +318,7 @@ angleAcceleration = <span class="num">0</span>;   <span class="cm">// reset each
         frame = 0;
         if(currentSlide===3) { angMotAngle=0; angMotVel=0; }
         if(currentSlide===4) { batonAngle=0; batonVel=0; batonAcc=0; }
+        if(currentSlide>=8) { springBobY=0; springBobVY=0; springTrail=[]; }
     }
 
     // ============ NAVIGATION ============
@@ -516,6 +559,176 @@ angleAcceleration = <span class="num">0</span>;   <span class="cm">// reset each
         ctx.fillText('→ oscillation (sine wave)',waveStartX+waveW/2,cy+r+18);
 
         updateStats(a%TWO_PI,0);
+    }
+
+    // ============ SPRING HELPERS ============
+    function drawSpringCoils(x1,y1,x2,y2,coils,spread){
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+        if(len<2)return;
+        const ux=dx/len,uy=dy/len,px=-uy,py=ux;
+        const n=coils*2+2;
+        ctx.beginPath();ctx.moveTo(x1,y1);
+        for(let i=1;i<=n;i++){
+            const t=i/n,bx=x1+dx*t,by=y1+dy*t;
+            if(i<=1||i>=n){ctx.lineTo(bx,by);continue;}
+            const s=((i%2===0)?1:-1)*spread;
+            ctx.lineTo(bx+px*s,by+py*s);
+        }
+        ctx.stroke();
+    }
+
+    // ============ SPRING SLIDE DRAWINGS ============
+    function drawSpringIntro(){
+        clearCanvas();frame++;
+        const ax=W/2,ay=50,restLen=H*0.35;
+        const bobY=clamp(my||ay+restLen,ay+30,H-30);
+        const ext=bobY-(ay+restLen);
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(ax-25,ay-3,50,6);
+
+        ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(ax-35,ay+restLen);ctx.lineTo(ax+35,ay+restLen);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='500 10px JetBrains Mono,monospace';ctx.textAlign='right';ctx.textBaseline='middle';
+        ctx.fillText('rest length',ax-40,ay+restLen);
+
+        if(Math.abs(ext)>8){
+            const col=ext>0?'#f97316':'#3b82f6';
+            ctx.strokeStyle=col;ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(ax+28,ay+restLen);ctx.lineTo(ax+34,ay+restLen);ctx.lineTo(ax+34,bobY);ctx.lineTo(ax+28,bobY);ctx.stroke();
+            ctx.fillStyle=col;ctx.font='600 11px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+            ctx.fillText(ext>0?'extension':'compression',ax+40,(ay+restLen+bobY)/2);
+            ctx.fillText('x = '+Math.abs(ext).toFixed(0)+'px',ax+40,(ay+restLen+bobY)/2+16);
+        }
+
+        ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=2;
+        drawSpringCoils(ax,ay,ax,bobY,10,12);
+
+        ctx.fillStyle='rgba(139,92,246,0.6)';ctx.strokeStyle='rgba(139,92,246,0.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(ax,bobY,16,0,TWO_PI);ctx.fill();ctx.stroke();
+
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(ax-55,ay);ctx.lineTo(ax-55,ay+restLen);ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='500 9px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.save();ctx.translate(ax-63,ay+restLen/2);ctx.rotate(-PI/2);ctx.fillText('natural length',0,0);ctx.restore();
+
+        updateStats(0,0);
+    }
+
+    function drawHookesLaw(){
+        clearCanvas();frame++;
+        const ax=W/2,ay=50,restLen=H*0.35,k=0.02;
+        const bobY=clamp(my||ay+restLen,ay+30,H-30);
+        const ext=bobY-(ay+restLen);
+        const force=-k*ext;
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(ax-25,ay-3,50,6);
+
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(ax-30,ay+restLen);ctx.lineTo(ax+30,ay+restLen);ctx.stroke();ctx.setLineDash([]);
+
+        ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;
+        drawSpringCoils(ax,ay,ax,bobY,10,11);
+
+        ctx.fillStyle='rgba(139,92,246,0.5)';ctx.strokeStyle='rgba(139,92,246,0.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(ax,bobY,16,0,TWO_PI);ctx.fill();ctx.stroke();
+
+        if(Math.abs(force)>0.05){
+            drawArrow(ax,bobY,ax,bobY+force*800,'#10b981','F_spring',2);
+        }
+
+        ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='600 13px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText('F = -k × x',16,20);
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='500 12px JetBrains Mono,monospace';
+        ctx.fillText(`k = ${k}`,16,42);
+        ctx.fillText(`x = ${ext.toFixed(1)} px`,16,60);
+        ctx.fillStyle=force>0?'#10b981':'#f97316';
+        ctx.fillText(`F = ${force.toFixed(3)}`,16,78);
+
+        updateStats(Math.abs(ext)/100,Math.abs(force));
+    }
+
+    function drawSpringCode(){
+        clearCanvas();frame++;
+        const ax=W/2,ay=40,restLen=H*0.35,k=0.025,grav=0.2,damp=0.98;
+        if(springBobY===0) springBobY=ay+restLen+60;
+
+        const ext=springBobY-(ay+restLen);
+        const springF=-k*ext;
+        springBobVY+=(springF+grav);
+        springBobVY*=damp;
+        springBobY+=springBobVY;
+        if(springBobY>H-20){springBobY=H-20;springBobVY*=-0.5;}
+        if(springBobY<ay+20){springBobY=ay+20;springBobVY*=-0.5;}
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(ax-25,ay-3,50,6);
+
+        ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(ax-25,ay+restLen);ctx.lineTo(ax+25,ay+restLen);ctx.stroke();ctx.setLineDash([]);
+
+        ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;
+        drawSpringCoils(ax,ay,ax,springBobY,10,11);
+
+        ctx.fillStyle='rgba(139,92,246,0.5)';ctx.strokeStyle='rgba(139,92,246,0.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(ax,springBobY,16,0,TWO_PI);ctx.fill();ctx.stroke();
+
+        drawArrow(ax-25,springBobY,ax-25,springBobY+grav*80,'#ef4444','gravity',2);
+        if(Math.abs(springF)>0.05) drawArrow(ax+25,springBobY,ax+25,springBobY+springF*80,'#10b981','spring',2);
+        drawArrow(ax,springBobY+22,ax,springBobY+22+springBobVY*12,'#06b6d4','vel',2);
+
+        ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`spring: ${springF.toFixed(3)}`,16,20);
+        ctx.fillText(`gravity: ${grav.toFixed(3)}`,16,38);
+        ctx.fillText(`vel: ${springBobVY.toFixed(3)}`,16,56);
+
+        updateStats(Math.abs(ext)/100,Math.abs(springBobVY));
+    }
+
+    function drawSpringOscillation(){
+        clearCanvas();frame++;
+        const ax=W*0.22,ay=40,restLen=H*0.35,k=0.02,grav=0.15,damp=0.997;
+        if(springBobY===0) springBobY=ay+restLen+50;
+
+        const ext=springBobY-(ay+restLen);
+        const springF=-k*ext;
+        springBobVY+=(springF+grav);
+        springBobVY*=damp;
+        springBobY+=springBobVY;
+        if(springBobY>H-20){springBobY=H-20;springBobVY*=-0.5;}
+        if(springBobY<ay+20){springBobY=ay+20;springBobVY*=-0.5;}
+
+        springTrail.push(springBobY);
+        if(springTrail.length>300) springTrail.shift();
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(ax-20,ay-3,40,6);
+
+        ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;
+        drawSpringCoils(ax,ay,ax,springBobY,10,10);
+
+        ctx.fillStyle='rgba(139,92,246,0.5)';ctx.strokeStyle='rgba(139,92,246,0.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(ax,springBobY,14,0,TWO_PI);ctx.fill();ctx.stroke();
+
+        const trailX=W*0.38;
+        ctx.strokeStyle='rgba(139,92,246,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.moveTo(ax+14,springBobY);ctx.lineTo(trailX,springBobY);ctx.stroke();ctx.setLineDash([]);
+
+        const trailW=W*0.58;
+        ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(trailX,ay+restLen);ctx.lineTo(trailX+trailW,ay+restLen);ctx.stroke();
+
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;ctx.beginPath();
+        for(let i=0;i<springTrail.length;i++){
+            const tx=trailX+trailW*(i/300);
+            if(i===0)ctx.moveTo(tx,springTrail[i]);else ctx.lineTo(tx,springTrail[i]);
+        }
+        ctx.stroke();
+
+        if(springTrail.length>0){ctx.fillStyle='#10b981';ctx.beginPath();ctx.arc(trailX,springBobY,4,0,TWO_PI);ctx.fill();}
+
+        ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='500 11px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+        ctx.fillText('spring',ax,H-20);
+        ctx.fillText('bob position over time →',trailX+trailW/2,H-20);
+
+        updateStats(Math.abs(ext)/100,Math.abs(springBobVY));
     }
 
     // ============ MAIN LOOP ============

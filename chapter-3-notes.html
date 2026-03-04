@@ -97,7 +97,11 @@
                 <li><a href="#demo-mouse"><span class="toc-number">05</span> Class Demo 1: Mouse-Mapped Rotation</a></li>
                 <li><a href="#angular-motion"><span class="toc-number">06</span> Angular Motion: The Pipeline</a></li>
                 <li><a href="#demo-baton"><span class="toc-number">07</span> Class Demo 2: Wind-Driven Baton</a></li>
-                <li><a href="#whats-next"><span class="toc-number">08</span> What's Next: Oscillation</a></li>
+                <li><a href="#bridge"><span class="toc-number">08</span> The Bridge: Rotation → Oscillation</a></li>
+                <li><a href="#what-is-spring"><span class="toc-number">09</span> What Is a Spring?</a></li>
+                <li><a href="#hookes-law"><span class="toc-number">10</span> Hooke's Law: F = −kx</a></li>
+                <li><a href="#spring-code"><span class="toc-number">11</span> Building a Spring Simulation</a></li>
+                <li><a href="#spring-oscillation"><span class="toc-number">12</span> Springs Produce Oscillation</a></li>
             </ol>
         </nav>
 
@@ -386,9 +390,9 @@
         <hr class="section-divider">
 
         <!-- Section 8 -->
-        <section class="section" id="whats-next">
+        <section class="section" id="bridge">
             <div class="section-label">SECTION 08</div>
-            <h2>What's Next: Oscillation</h2>
+            <h2>The Bridge: Rotation → Oscillation</h2>
             <div class="prose">
                 <p>Today's class covered the foundation: radians, rotation in p5.js, and the angular motion pipeline. But this is all <em>setup</em> for the real payoff: <strong>oscillation</strong>.</p>
 
@@ -406,11 +410,162 @@
                     <p>Rotation → Projection → Sine wave → Oscillation. That's the chain. Today we learned rotation. Next, we project it, and everything clicks into place.</p>
                 </div>
 
+                <p>Now that we have the rotation foundation, let's put it to use. The next topic—springs—will show how a simple restoring force produces the exact same sine-wave oscillation we just visualized, no trig function required.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 9 -->
+        <section class="section" id="what-is-spring">
+            <div class="section-label">SECTION 09</div>
+            <h2>What Is a Spring?</h2>
+            <div class="prose">
+                <p>When you apply a force to an object, it can stretch, compress, or bend. This is called <strong>deformation</strong>. There are two kinds:</p>
+                <ul>
+                    <li><strong>Elastic deformation:</strong> the object returns to its original shape once the force is removed—like a rubber band snapping back or a spring bouncing.</li>
+                    <li><strong>Inelastic (plastic) deformation:</strong> the object stays permanently changed—like a bent paper clip or squished clay.</li>
+                </ul>
+
+                <p>A spring has a <strong>natural length</strong> (its rest state, with no force applied). When you pull it, the increase in length is called the <strong>extension</strong>. When you push it shorter, that's <strong>compression</strong>. In both cases, the spring fights back with a <em>restoring force</em>—it always wants to return to its natural length.</p>
+
+                <div class="callout key">
+                    <div class="callout-title">Two Forces Required</div>
+                    <p>To deform an object without it flying away, you always need at least <strong>two forces</strong>. Stretching: two forces pulling in opposite directions. Compressing: two forces pushing inward. Even pushing something against a surface counts—the surface pushes back (Newton's third law).</p>
+                </div>
+
+                <p>In our p5.js simulations, we'll model ideal elastic springs: they always obey Hooke's Law, never break, and never permanently deform. It's a simplification, but it produces beautiful oscillating motion.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 10 -->
+        <section class="section" id="hookes-law">
+            <div class="section-label">SECTION 10</div>
+            <h2>Hooke's Law: F = −kx</h2>
+            <div class="prose">
+                <p>Robert Hooke figured this out in 1660: <em>"As the extension, so the force."</em> The force of a spring is directly proportional to how far it's been stretched or compressed from its rest length. Double the extension, double the force.</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">F</span><sub>spring</sub> <span class="op">=</span> <span class="op">−</span><span class="v">k</span> × <span class="v">x</span></div>
+                    <div class="caption">k = spring constant (stiffness), x = extension (current length − rest length)</div>
+                </div>
+
+                <h3>The Spring Constant (k)</h3>
+                <p>The spring constant tells you how many Newtons of force it takes to stretch the spring by 1 metre. A <strong>low k</strong> (like 5 N/m) means the spring is soft and stretchy—think of a slinky. A <strong>high k</strong> (like 500 N/m) means the spring is stiff—think of a car suspension coil. In our code, k is just a tuning knob: higher values = snappier, more rigid springs.</p>
+
+                <h3>The Negative Sign</h3>
+                <p>The −1 is the most important part. It makes the force a <strong>restoring force</strong>: if the bob is below the rest position (positive extension), the force pulls it <em>up</em>. If the bob is above (negative extension / compression), the force pushes it <em>down</em>. Always back toward equilibrium.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">let</span> force = p5.Vector.<span class="fn">sub</span>(bob.<span class="prop">position</span>, <span class="kw">this</span>.<span class="prop">anchor</span>);
+<span class="kw">let</span> currentLength = force.<span class="fn">mag</span>();
+<span class="kw">let</span> x = currentLength - <span class="kw">this</span>.<span class="prop">restLength</span>;
+
+force.<span class="fn">setMag</span>(<span class="num">-1</span> * <span class="kw">this</span>.<span class="prop">k</span> * x);
+bob.<span class="fn">applyForce</span>(force);</pre>
+                </div>
+
+                <div class="callout warn">
+                    <div class="callout-title">The Elastic Limit</div>
+                    <p>In the real world, Hooke's Law only applies up to the <strong>elastic limit</strong>. Stretch a spring too far and the force-extension relationship stops being linear—the spring deforms permanently. On a force-extension graph, this is where the straight line starts to curve. In our simulations, we ignore this, but it's worth knowing why real springs can break.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 11 -->
+        <section class="section" id="spring-code">
+            <div class="section-label">SECTION 11</div>
+            <h2>Building a Spring Simulation</h2>
+            <div class="prose">
+                <p>To implement a spring in code, we separate it into two objects: a <strong>Spring</strong> (knows the anchor position, rest length, and stiffness) and a <strong>Bob</strong> (a Mover from Chapter 2 with position, velocity, and acceleration). The Spring calculates the force and applies it directly to the Bob.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">class</span> <span class="fn">Spring</span> {
+  <span class="fn">constructor</span>(x, y, length) {
+    <span class="kw">this</span>.<span class="prop">anchor</span> = <span class="fn">createVector</span>(x, y);
+    <span class="kw">this</span>.<span class="prop">restLength</span> = length;
+    <span class="kw">this</span>.<span class="prop">k</span> = <span class="num">0.2</span>;
+  }
+
+  <span class="fn">connect</span>(bob) {
+    <span class="kw">let</span> force = p5.Vector.<span class="fn">sub</span>(bob.<span class="prop">position</span>, <span class="kw">this</span>.<span class="prop">anchor</span>);
+    <span class="kw">let</span> stretch = force.<span class="fn">mag</span>() - <span class="kw">this</span>.<span class="prop">restLength</span>;
+    force.<span class="fn">setMag</span>(<span class="num">-1</span> * <span class="kw">this</span>.<span class="prop">k</span> * stretch);
+    bob.<span class="fn">applyForce</span>(force);  <span class="cm">// apply internally!</span>
+  }
+}</pre>
+                </div>
+
+                <p>The main loop is clean—same pipeline as Chapter 2:</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">function</span> <span class="fn">draw</span>() {
+  <span class="kw">let</span> gravity = <span class="fn">createVector</span>(<span class="num">0</span>, <span class="num">1</span>);
+  bob.<span class="fn">applyForce</span>(gravity);   <span class="cm">// gravity always</span>
+  spring.<span class="fn">connect</span>(bob);       <span class="cm">// spring force</span>
+  bob.<span class="fn">update</span>();
+  bob.<span class="fn">show</span>();
+  spring.<span class="fn">show</span>();
+}</pre>
+                </div>
+
+                <div class="callout aha">
+                    <div class="callout-title">Same Pipeline, New Force</div>
+                    <p>The Bob is just a Mover from Chapter 2. It still uses <code>applyForce()</code>, <code>update()</code>, and <code>show()</code>. The spring force is accumulated alongside gravity, friction, or any other force. This is the beauty of the force accumulation pattern: adding a new force doesn't require changing the object's code at all—you just call <code>applyForce()</code> one more time.</p>
+                </div>
+
+                <p>Notice that <code>connect()</code> calls <code>applyForce()</code> internally instead of returning the force vector. This is a design choice—you could do it either way. Embedding it inside the Spring keeps the draw loop cleaner, especially when you have multiple spring connections.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">Damping in Springs</div>
+                    <p>Without damping, a spring oscillates forever. In reality, air resistance and internal friction gradually steal energy. The quick fix: multiply the bob's velocity by 0.99 (or similar) each frame, just like angular damping. Or you can apply a proper friction force from Chapter 2. Either works—one is a shortcut, the other is physically grounded.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 12 -->
+        <section class="section" id="spring-oscillation">
+            <div class="section-label">SECTION 12</div>
+            <h2>Springs Produce Oscillation</h2>
+            <div class="prose">
+                <p>Here's the payoff for the entire chapter: a bob on a spring <strong>naturally oscillates in a sine-wave pattern</strong>. No <code>sin()</code> function needed. Hooke's Law produces it automatically.</p>
+
+                <p>Why? Because the restoring force is <strong>proportional to displacement</strong>. The further the bob is from rest, the harder the spring pulls it back. It overshoots equilibrium (because of velocity), compresses past the rest point, and the spring pushes it back the other way. This back-and-forth motion is called <strong>simple harmonic motion</strong>—the same pattern described by the sine function.</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">x</span>(t) <span class="op">=</span> <span class="v">A</span> × <span class="v">sin</span>(<span class="v">ωt</span>)</div>
+                    <div class="caption">Amplitude × sin(angular frequency × time) — the position of an ideal spring bob over time.</div>
+                </div>
+
+                <p>If you track the bob's Y position over time and plot it, you get a perfect sine wave. This closes the loop on everything in this chapter:</p>
+
+                <ul>
+                    <li><strong>Rotation</strong> around a circle → project onto one axis → <strong>sine wave</strong></li>
+                    <li><strong>Spring</strong> with restoring force → bob oscillates → plots a <strong>sine wave</strong></li>
+                    <li>The <code>sin()</code> function → directly outputs a <strong>sine wave</strong></li>
+                </ul>
+
+                <p>Three completely different mechanisms, same curve. That's not a coincidence—it's the deep structure of oscillation.</p>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Full Circle</div>
+                    <p><strong>Radians → Rotation → Angular motion → Sine wave → Spring force → Oscillation.</strong> Every concept in this chapter feeds into the next. Radians let us describe rotation. Rotation projected onto an axis gives us sine. And Hooke's Law, a completely separate physical law, produces the same sine pattern through force and acceleration. Once you see it, you can't unsee it.</p>
+                </div>
+
                 <hr class="section-divider">
 
-                <p>That's Chapter 3's first session. The whole thing boils down to: <strong>radians are the natural language of rotation, and the angular motion pipeline is identical to linear motion but with scalars instead of vectors.</strong> Damping replaces friction as the simplest way to prevent infinite spin.</p>
+                <p>That's Chapter 3. The whole thing boils down to: <strong>radians are the natural language of rotation, angular motion mirrors linear motion with scalars, and springs are nature's built-in oscillators.</strong> The force-based approach from Chapter 2 carries forward: springs are just another force to accumulate.</p>
 
-                <p>Next up: we exploit the rotation-to-sine connection to build oscillating systems—things that move back and forth in a predictable, periodic pattern. Pendulums, springs, and waves are all coming.</p>
+                <p>What's coming next? Pendulums (springs with fixed-length arms), waves (arrays of oscillators), and particle systems that combine everything we've learned so far.</p>
 
                 <a href="#toc" class="back-to-top">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>

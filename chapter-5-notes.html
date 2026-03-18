@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 5: Autonomous Agents – Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-main:#f8fafc;--bg-white:#fff;--bg-canvas:#f1f5f9;--text-primary:#1e293b;--text-secondary:#475569;--text-muted:#94a3b8;--accent-blue:#3b82f6;--accent-cyan:#06b6d4;--accent-green:#10b981;--accent-orange:#f97316;--accent-purple:#8b5cf6;--accent-red:#ef4444;--accent-amber:#f59e0b;--border-light:#e2e8f0;--border-medium:#cbd5e1;--shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-main);color:var(--text-primary);min-height:100vh}
+        header{background:var(--bg-white);border-bottom:1px solid var(--border-light);padding:0 32px;position:sticky;top:0;z-index:100}
+        .header-top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+        .header-left{display:flex;align-items:center;gap:16px}
+        .back-btn{display:flex;align-items:center;gap:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .2s}
+        .back-btn:hover{background:var(--bg-canvas);color:var(--text-primary)}
+        .back-btn svg{width:16px;height:16px}
+        .chapter-badge{background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan));color:white;font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px}
+        .chapter-title{font-size:16px;font-weight:600}
+        .header-tabs{display:flex;gap:0}
+        .tab-link{padding:12px 24px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;border-bottom:2px solid transparent;transition:all .2s}
+        .tab-link:hover{color:var(--text-secondary)}
+        .tab-link.active{color:var(--accent-green);border-bottom-color:var(--accent-green)}
+        .reading-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent-green),var(--accent-cyan));z-index:200;transition:width .1s linear}
+        .article-container{max-width:760px;margin:0 auto;padding:48px 24px 120px;animation:fadeIn .5s ease-out}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .toc{background:var(--bg-white);border:1px solid var(--border-light);border-radius:16px;padding:28px 32px;margin-bottom:48px}
+        .toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:16px;font-weight:600}
+        .toc-list{list-style:none}
+        .toc-list a{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:0 -12px;color:var(--text-secondary);text-decoration:none;font-size:15px;border-radius:8px;transition:all .15s}
+        .toc-list a:hover{background:var(--bg-canvas);color:var(--text-primary)}
+        .toc-number{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--accent-green);width:24px;text-align:right;flex-shrink:0}
+        .section{margin-bottom:56px}
+        .section-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent-green);font-weight:500;letter-spacing:.5px;margin-bottom:8px}
+        .section h2{font-size:28px;font-weight:700;margin-bottom:24px;line-height:1.3}
+        .section h3{font-size:20px;font-weight:600;margin-top:32px;margin-bottom:16px}
+        .prose{font-size:16.5px;line-height:1.85;color:var(--text-secondary)}
+        .prose p{margin-bottom:20px}
+        .prose strong{color:var(--text-primary);font-weight:600}
+        .prose em{font-family:'Lora',Georgia,serif;font-style:italic;color:var(--text-primary)}
+        .prose ul,.prose ol{margin-bottom:20px;padding-left:24px}
+        .prose li{margin-bottom:8px}
+        .prose code{font-family:'JetBrains Mono',monospace;font-size:.88em;background:var(--bg-canvas);padding:2px 7px;border-radius:4px;color:var(--accent-green)}
+        .code-block{background:#1e293b;border-radius:12px;margin:24px 0;overflow:hidden}
+        .code-header{padding:10px 20px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:8px}
+        .code-dot{width:8px;height:8px;border-radius:50%}
+        .code-block pre{padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;color:#e2e8f0;margin:0;overflow-x:auto}
+        .code-block .kw{color:#c084fc}.code-block .fn{color:#67e8f9}.code-block .num{color:#fbbf24}.code-block .cm{color:#64748b}.code-block .str{color:#86efac}.code-block .prop{color:#93c5fd}
+        .callout{border-radius:12px;padding:20px 24px;margin:28px 0;border-left:4px solid}
+        .callout-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+        .callout p{font-size:15px;line-height:1.7;margin-bottom:0}
+        .callout p+p{margin-top:12px}
+        .callout.think{background:rgba(249,115,22,.06);border-color:var(--accent-orange)}.callout.think .callout-title{color:var(--accent-orange)}
+        .callout.key{background:rgba(59,130,246,.06);border-color:var(--accent-blue)}.callout.key .callout-title{color:var(--accent-blue)}
+        .callout.aha{background:rgba(16,185,129,.06);border-color:var(--accent-green)}.callout.aha .callout-title{color:var(--accent-green)}
+        .callout.warn{background:rgba(245,158,11,.06);border-color:var(--accent-amber)}.callout.warn .callout-title{color:var(--accent-amber)}
+        .formula-block{background:var(--bg-white);border:2px solid var(--border-light);border-radius:12px;padding:24px;margin:28px 0;text-align:center}
+        .formula-block .formula{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--text-primary)}
+        .formula-block .formula .v{color:var(--accent-blue);font-weight:600}.formula-block .formula .op{color:var(--accent-green);font-weight:600}
+        .formula-block .caption{font-size:13px;color:var(--text-muted);margin-top:10px}
+        .section-divider{border:none;border-top:1px solid var(--border-light);margin:56px 0}
+        .back-to-top{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:8px;border:1px solid var(--border-light);transition:all .2s;margin-top:24px}
+        .back-to-top:hover{background:var(--bg-white);color:var(--text-secondary)}
+        @media(max-width:768px){header{padding:0 20px}.article-container{padding:32px 16px 80px}.section h2{font-size:24px}.toc{padding:20px 24px}}
+    </style>
+</head>
+
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</a>
+                <div class="chapter-badge">Chapter 5</div>
+                <div class="chapter-title">Autonomous Agents</div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-5-agents.html" class="tab-link">Slides</a>
+            <a href="chapter-5-notes.html" class="tab-link active">Notes</a>
+        </div>
+    </header>
+
+    <div class="article-container">
+
+        <nav class="toc" id="toc">
+            <h3>In this chapter</h3>
+            <ol class="toc-list">
+                <li><a href="#what-is-agent"><span class="toc-number">01</span> What Is an Autonomous Agent?</a></li>
+                <li><a href="#vehicle-class"><span class="toc-number">02</span> The Vehicle Class</a></li>
+                <li><a href="#steering-formula"><span class="toc-number">03</span> Steering Force = Desired − Velocity</a></li>
+                <li><a href="#seek"><span class="toc-number">04</span> Seek Behavior</a></li>
+                <li><a href="#arrive"><span class="toc-number">05</span> Arrive Behavior</a></li>
+                <li><a href="#flee"><span class="toc-number">06</span> Flee Behavior</a></li>
+                <li><a href="#flow-field"><span class="toc-number">07</span> What Is a Flow Field?</a></li>
+                <li><a href="#following-field"><span class="toc-number">08</span> Following a Flow Field</a></li>
+                <li><a href="#combining"><span class="toc-number">09</span> Combining Behaviors</a></li>
+                <li><a href="#emergence"><span class="toc-number">10</span> Emergence from Simplicity</a></li>
+            </ol>
+        </nav>
+
+        <!-- Section 1 -->
+        <section class="section" id="what-is-agent">
+            <div class="section-label">SECTION 01</div>
+            <h2>What Is an Autonomous Agent?</h2>
+            <div class="prose">
+                <p>In Chapter 2, we learned about forces: gravity pulls objects down, friction slows them, springs pull them back. But in every case, the force was applied <strong>externally</strong>. The object didn't decide anything — it just obeyed Newton's second law.</p>
+
+                <p>An <strong>autonomous agent</strong> is different. It generates its own internal forces based on what it perceives. Craig Reynolds, in his foundational 1999 paper <em>"Steering Behaviors for Autonomous Characters"</em>, defined three key properties:</p>
+
+                <ul>
+                    <li><strong>Limited perception:</strong> The agent can only see part of its environment — not everything, just what's nearby or relevant.</li>
+                    <li><strong>Internal processing:</strong> It takes that perception and computes an action — a <em>steering force</em> — using simple rules.</li>
+                    <li><strong>No global leader:</strong> Each agent acts independently. There's no central controller telling everyone where to go.</li>
+                </ul>
+
+                <div class="callout think">
+                    <div class="callout-title">My Takeaway</div>
+                    <p>In Chapter 2, gravity and friction happened TO the object. In Chapter 5, the object DECIDES how to move. That's the shift from passive physics to active agency. The <code>applyForce()</code> pipeline is the same — the difference is who's computing the force.</p>
+                </div>
+
+                <p>Reynolds called these forces <strong>steering behaviors</strong>. The word "steering" is deliberate: like turning a car's steering wheel, you don't teleport to a new heading — you apply a corrective force that gradually changes your direction. The behaviors we'll cover (seek, arrive, flee, flow field following) are all variations of this one idea.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 2 -->
+        <section class="section" id="vehicle-class">
+            <div class="section-label">SECTION 02</div>
+            <h2>The Vehicle Class</h2>
+            <div class="prose">
+                <p>Our Vehicle builds directly on the <strong>Mover</strong> from Chapter 2. Same position, velocity, acceleration. Same <code>applyForce()</code> and <code>update()</code> methods. The only additions are two constraints that make it behave like an agent:</p>
+
+                <ul>
+                    <li><strong><code>maxSpeed</code></strong> — limits how fast the vehicle can go. After adding acceleration to velocity, we clamp the velocity magnitude.</li>
+                    <li><strong><code>maxForce</code></strong> — limits how sharply it can steer. Every steering force is clamped to this maximum before being applied.</li>
+                </ul>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">class</span> <span class="fn">Vehicle</span> {
+  <span class="fn">constructor</span>(x, y) {
+    <span class="kw">this</span>.<span class="prop">pos</span> = <span class="kw">new</span> <span class="fn">Vec</span>(x, y);
+    <span class="kw">this</span>.<span class="prop">vel</span> = <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">acc</span> = <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">maxSpeed</span> = <span class="num">4</span>;
+    <span class="kw">this</span>.<span class="prop">maxForce</span> = <span class="num">0.2</span>;
+  }
+
+  <span class="fn">applyForce</span>(force) {
+    <span class="kw">this</span>.<span class="prop">acc</span>.<span class="fn">add</span>(force);
+  }
+
+  <span class="fn">update</span>() {
+    <span class="kw">this</span>.<span class="prop">vel</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">acc</span>);
+    <span class="kw">this</span>.<span class="prop">vel</span>.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+    <span class="kw">this</span>.<span class="prop">pos</span>.<span class="fn">add</span>(<span class="kw">this</span>.<span class="prop">vel</span>);
+    <span class="kw">this</span>.<span class="prop">acc</span>.<span class="fn">mult</span>(<span class="num">0</span>);  <span class="cm">// reset each frame</span>
+  }
+}</pre>
+                </div>
+
+                <div class="callout key">
+                    <div class="callout-title">Two Knobs, Infinite Feels</div>
+                    <p><code>maxSpeed</code> is the gas pedal limit. <code>maxForce</code> is the steering wheel limit. A fast vehicle with low <code>maxForce</code> takes wide, sweeping turns — like a car on a highway. A slow vehicle with high <code>maxForce</code> is nimble and reactive — like a drone hovering. These two values control the entire personality of every behavior.</p>
+                </div>
+
+                <p>The vehicle is drawn as a <strong>triangle</strong> pointing in the direction of its velocity (using <code>atan2(vel.y, vel.x)</code> for the heading). This makes it visually obvious where the agent is headed and how it's turning.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 3 -->
+        <section class="section" id="steering-formula">
+            <div class="section-label">SECTION 03</div>
+            <h2>Steering Force = Desired − Velocity</h2>
+            <div class="prose">
+                <p>This is the single most important formula in this chapter. Every behavior — seek, arrive, flee, follow — uses it.</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">steering</span> <span class="op">=</span> <span class="v">desired</span> <span class="op">−</span> <span class="v">velocity</span></div>
+                    <div class="caption">The steering force is the difference between where you want to go and where you're currently going.</div>
+                </div>
+
+                <p>Think about driving a car. You're heading north at 60 km/h but want to go northeast. You don't teleport — you turn the wheel. The steering wheel applies a <em>correction</em> that gradually shifts your heading. Reynolds' insight was exactly this: don't set the velocity directly. Instead, compute the <strong>correction</strong> needed to go from your current velocity to your desired velocity.</p>
+
+                <p>The <code>desired</code> vector changes depending on the behavior:</p>
+                <ul>
+                    <li><strong>Seek:</strong> desired points toward the target at full speed</li>
+                    <li><strong>Flee:</strong> desired points away from the target at full speed</li>
+                    <li><strong>Arrive:</strong> desired points toward the target, speed scaled by distance</li>
+                    <li><strong>Follow field:</strong> desired comes from the flow field cell lookup</li>
+                </ul>
+
+                <p>But the subtraction <code>desired − velocity</code> is <em>always</em> the same. That's the elegance.</p>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Click Moment</div>
+                    <p>This is Reynolds' genius: <code>desired − velocity</code> gives you the exact correction needed to go from where you ARE heading to where you WANT to head. Every behavior in this chapter just changes how you compute "desired." The rest of the math stays identical.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 4 -->
+        <section class="section" id="seek">
+            <div class="section-label">SECTION 04</div>
+            <h2>Seek Behavior</h2>
+            <div class="prose">
+                <p>Seek is the simplest steering behavior and the foundation for everything else. The algorithm has three steps:</p>
+
+                <ol>
+                    <li><strong>Calculate the desired velocity:</strong> a vector pointing from the vehicle's position to the target, normalized and scaled to <code>maxSpeed</code>.</li>
+                    <li><strong>Compute the steering force:</strong> <code>desired − velocity</code>.</li>
+                    <li><strong>Limit the steering force</strong> to <code>maxForce</code>.</li>
+                </ol>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">seek</span>(target) {
+  <span class="kw">let</span> desired = Vec.<span class="fn">sub</span>(target, <span class="kw">this</span>.<span class="prop">pos</span>);
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+
+  <span class="kw">let</span> steer = Vec.<span class="fn">sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre>
+                </div>
+
+                <p>Notice that the desired velocity always has magnitude <code>maxSpeed</code>. The vehicle wants to go toward the target at full throttle. The <code>limit(maxForce)</code> call is what prevents instant turning — the vehicle can only adjust its course by a small amount per frame.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">What Happens Visually</div>
+                    <p>If <code>maxForce</code> is very high relative to <code>maxSpeed</code>, the vehicle turns on a dime — almost instant course corrections. If <code>maxForce</code> is low, the vehicle takes wide, arcing turns to reach the target. Try tweaking these values in the interactive slide to see the difference.</p>
+                </div>
+
+                <p>One consequence of seek: the vehicle never <em>stops</em> at the target. It arrives at full speed, overshoots, turns around, overshoots again, and ends up orbiting. To fix that, we need arrive.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 5 -->
+        <section class="section" id="arrive">
+            <div class="section-label">SECTION 05</div>
+            <h2>Arrive Behavior</h2>
+            <div class="prose">
+                <p>Arrive solves seek's overshooting problem. The idea: define a <strong>slowing radius</strong> around the target. Outside the radius, behave exactly like seek (full speed). Inside, reduce the desired speed proportionally to the distance.</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">if</span> (<span class="v">d</span> <span class="op">&lt;</span> <span class="v">slowRadius</span>): <span class="v">speed</span> <span class="op">=</span> <span class="v">maxSpeed</span> <span class="op">×</span> (<span class="v">d</span> / <span class="v">slowRadius</span>)</div>
+                    <div class="caption">When inside the slowing radius, desired speed maps linearly from maxSpeed (at the edge) to 0 (at the target).</div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">arrive</span>(target, slowRadius) {
+  <span class="kw">let</span> desired = Vec.<span class="fn">sub</span>(target, <span class="kw">this</span>.<span class="prop">pos</span>);
+  <span class="kw">let</span> d = desired.<span class="fn">mag</span>();
+  <span class="kw">let</span> speed = <span class="kw">this</span>.<span class="prop">maxSpeed</span>;
+
+  <span class="kw">if</span> (d <span class="op">&lt;</span> slowRadius) {
+    speed = <span class="fn">map</span>(d, <span class="num">0</span>, slowRadius, <span class="num">0</span>, <span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  }
+
+  desired.<span class="fn">setMag</span>(speed);
+  <span class="kw">let</span> steer = Vec.<span class="fn">sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre>
+                </div>
+
+                <p>The only difference from seek is the <code>if (d &lt; slowRadius)</code> check. Outside the radius, arrive IS seek. Inside, the <code>map()</code> function linearly scales the desired speed from <code>maxSpeed</code> at the edge down to <code>0</code> at the target itself.</p>
+
+                <div class="callout key">
+                    <div class="callout-title">Seek vs Arrive</div>
+                    <p>Without arrive, a seeking vehicle perpetually overshoots its target and orbits around it — it always wants to go full speed, so it can never stop. Arrive solves this by reducing the desired speed as distance decreases. The vehicle decelerates smoothly and comes to rest exactly on the target.</p>
+                </div>
+
+                <h3>Choosing the Slowing Radius</h3>
+                <p>A large radius (200+ pixels) creates a gentle, gradual deceleration. A small radius (50 pixels) means the vehicle brakes hard at the last moment. The "right" value depends on the feel you want — experiment in the interactive slide to find a balance.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 6 -->
+        <section class="section" id="flee">
+            <div class="section-label">SECTION 06</div>
+            <h2>Flee Behavior</h2>
+            <div class="prose">
+                <p>Flee is the mirror image of seek. Instead of a desired velocity pointing <strong>toward</strong> the target, flee's desired velocity points <strong>away</strong> from it.</p>
+
+                <div class="formula-block">
+                    <div class="formula"><span class="v">desired</span> <span class="op">=</span> normalize(<span class="v">position</span> <span class="op">−</span> <span class="v">target</span>) <span class="op">×</span> <span class="v">maxSpeed</span></div>
+                    <div class="caption">Flee reverses the direction: position − target points away from the threat.</div>
+                </div>
+
+                <p>The subtraction is flipped: <code>position − target</code> instead of <code>target − position</code>. That's the only mathematical difference. The rest — normalize, scale to maxSpeed, subtract velocity, limit to maxForce — is identical.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">flee</span>(target, perceptionRadius) {
+  <span class="kw">let</span> desired = Vec.<span class="fn">sub</span>(<span class="kw">this</span>.<span class="prop">pos</span>, target);
+  <span class="kw">let</span> d = desired.<span class="fn">mag</span>();
+
+  <span class="cm">// Only flee if the threat is close enough</span>
+  <span class="kw">if</span> (d <span class="op">&gt;</span> perceptionRadius)
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  <span class="kw">let</span> steer = Vec.<span class="fn">sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre>
+                </div>
+
+                <h3>The Perception Radius</h3>
+                <p>We add a <strong>perception radius</strong> — the vehicle only flees when the threat is within range. If the threat is far away, the method returns a zero vector (no force). This makes the behavior more realistic: animals don't flee from predators that are kilometers away.</p>
+
+                <div class="callout warn">
+                    <div class="callout-title">Flee vs Negative Seek</div>
+                    <p>You could implement flee by negating the seek steering force: <code>seek(target).mult(-1)</code>. This works mathematically, but computing the desired velocity directly (pointing away) is cleaner. It also makes adding the perception radius natural — you check distance before computing the force, not after.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 7 -->
+        <section class="section" id="flow-field">
+            <div class="section-label">SECTION 07</div>
+            <h2>What Is a Flow Field?</h2>
+            <div class="prose">
+                <p>A <strong>flow field</strong> (also called a <em>vector field</em>) divides the canvas into a grid of cells. Each cell stores a <strong>direction vector</strong>. When a vehicle enters a cell, it reads that cell's vector and treats it as its desired direction.</p>
+
+                <p>Think of it like invisible currents in a river. Each point in the water has a direction the current flows. A leaf floating on the surface follows whatever current it happens to be in.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">class</span> <span class="fn">FlowField</span> {
+  <span class="fn">constructor</span>(resolution, w, h) {
+    <span class="kw">this</span>.<span class="prop">resolution</span> = resolution;
+    <span class="kw">this</span>.<span class="prop">cols</span> = Math.<span class="fn">ceil</span>(w / resolution);
+    <span class="kw">this</span>.<span class="prop">rows</span> = Math.<span class="fn">ceil</span>(h / resolution);
+    <span class="kw">this</span>.<span class="prop">grid</span> = [];  <span class="cm">// 2D array of Vec</span>
+  }
+
+  <span class="fn">update</span>(zOffset) {
+    <span class="kw">for</span> (<span class="kw">let</span> r = <span class="num">0</span>; r &lt; <span class="kw">this</span>.<span class="prop">rows</span>; r++) {
+      <span class="kw">this</span>.<span class="prop">grid</span>[r] = [];
+      <span class="kw">for</span> (<span class="kw">let</span> c = <span class="num">0</span>; c &lt; <span class="kw">this</span>.<span class="prop">cols</span>; c++) {
+        <span class="kw">let</span> angle = <span class="fn">noise</span>(c * <span class="num">0.06</span>, r * <span class="num">0.06</span>, zOffset);
+        angle *= Math.<span class="prop">PI</span> * <span class="num">4</span>;
+        <span class="kw">this</span>.<span class="prop">grid</span>[r][c] = <span class="kw">new</span> <span class="fn">Vec</span>(
+          Math.<span class="fn">cos</span>(angle),
+          Math.<span class="fn">sin</span>(angle)
+        );
+      }
+    }
+  }
+}</pre>
+                </div>
+
+                <h3>Why Perlin Noise?</h3>
+                <p><strong>Perlin noise</strong> is a function that produces smooth, continuous random values. Unlike pure <code>Math.random()</code> (which is completely uncorrelated between calls), Perlin noise ensures that nearby inputs produce <em>similar</em> outputs. This means neighboring cells in our grid will point in <strong>similar directions</strong>, creating smooth, river-like flows instead of chaotic random directions.</p>
+
+                <div class="callout aha">
+                    <div class="callout-title">Noise as a Design Tool</div>
+                    <p>By mapping Perlin noise values to angles, we get organic-looking currents and eddies for free. The <code>zOffset</code> parameter lets us evolve the field over time — advancing it slowly each frame creates a living, breathing flow that vehicles navigate through.</p>
+                </div>
+
+                <p>The <strong>resolution</strong> controls cell size. A resolution of 20 means each cell is 20x20 pixels. Lower resolution = more cells = finer detail (but more computation). Higher resolution = fewer cells = broader strokes.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 8 -->
+        <section class="section" id="following-field">
+            <div class="section-label">SECTION 08</div>
+            <h2>Following a Flow Field</h2>
+            <div class="prose">
+                <p>Once we have a flow field, following it is straightforward. Each frame, the vehicle:</p>
+
+                <ol>
+                    <li><strong>Determines which cell it's in</strong> by dividing its position by the resolution.</li>
+                    <li><strong>Reads that cell's vector</strong> as the desired direction.</li>
+                    <li><strong>Computes the steering force</strong> using the same <code>desired − velocity</code> formula.</li>
+                </ol>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="fn">follow</span>(field) {
+  <span class="kw">let</span> col = Math.<span class="fn">floor</span>(<span class="kw">this</span>.<span class="prop">pos</span>.<span class="prop">x</span> / field.<span class="prop">resolution</span>);
+  <span class="kw">let</span> row = Math.<span class="fn">floor</span>(<span class="kw">this</span>.<span class="prop">pos</span>.<span class="prop">y</span> / field.<span class="prop">resolution</span>);
+
+  <span class="cm">// Clamp to grid bounds</span>
+  col = <span class="fn">clamp</span>(col, <span class="num">0</span>, field.<span class="prop">cols</span> - <span class="num">1</span>);
+  row = <span class="fn">clamp</span>(row, <span class="num">0</span>, field.<span class="prop">rows</span> - <span class="num">1</span>);
+
+  <span class="kw">let</span> desired = field.<span class="prop">grid</span>[row][col].<span class="fn">copy</span>();
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+
+  <span class="kw">let</span> steer = Vec.<span class="fn">sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre>
+                </div>
+
+                <div class="callout key">
+                    <div class="callout-title">Same Formula, Different Source</div>
+                    <p><code>follow()</code> is just <code>seek()</code> where the desired direction comes from a <strong>lookup table</strong> instead of a target point. The steering math — desired minus velocity, limited to maxForce — is identical. The only thing that changes across all these behaviors is <em>how you compute the desired velocity</em>.</p>
+                </div>
+
+                <p>One edge case to handle: when the vehicle is at the canvas edge (or wraps around), the cell lookup can go out of bounds. Always clamp the row and column indices to the grid dimensions before reading.</p>
+
+                <h3>Wrapping at Edges</h3>
+                <p>Flow field simulations typically wrap vehicles at the canvas edges: if a vehicle exits the right side, it reappears on the left. This creates the illusion of an infinite field and keeps all vehicles visible.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 9 -->
+        <section class="section" id="combining">
+            <div class="section-label">SECTION 09</div>
+            <h2>Combining Behaviors</h2>
+            <div class="prose">
+                <p>The real power of steering behaviors comes from <strong>combining</strong> them. A vehicle can seek food while simultaneously fleeing from a predator. How? The same way we combined forces in Chapter 2 — by calling <code>applyForce()</code> multiple times.</p>
+
+                <div class="code-block">
+                    <div class="code-header"><div class="code-dot" style="background:#ef4444"></div><div class="code-dot" style="background:#f59e0b"></div><div class="code-dot" style="background:#22c55e"></div></div>
+                    <pre><span class="kw">let</span> seekForce = vehicle.<span class="fn">seek</span>(food);
+<span class="kw">let</span> fleeForce = vehicle.<span class="fn">flee</span>(predator, <span class="num">100</span>);
+
+<span class="cm">// Weight the forces</span>
+seekForce.<span class="fn">mult</span>(<span class="num">1.0</span>);   <span class="cm">// normal priority</span>
+fleeForce.<span class="fn">mult</span>(<span class="num">2.0</span>);   <span class="cm">// survival is urgent</span>
+
+vehicle.<span class="fn">applyForce</span>(seekForce);
+vehicle.<span class="fn">applyForce</span>(fleeForce);</pre>
+                </div>
+
+                <p>Each behavior returns a steering force vector. You can <strong>weight</strong> these forces by multiplying them by a scalar before applying. A higher weight means that behavior dominates. In the example above, fleeing has twice the weight of seeking — survival beats hunger.</p>
+
+                <div class="callout think">
+                    <div class="callout-title">Tuning Weights</div>
+                    <p>This is where it gets creative. By adjusting weights, you can make vehicles that are mostly curious (high seek weight) but cautious (moderate flee weight), or panicky (high flee, low seek). The same code, different numbers, completely different personality.</p>
+                </div>
+
+                <p>The accumulation pattern is identical to Chapter 2. Gravity + friction + spring force became seek + flee + flow field. The <code>applyForce()</code> function doesn't care where the force came from — it just adds them to the acceleration.</p>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- Section 10 -->
+        <section class="section" id="emergence">
+            <div class="section-label">SECTION 10</div>
+            <h2>Emergence from Simplicity</h2>
+            <div class="prose">
+                <p>Here's the big picture: everything in this chapter follows <strong>one pattern</strong>.</p>
+
+                <ol>
+                    <li>Compute a <strong>desired velocity</strong> (how you want to go).</li>
+                    <li>Subtract your <strong>current velocity</strong> (to get the correction).</li>
+                    <li><strong>Limit</strong> the result to maxForce (you can only steer so fast).</li>
+                    <li><strong>Apply</strong> it as a force.</li>
+                </ol>
+
+                <p>Seek, arrive, flee, follow — they all use this formula. The only thing that changes is <em>how you compute the desired velocity</em>. That's the elegance of Reynolds' framework.</p>
+
+                <p>When you put many agents together, each independently running these simple rules, something remarkable happens: <strong>complex behavior emerges</strong>. Vehicles cluster, scatter, flow in streams, avoid obstacles — all without a single line of code telling them to do so. No central controller, no global plan.</p>
+
+                <div class="callout aha">
+                    <div class="callout-title">The Foundation</div>
+                    <p>Seek, arrive, flee, and flow field following are just the beginning. Reynolds also defined <strong>separation</strong> (don't crowd neighbors), <strong>alignment</strong> (steer toward the average heading of neighbors), and <strong>cohesion</strong> (steer toward the average position of neighbors). Combine all three and you get <strong>flocking</strong> — the famous "boids" algorithm that simulates bird flocks, fish schools, and crowd movement. All from the same <code>desired − velocity</code> formula.</p>
+                </div>
+
+                <p>That's Chapter 5. The whole thing boils down to: <strong>autonomous agents generate their own steering forces using simple local rules, and the same formula — desired minus velocity — drives every behavior.</strong> The force accumulation pattern from Chapter 2 carries forward: steering behaviors are just another set of forces to accumulate.</p>
+
+                <a href="#toc" class="back-to-top">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    Back to top
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <footer style="text-align:center; padding:32px 24px; border-top:1px solid var(--border-light);">
+        <p style="font-size:13px; color:var(--text-muted);">Written by <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> for CSC 375 at Notre Dame University</p>
+        <p style="margin-top:6px; font-size:11px; color:var(--text-muted);">Last updated: March 18, 2026</p>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll',()=>{const d=document.documentElement.scrollHeight-window.innerHeight;const s=window.scrollY;document.getElementById('readingProgress').style.width=(s/d)*100+'%';});
+    </script>
+</body>
+</html>

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 5: Autonomous Agents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+
+        /* Header */
+        header { background:var(--bg-white); border-bottom:1px solid var(--border-light); padding:0 32px; position:sticky; top:0; z-index:100; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; padding:8px 12px; border-radius:8px; transition:all .2s; }
+        .back-btn:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .back-btn svg { width:16px; height:16px; }
+        .chapter-badge { background:linear-gradient(135deg, var(--accent-green), var(--accent-cyan)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
+        .chapter-title { font-size:16px; font-weight:600; }
+        .progress-container { display:flex; align-items:center; gap:12px; }
+        .progress-text { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted); }
+        .progress-bar { width:100px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg, var(--accent-green), var(--accent-cyan)); border-radius:2px; transition:width .3s; }
+        .header-tabs { display:flex; gap:0; }
+        .tab-link { padding:12px 24px; font-size:14px; font-weight:500; color:var(--text-muted); text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; }
+        .tab-link:hover { color:var(--text-secondary); }
+        .tab-link.active { color:var(--accent-green); border-bottom-color:var(--accent-green); }
+
+        /* Main Grid */
+        main { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px 32px; min-height:calc(100vh - 140px); }
+
+        /* Content Panel */
+        .content-panel { padding:32px; }
+        .slide-number { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-green); letter-spacing:1px; margin-bottom:8px; font-weight:500; }
+        .slide-title { font-size:28px; font-weight:700; margin-bottom:20px; line-height:1.3; }
+        .slide-content { animation:fadeIn .4s ease; }
+        .slide-text { font-size:15px; line-height:1.75; color:var(--text-secondary); margin-bottom:16px; }
+        .slide-text strong { color:var(--text-primary); }
+        .slide-text code { font-family:'JetBrains Mono',monospace; font-size:13px; background:var(--bg-canvas); padding:2px 6px; border-radius:4px; color:var(--accent-green); }
+        .highlight-box { background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.08)); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:16px 20px; margin:16px 0; }
+        .highlight-box h4 { font-size:13px; color:var(--accent-green); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+        .highlight-box p { font-size:14px; color:var(--text-secondary); line-height:1.6; }
+        .code-block { background:#1e293b; border-radius:10px; padding:16px 20px; margin:14px 0; overflow-x:auto; }
+        .code-block pre { font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65; color:#e2e8f0; margin:0; }
+        .code-block .kw { color:#c084fc; } .code-block .fn { color:#67e8f9; } .code-block .num { color:#fbbf24; } .code-block .cm { color:#64748b; } .code-block .str { color:#86efac; } .code-block .prop { color:#93c5fd; } .code-block .op { color:#10b981; }
+        .formula-box { background:var(--bg-white); border:2px solid var(--border-light); border-radius:10px; padding:16px; margin:14px 0; text-align:center; }
+        .formula-box .formula { font-family:'JetBrains Mono',monospace; font-size:16px; }
+        .formula-box .formula .var { color:var(--accent-blue); font-weight:600; } .formula-box .formula .op { color:var(--accent-green); font-weight:600; }
+
+        /* Nav Controls */
+        .nav-controls { display:flex; justify-content:space-between; margin-top:32px; padding-top:20px; border-top:1px solid var(--border-light); }
+        .nav-btn { display:flex; align-items:center; gap:8px; padding:10px 20px; border:none; border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s; font-family:inherit; }
+        .nav-btn svg { width:16px; height:16px; }
+        .nav-btn.secondary { background:var(--bg-canvas); color:var(--text-secondary); }
+        .nav-btn.secondary:hover { background:var(--border-light); }
+        .nav-btn.primary { background:linear-gradient(135deg, var(--accent-green), var(--accent-cyan)); color:white; }
+        .nav-btn.primary:hover { opacity:0.9; transform:translateY(-1px); }
+        .nav-btn:disabled { opacity:0.4; cursor:default; transform:none; }
+
+        /* Canvas Panel */
+        .canvas-panel { background:var(--bg-white); border-radius:20px; border:1px solid var(--border-light); box-shadow:var(--shadow-lg); overflow:hidden; display:flex; flex-direction:column; }
+        .canvas-header { padding:16px 24px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; }
+        .canvas-title { font-size:13px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+        .canvas-hint { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .canvas-hint svg { width:16px; height:16px; }
+        .canvas-wrapper { flex:1; position:relative; background:#1e293b; }
+        canvas { display:block; width:100%; height:100%; }
+        .canvas-overlay { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.95); padding:10px 20px; border-radius:30px; box-shadow:var(--shadow-md); font-size:13px; color:var(--text-secondary); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+        .canvas-overlay svg { width:16px; height:16px; color:var(--accent-green); }
+        .stats-bar { padding:12px 24px; background:var(--bg-white); border-top:1px solid var(--border-light); display:flex; gap:24px; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:8px; }
+        .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .stat-value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--text-primary); }
+        .stat-dot { width:8px; height:8px; border-radius:50%; }
+
+        /* Slide Dots */
+        .slide-dots { display:flex; gap:8px; margin-bottom:24px; }
+        .slide-dot { width:32px; height:4px; background:var(--border-light); border-radius:2px; cursor:pointer; transition:all .2s; }
+        .slide-dot:hover { background:var(--border-medium); }
+        .slide-dot.active { background:var(--accent-green); }
+        .slide-dot.completed { background:var(--accent-green); opacity:0.4; }
+
+        /* Responsive */
+        @media (max-width:1024px) { main { grid-template-columns:1fr; padding:24px; } .canvas-panel { min-height:400px; order:-1; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:24px; } }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 5</div>
+                <div class="chapter-title">Autonomous Agents</div>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text" id="progressText">1 / 8</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12.5%"></div></div>
+            </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-5-agents.html" class="tab-link active">Slides</a>
+            <a href="chapter-5-notes.html" class="tab-link">Notes</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-panel">
+            <div class="slide-dots" id="slideDots"></div>
+            <div class="slide-number" id="slideNumber">SLIDE 01</div>
+            <h1 class="slide-title" id="slideTitle">What is an Autonomous Agent?</h1>
+            <div class="slide-content" id="slideContent"></div>
+            <div class="nav-controls">
+                <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous
+                </button>
+                <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
+                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <span class="canvas-title" id="canvasTitle">Interactive Demo</span>
+                <span class="canvas-hint" id="canvasHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Watch the agent navigate</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span id="overlayText">Perceive → Calculate → Steer</span>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-green)"></div><span class="stat-label">Speed</span><span class="stat-value" id="statSpeed">0.00</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-cyan)"></div><span class="stat-label">Steering</span><span class="stat-value" id="statSteering">0.00</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-purple)"></div><span class="stat-label">Distance</span><span class="stat-value" id="statDist">0.0</span></div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align:center; padding:20px 32px; border-top:1px solid var(--border-light); background:var(--bg-white);">
+        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Last updated: March 18, 2026</p>
+    </footer>
+
+    <script>
+    const TWO_PI = Math.PI * 2;
+    const PI = Math.PI;
+    const HALF_PI = Math.PI / 2;
+
+    // ============ PERLIN NOISE (compact implementation) ============
+    const perlinPerm = (function(){
+        const p = [];
+        for(let i=0;i<256;i++) p[i]=i;
+        for(let i=255;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]];}
+        const perm=new Array(512);
+        for(let i=0;i<512;i++) perm[i]=p[i&255];
+        return perm;
+    })();
+    function perlinFade(t){return t*t*t*(t*(t*6-15)+10);}
+    function perlinLerp(a,b,t){return a+t*(b-a);}
+    function perlinGrad(hash,x,y,z){
+        const h=hash&15;const u=h<8?x:y;const v=h<4?y:h===12||h===14?x:z;
+        return((h&1)===0?u:-u)+((h&2)===0?v:-v);
+    }
+    function noise3D(x,y,z){
+        const X=Math.floor(x)&255,Y=Math.floor(y)&255,Z=Math.floor(z)&255;
+        x-=Math.floor(x);y-=Math.floor(y);z-=Math.floor(z);
+        const u=perlinFade(x),v=perlinFade(y),w=perlinFade(z);
+        const p=perlinPerm;
+        const A=p[X]+Y,AA=p[A]+Z,AB=p[A+1]+Z,B=p[X+1]+Y,BA=p[B]+Z,BB=p[B+1]+Z;
+        return perlinLerp(perlinLerp(perlinLerp(perlinGrad(p[AA],x,y,z),perlinGrad(p[BA],x-1,y,z),u),perlinLerp(perlinGrad(p[AB],x,y-1,z),perlinGrad(p[BB],x-1,y-1,z),u),v),perlinLerp(perlinLerp(perlinGrad(p[AA+1],x,y,z-1),perlinGrad(p[BA+1],x-1,y,z-1),u),perlinLerp(perlinGrad(p[AB+1],x,y-1,z-1),perlinGrad(p[BB+1],x-1,y-1,z-1),u),v),w);
+    }
+
+    // ============ VEC CLASS ============
+    class Vec {
+        constructor(x,y){this.x=x||0;this.y=y||0;}
+        copy(){return new Vec(this.x,this.y);}
+        add(v){this.x+=v.x;this.y+=v.y;return this;}
+        sub(v){this.x-=v.x;this.y-=v.y;return this;}
+        mult(n){this.x*=n;this.y*=n;return this;}
+        div(n){if(n!==0){this.x/=n;this.y/=n;}return this;}
+        mag(){return Math.sqrt(this.x*this.x+this.y*this.y);}
+        normalize(){const m=this.mag();if(m>0)this.div(m);return this;}
+        setMag(m){return this.normalize().mult(m);}
+        limit(max){if(this.mag()>max)this.setMag(max);return this;}
+        heading(){return Math.atan2(this.y,this.x);}
+        static sub(a,b){return new Vec(a.x-b.x,a.y-b.y);}
+        static add(a,b){return new Vec(a.x+b.x,a.y+b.y);}
+        static mult(a,n){return new Vec(a.x*n,a.y*n);}
+        static div(a,n){return new Vec(a.x/n,a.y/n);}
+    }
+
+    // ============ VEHICLE CLASS ============
+    class Vehicle {
+        constructor(x,y){
+            this.pos=new Vec(x,y);
+            this.vel=new Vec(Math.random()*2-1,Math.random()*2-1);
+            this.acc=new Vec(0,0);
+            this.maxSpeed=4;
+            this.maxForce=0.2;
+            this.r=6;
+            this.trail=[];
+            this.lastHeading=0;
+        }
+        applyForce(f){this.acc.add(f);}
+        update(){
+            this.vel.add(this.acc);
+            this.vel.limit(this.maxSpeed);
+            this.pos.add(this.vel);
+            this.acc.mult(0);
+            if(this.vel.mag()>0.01) this.lastHeading=this.vel.heading();
+        }
+        edges(w,h){
+            if(this.pos.x>w) this.pos.x=0;
+            if(this.pos.x<0) this.pos.x=w;
+            if(this.pos.y>h) this.pos.y=0;
+            if(this.pos.y<0) this.pos.y=h;
+        }
+        seek(target){
+            let desired=Vec.sub(target,this.pos);
+            desired.setMag(this.maxSpeed);
+            let steer=Vec.sub(desired,this.vel);
+            steer.limit(this.maxForce);
+            return steer;
+        }
+        arrive(target,slowRadius){
+            let desired=Vec.sub(target,this.pos);
+            let d=desired.mag();
+            let speed=this.maxSpeed;
+            if(d<slowRadius) speed=mapVal(d,0,slowRadius,0,this.maxSpeed);
+            desired.setMag(speed);
+            let steer=Vec.sub(desired,this.vel);
+            steer.limit(this.maxForce);
+            return steer;
+        }
+        flee(target,perceptionRadius){
+            let desired=Vec.sub(this.pos,target);
+            let d=desired.mag();
+            if(perceptionRadius&&d>perceptionRadius) return new Vec(0,0);
+            desired.setMag(this.maxSpeed);
+            let steer=Vec.sub(desired,this.vel);
+            steer.limit(this.maxForce);
+            return steer;
+        }
+        follow(field){
+            let col=Math.floor(this.pos.x/field.resolution);
+            let row=Math.floor(this.pos.y/field.resolution);
+            col=Math.max(0,Math.min(col,field.cols-1));
+            row=Math.max(0,Math.min(row,field.rows-1));
+            let desired=field.grid[row][col].copy();
+            desired.setMag(this.maxSpeed);
+            let steer=Vec.sub(desired,this.vel);
+            steer.limit(this.maxForce);
+            return steer;
+        }
+        addTrail(maxLen){
+            this.trail.push(this.pos.copy());
+            if(this.trail.length>maxLen) this.trail.shift();
+        }
+    }
+
+    // ============ FLOW FIELD CLASS ============
+    class FlowField {
+        constructor(res,w,h){
+            this.resolution=res;
+            this.cols=Math.ceil(w/res);
+            this.rows=Math.ceil(h/res);
+            this.grid=[];
+        }
+        update(zOff){
+            const scale=0.06;
+            for(let r=0;r<this.rows;r++){
+                this.grid[r]=[];
+                for(let c=0;c<this.cols;c++){
+                    let angle=noise3D(c*scale,r*scale,zOff)*PI*4;
+                    this.grid[r][c]=new Vec(Math.cos(angle),Math.sin(angle));
+                }
+            }
+        }
+    }
+
+    // ============ SLIDE DATA ============
+    const slides = [
+        { number:"SLIDE 01", title:"What is an Autonomous Agent?", canvasTitle:"Agent Wander", hint:"Watch the agent navigate on its own", overlay:"Perceive → Calculate → Steer",
+            content:`<p class="slide-text">An <strong>autonomous agent</strong> is an entity that makes its own decisions about how to move. Craig Reynolds defined three key properties:</p>
+            <p class="slide-text"><strong>1.</strong> It has a <strong>limited ability to perceive</strong> its environment.<br><strong>2.</strong> It <strong>processes</strong> that information to calculate an action.<br><strong>3.</strong> It has <strong>no global leader</strong> — each agent acts independently.</p>
+            <p class="slide-text">In Chapter 2, forces like gravity and friction happened <em>to</em> the object. Now, the object <strong>decides</strong> how to move by generating its own <strong>steering force</strong>.</p>
+            <div class="highlight-box"><h4>The Shift</h4><p>Chapter 2: external forces push objects around. Chapter 5: objects generate their own internal steering forces. That's the shift from passive physics to active agency.</p></div>`,
+            draw: drawAgentIntro },
+
+        { number:"SLIDE 02", title:"The Vehicle Class", canvasTitle:"Vehicle Anatomy", hint:"Click canvas to spawn vehicles", overlay:"position, velocity, maxSpeed, maxForce",
+            content:`<p class="slide-text">Our Vehicle builds on the <strong>Mover</strong> from Chapter 2 — same position, velocity, acceleration, and <code>applyForce()</code> pattern. Two new constraints make it an agent:</p>
+            <div class="formula-box"><div class="formula"><span class="var">maxSpeed</span> — how fast it can go<br><span class="var">maxForce</span> — how sharply it can steer</div></div>
+            <div class="code-block"><pre><span class="kw">class</span> <span class="fn">Vehicle</span> {
+  <span class="fn">constructor</span>(x, y) {
+    <span class="kw">this</span>.<span class="prop">pos</span> = <span class="kw">new</span> <span class="fn">Vec</span>(x, y);
+    <span class="kw">this</span>.<span class="prop">vel</span> = <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">acc</span> = <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+    <span class="kw">this</span>.<span class="prop">maxSpeed</span> = <span class="num">4</span>;
+    <span class="kw">this</span>.<span class="prop">maxForce</span> = <span class="num">0.2</span>;
+  }
+}</pre></div>
+            <p class="slide-text">The vehicle is drawn as a <strong>triangle</strong> pointing in its direction of motion. <code>maxSpeed</code> is the gas pedal limit. <code>maxForce</code> is the steering wheel limit.</p>
+            <div class="highlight-box"><h4>Why Two Limits?</h4><p>A fast vehicle with low maxForce takes wide, sweeping turns (like a car on a highway). A slow vehicle with high maxForce is nimble and reactive (like a drone). These two knobs control the feel of every behavior.</p></div>`,
+            draw: drawVehicleAnatomy },
+
+        { number:"SLIDE 03", title:"Seek Behavior", canvasTitle:"Seek the Mouse", hint:"Move mouse — vehicle seeks it", overlay:"steering = desired − velocity",
+            content:`<p class="slide-text">Seek is the foundation of all steering behaviors. The algorithm:</p>
+            <p class="slide-text"><strong>1.</strong> Calculate a <strong>desired velocity</strong> pointing from the vehicle to the target, at full speed.<br><strong>2.</strong> Compute the <strong>steering force</strong> = desired − current velocity.<br><strong>3.</strong> Limit the steering force to <code>maxForce</code>.</p>
+            <div class="formula-box"><div class="formula"><span class="var">desired</span> <span class="op">=</span> normalize(<span class="var">target</span> <span class="op">−</span> <span class="var">position</span>) <span class="op">×</span> <span class="var">maxSpeed</span><br><span class="var">steering</span> <span class="op">=</span> <span class="var">desired</span> <span class="op">−</span> <span class="var">velocity</span></div></div>
+            <div class="code-block"><pre><span class="fn">seek</span>(target) {
+  <span class="kw">let</span> desired = <span class="fn">Vec.sub</span>(target, <span class="kw">this</span>.<span class="prop">pos</span>);
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  <span class="kw">let</span> steer = <span class="fn">Vec.sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre></div>
+            <div class="highlight-box"><h4>Why desired − velocity?</h4><p>You don't teleport to the desired heading — you compute the <strong>correction</strong> needed to go from where you ARE heading to where you WANT to head. That's Reynolds' genius: the steering force is always a course correction.</p></div>`,
+            draw: drawSeek },
+
+        { number:"SLIDE 04", title:"Arrive Behavior", canvasTitle:"Arrive at Target", hint:"Move mouse — vehicle arrives smoothly", overlay:"Slow down within the radius",
+            content:`<p class="slide-text"><strong>Arrive</strong> is seek with a <strong>slowing radius</strong>. Outside the radius, the vehicle seeks at full speed. Inside, the desired speed scales with distance — closer means slower.</p>
+            <div class="formula-box"><div class="formula"><span class="kw">if</span> (<span class="var">d</span> <span class="op">&lt;</span> <span class="var">slowRadius</span>): <span class="var">speed</span> <span class="op">=</span> <span class="var">maxSpeed</span> <span class="op">×</span> (<span class="var">d</span> / <span class="var">slowRadius</span>)</div></div>
+            <div class="code-block"><pre><span class="fn">arrive</span>(target, slowRadius) {
+  <span class="kw">let</span> desired = <span class="fn">Vec.sub</span>(target, <span class="kw">this</span>.<span class="prop">pos</span>);
+  <span class="kw">let</span> d = desired.<span class="fn">mag</span>();
+  <span class="kw">let</span> speed = <span class="kw">this</span>.<span class="prop">maxSpeed</span>;
+  <span class="kw">if</span> (d <span class="op">&lt;</span> slowRadius)
+    speed = <span class="fn">map</span>(d, <span class="num">0</span>, slowRadius, <span class="num">0</span>, <span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  desired.<span class="fn">setMag</span>(speed);
+  <span class="kw">let</span> steer = <span class="fn">Vec.sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre></div>
+            <p class="slide-text">The translucent circle on the canvas shows the slowing radius. Watch how the vehicle decelerates smoothly as it enters.</p>
+            <div class="highlight-box"><h4>Seek vs Arrive</h4><p>Without arrive, a seeking vehicle perpetually <strong>overshoots</strong> the target and orbits around it. Arrive maps speed to distance inside the radius, creating smooth deceleration to a stop.</p></div>`,
+            draw: drawArrive },
+
+        { number:"SLIDE 05", title:"Flee Behavior", canvasTitle:"Flee from Mouse", hint:"Move mouse near vehicles to scare them", overlay:"Flee = seek in reverse + perception radius",
+            content:`<p class="slide-text"><strong>Flee</strong> is the opposite of seek. The desired velocity points <strong>away</strong> from the target instead of toward it.</p>
+            <div class="formula-box"><div class="formula"><span class="var">desired</span> <span class="op">=</span> normalize(<span class="var">position</span> <span class="op">−</span> <span class="var">target</span>) <span class="op">×</span> <span class="var">maxSpeed</span></div></div>
+            <p class="slide-text">We add a <strong>perception radius</strong> — the vehicle only flees when the threat is within range. Outside the radius, it drifts normally.</p>
+            <div class="code-block"><pre><span class="fn">flee</span>(target, radius) {
+  <span class="kw">let</span> desired = <span class="fn">Vec.sub</span>(<span class="kw">this</span>.<span class="prop">pos</span>, target);
+  <span class="kw">if</span> (desired.<span class="fn">mag</span>() <span class="op">&gt;</span> radius)
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Vec</span>(<span class="num">0</span>, <span class="num">0</span>);
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  <span class="kw">let</span> steer = <span class="fn">Vec.sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre></div>
+            <div class="highlight-box"><h4>Perception Radius</h4><p>Dashed circles show each vehicle's perception range. Vehicles glow <strong>red</strong> when actively fleeing and <strong>green</strong> when calm. Move your mouse close to trigger the flee response.</p></div>`,
+            draw: drawFlee },
+
+        { number:"SLIDE 06", title:"What is a Flow Field?", canvasTitle:"Vector Field Visualization", hint:"Watch the field animate with noise", overlay:"A grid of vectors guiding movement",
+            content:`<p class="slide-text">A <strong>flow field</strong> (or vector field) divides the canvas into a grid. Each cell stores a <strong>direction vector</strong>. Agents look up which cell they're in and steer toward that vector.</p>
+            <p class="slide-text">We generate the field with <strong>Perlin noise</strong> — smooth, continuous random values where neighbors point in similar directions. This creates organic currents and eddies instead of chaos.</p>
+            <div class="code-block"><pre><span class="kw">class</span> <span class="fn">FlowField</span> {
+  <span class="fn">constructor</span>(resolution, w, h) {
+    <span class="kw">this</span>.<span class="prop">cols</span> = <span class="fn">ceil</span>(w / resolution);
+    <span class="kw">this</span>.<span class="prop">rows</span> = <span class="fn">ceil</span>(h / resolution);
+    <span class="kw">this</span>.<span class="prop">grid</span> = [];  <span class="cm">// 2D array of Vec</span>
+  }
+  <span class="fn">update</span>(zOff) {
+    <span class="kw">for each</span> cell:
+      angle = <span class="fn">noise</span>(col, row, zOff);
+      grid[r][c] = <span class="kw">new</span> <span class="fn">Vec</span>(<span class="fn">cos</span>(angle), <span class="fn">sin</span>(angle));
+  }
+}</pre></div>
+            <div class="highlight-box"><h4>Why Perlin Noise?</h4><p>Random noise would give every cell a completely unrelated direction — chaotic and ugly. Perlin noise ensures neighboring cells point in <strong>similar directions</strong>, creating smooth, river-like flows.</p></div>`,
+            draw: drawFlowFieldViz },
+
+        { number:"SLIDE 07", title:"Following a Flow Field", canvasTitle:"Vehicles in the Field", hint:"Watch vehicles follow the flow", overlay:"Look up cell → steer toward its vector",
+            content:`<p class="slide-text">Each frame, the vehicle checks which grid cell it's in, reads that cell's direction vector, and treats it as the <strong>desired velocity</strong>. Same steering formula as seek — the only difference is where "desired" comes from.</p>
+            <div class="code-block"><pre><span class="fn">follow</span>(field) {
+  <span class="kw">let</span> col = <span class="fn">floor</span>(<span class="kw">this</span>.<span class="prop">pos</span>.<span class="prop">x</span> / field.<span class="prop">resolution</span>);
+  <span class="kw">let</span> row = <span class="fn">floor</span>(<span class="kw">this</span>.<span class="prop">pos</span>.<span class="prop">y</span> / field.<span class="prop">resolution</span>);
+  <span class="kw">let</span> desired = field.<span class="prop">grid</span>[row][col].<span class="fn">copy</span>();
+  desired.<span class="fn">setMag</span>(<span class="kw">this</span>.<span class="prop">maxSpeed</span>);
+  <span class="kw">let</span> steer = <span class="fn">Vec.sub</span>(desired, <span class="kw">this</span>.<span class="prop">vel</span>);
+  steer.<span class="fn">limit</span>(<span class="kw">this</span>.<span class="prop">maxForce</span>);
+  <span class="kw">return</span> steer;
+}</pre></div>
+            <p class="slide-text">25 vehicles are released into the field. Each one follows the local current, wrapping at edges. The field slowly evolves over time as the noise z-offset advances.</p>
+            <div class="highlight-box"><h4>Same Formula, Different Source</h4><p><code>follow()</code> is just <code>seek()</code> where the target direction comes from a <strong>lookup table</strong> instead of a fixed point. The steering math — desired minus velocity — is identical.</p></div>`,
+            draw: drawFlowFieldFollow },
+
+        { number:"SLIDE 08", title:"Combining Behaviors", canvasTitle:"Seek + Flee Together", hint:"Move mouse — green seeks, red is predator", overlay:"Weighted sum of steering forces",
+            content:`<p class="slide-text">The real power of steering behaviors is <strong>combining</strong> them. Multiple steering forces are summed — the same accumulation pattern from Chapter 2's <code>applyForce()</code>.</p>
+            <div class="code-block"><pre><span class="kw">let</span> seekForce = vehicle.<span class="fn">seek</span>(food);
+<span class="kw">let</span> fleeForce = vehicle.<span class="fn">flee</span>(predator, <span class="num">100</span>);
+
+seekForce.<span class="fn">mult</span>(<span class="num">1.0</span>);    <span class="cm">// weight</span>
+fleeForce.<span class="fn">mult</span>(<span class="num">2.0</span>);    <span class="cm">// flee is stronger</span>
+
+vehicle.<span class="fn">applyForce</span>(seekForce);
+vehicle.<span class="fn">applyForce</span>(fleeForce);</pre></div>
+            <p class="slide-text">Green vehicles seek your mouse (food). A red predator wanders around. When green vehicles get close to the predator, they flee — even while seeking the mouse. Simple local rules, complex emergent behavior.</p>
+            <div class="highlight-box"><h4>Emergence</h4><p>No central controller. Each agent independently calculates seek + flee. Yet the group produces flocking-like avoidance patterns. This is the foundation of <strong>boids</strong>, crowd simulation, and swarm intelligence.</p></div>`,
+            draw: drawCombined }
+    ];
+
+    // ============ STATE ============
+    let currentSlide = 0;
+    let frame = 0;
+    let mx = 0, my = 0;
+    let mouseInCanvas = false;
+
+    // Slide-specific state
+    let wanderVehicle;
+    let wanderNoiseX = Math.random()*1000, wanderNoiseY = Math.random()*1000;
+    let anatomyVehicles = [];
+    let seekVehicle;
+    let arriveVehicle;
+    let fleeVehicles = [];
+    let flowField;
+    let flowVehicles = [];
+    let combinedVehicles = [];
+    let predator;
+    let predatorTarget;
+    let noiseZ = 0;
+    let lastSteerMag = 0;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    // ============ INIT ============
+    function init() { resize(); updateUI(); generateDots(); animate(); }
+    function resize() {
+        const r = canvas.parentElement.getBoundingClientRect();
+        W = canvas.width = r.width;
+        H = canvas.height = r.height;
+        resetSim();
+    }
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousemove', (e) => { const r=canvas.getBoundingClientRect(); mx=e.clientX-r.left; my=e.clientY-r.top; mouseInCanvas=true; });
+    canvas.addEventListener('mouseleave', () => { mouseInCanvas=false; });
+    canvas.addEventListener('click', () => {
+        if(currentSlide===1 && anatomyVehicles.length<12){
+            let v=new Vehicle(mx,my);
+            v.vel=new Vec(Math.random()*4-2,Math.random()*4-2);
+            anatomyVehicles.push(v);
+        }
+    });
+
+    function resetSim() {
+        frame = 0;
+        lastSteerMag = 0;
+        if(currentSlide===0) { wanderVehicle=new Vehicle(W/2,H/2); wanderVehicle.trail=[]; wanderVehicle.maxSpeed=2.5; wanderVehicle.maxForce=0.15; }
+        if(currentSlide===1) { anatomyVehicles=[new Vehicle(W/2,H/2)]; anatomyVehicles[0].vel=new Vec(2,1); }
+        if(currentSlide===2) { seekVehicle=new Vehicle(W*0.3,H*0.7); seekVehicle.maxSpeed=4; seekVehicle.maxForce=0.25; }
+        if(currentSlide===3) { arriveVehicle=new Vehicle(W*0.3,H*0.7); arriveVehicle.maxSpeed=5; arriveVehicle.maxForce=0.3; }
+        if(currentSlide===4) {
+            fleeVehicles=[];
+            for(let i=0;i<6;i++){let v=new Vehicle(Math.random()*W,Math.random()*H); v.maxSpeed=3; v.maxForce=0.2; fleeVehicles.push(v);}
+        }
+        if(currentSlide===5||currentSlide===6){
+            flowField=new FlowField(20,W,H); flowField.update(0); noiseZ=0;
+            if(currentSlide===6){
+                flowVehicles=[];
+                for(let i=0;i<25;i++){let v=new Vehicle(Math.random()*W,Math.random()*H); v.maxSpeed=3; v.maxForce=0.15; v.trail=[]; flowVehicles.push(v);}
+            }
+        }
+        if(currentSlide===7){
+            combinedVehicles=[];
+            for(let i=0;i<10;i++){let v=new Vehicle(Math.random()*W,Math.random()*H); v.maxSpeed=3.5; v.maxForce=0.2; combinedVehicles.push(v);}
+            predator=new Vehicle(W*0.8,H*0.2); predator.maxSpeed=2; predator.maxForce=0.08; predator.r=10;
+            predatorTarget=new Vec(Math.random()*W,Math.random()*H);
+        }
+    }
+
+    // ============ NAVIGATION ============
+    function nextSlide(){if(currentSlide<slides.length-1){currentSlide++;resetSim();updateUI();}}
+    function prevSlide(){if(currentSlide>0){currentSlide--;resetSim();updateUI();}}
+    function goToSlide(i){currentSlide=i;resetSim();updateUI();}
+    function updateUI(){
+        const s=slides[currentSlide];
+        document.getElementById('slideNumber').textContent=s.number;
+        document.getElementById('slideTitle').textContent=s.title;
+        document.getElementById('slideContent').innerHTML=s.content;
+        document.getElementById('canvasTitle').textContent=s.canvasTitle;
+        document.getElementById('canvasHint').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>${s.hint}`;
+        document.getElementById('overlayText').textContent=s.overlay;
+        document.getElementById('progressText').textContent=`${currentSlide+1} / ${slides.length}`;
+        document.getElementById('progressFill').style.width=`${((currentSlide+1)/slides.length)*100}%`;
+        document.getElementById('btnPrev').disabled=currentSlide===0;
+        document.getElementById('btnNext').disabled=currentSlide===slides.length-1;
+        document.querySelectorAll('.slide-dot').forEach((d,i)=>{d.classList.remove('active','completed');if(i===currentSlide)d.classList.add('active');else if(i<currentSlide)d.classList.add('completed');});
+    }
+    function generateDots(){const c=document.getElementById('slideDots');c.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='slide-dot'+(i===0?' active':'');d.onclick=()=>goToSlide(i);c.appendChild(d);});}
+
+    // ============ DRAWING HELPERS ============
+    function mapVal(v,a1,a2,b1,b2){return b1+((v-a1)/(a2-a1))*(b2-b1);}
+    function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+    function clearCanvas(bg='#1e293b'){ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);}
+    function drawArrow(x1,y1,x2,y2,color,label,lw=2){
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);if(len<2)return;
+        const angle=Math.atan2(dy,dx),headLen=Math.min(8,len*0.3);
+        ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-headLen*Math.cos(angle-PI/6),y2-headLen*Math.sin(angle-PI/6));ctx.lineTo(x2-headLen*Math.cos(angle+PI/6),y2-headLen*Math.sin(angle+PI/6));ctx.closePath();ctx.fill();
+        if(label){ctx.font='600 10px Inter,sans-serif';const lx=(x1+x2)/2,ly=(y1+y2)/2;const perpX=-Math.sin(angle)*12,perpY=Math.cos(angle)*12;ctx.fillText(label,lx+perpX,ly+perpY);}
+        ctx.restore();
+    }
+    function drawVehicleShape(v,color,size){
+        const a=v.lastHeading;
+        const s=size||v.r;
+        ctx.save();
+        ctx.translate(v.pos.x,v.pos.y);
+        ctx.rotate(a);
+        ctx.fillStyle=color;
+        ctx.strokeStyle='rgba(255,255,255,0.5)';
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(s*2,0);
+        ctx.lineTo(-s,-s);
+        ctx.lineTo(-s*0.3,0);
+        ctx.lineTo(-s,s);
+        ctx.closePath();
+        ctx.fill();ctx.stroke();
+        ctx.restore();
+    }
+    function drawTrail(trail,color){
+        if(trail.length<2) return;
+        for(let i=1;i<trail.length;i++){
+            const alpha=i/trail.length*0.4;
+            ctx.strokeStyle=color.replace('1)',alpha+')');
+            ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();
+        }
+    }
+    function drawCrosshair(x,y,color,size){
+        const s=size||8;
+        ctx.strokeStyle=color;ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(x-s,y);ctx.lineTo(x+s,y);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y-s);ctx.lineTo(x,y+s);ctx.stroke();
+        ctx.beginPath();ctx.arc(x,y,s*0.6,0,TWO_PI);ctx.stroke();
+    }
+    function updateStats(speed,steering,dist){
+        document.getElementById('statSpeed').textContent=speed.toFixed(2);
+        document.getElementById('statSteering').textContent=steering.toFixed(2);
+        document.getElementById('statDist').textContent=dist.toFixed(1);
+    }
+
+    // ============ SLIDE DRAWINGS ============
+
+    function drawAgentIntro(){
+        clearCanvas(); frame++;
+        let v=wanderVehicle;
+
+        wanderNoiseX+=0.01; wanderNoiseY+=0.01;
+        let steerAngle=noise3D(wanderNoiseX,wanderNoiseY,0)*TWO_PI*2;
+        let steerForce=new Vec(Math.cos(steerAngle),Math.sin(steerAngle));
+        steerForce.setMag(v.maxForce);
+        v.applyForce(steerForce);
+        v.update();
+        v.edges(W,H);
+        v.addTrail(80);
+
+        drawTrail(v.trail,'rgba(16,185,129,1)');
+        drawVehicleShape(v,'rgba(16,185,129,0.9)');
+
+        // Labels
+        const labelY=H-60;
+        ctx.font='500 12px JetBrains Mono,monospace';ctx.textAlign='center';
+        ctx.fillStyle='rgba(6,182,212,0.7)';ctx.fillText('1. Perceive',W*0.2,labelY);
+        ctx.fillStyle='rgba(139,92,246,0.7)';ctx.fillText('2. Calculate',W*0.5,labelY);
+        ctx.fillStyle='rgba(16,185,129,0.7)';ctx.fillText('3. Steer',W*0.8,labelY);
+
+        ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(W*0.32,labelY-6);ctx.lineTo(W*0.38,labelY-6);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(W*0.62,labelY-6);ctx.lineTo(W*0.68,labelY-6);ctx.stroke();
+
+        updateStats(v.vel.mag(),steerForce.mag(),0);
+    }
+
+    function drawVehicleAnatomy(){
+        clearCanvas(); frame++;
+
+        for(let v of anatomyVehicles){
+            v.update(); v.edges(W,H);
+            drawVehicleShape(v,'rgba(16,185,129,0.7)');
+        }
+
+        // Main vehicle annotation
+        let main=anatomyVehicles[0];
+        if(!main) return;
+
+        // maxSpeed circle
+        ctx.strokeStyle='rgba(16,185,129,0.15)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.arc(main.pos.x,main.pos.y,main.maxSpeed*15,0,TWO_PI);ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Velocity arrow
+        if(main.vel.mag()>0.1){
+            const vScale=15;
+            drawArrow(main.pos.x,main.pos.y,main.pos.x+main.vel.x*vScale,main.pos.y+main.vel.y*vScale,'#06b6d4','velocity',2);
+        }
+
+        // Labels
+        ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='500 10px JetBrains Mono,monospace';ctx.textAlign='left';
+        ctx.fillText('maxSpeed radius',main.pos.x+main.maxSpeed*15+8,main.pos.y);
+
+        ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='600 12px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`vehicles: ${anatomyVehicles.length}`,16,20);
+        ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='500 11px Inter,sans-serif';
+        ctx.fillText('click canvas to spawn more',16,40);
+
+        updateStats(main.vel.mag(),0,0);
+    }
+
+    function drawSeek(){
+        clearCanvas(); frame++;
+        let v=seekVehicle;
+        let target=new Vec(mouseInCanvas?mx:W/2,mouseInCanvas?my:H/2);
+
+        let steer=v.seek(target);
+        lastSteerMag=steer.mag();
+        v.applyForce(steer);
+        v.update();
+        v.edges(W,H);
+        v.addTrail(40);
+
+        let dist=Vec.sub(target,v.pos).mag();
+
+        // Trail
+        drawTrail(v.trail,'rgba(16,185,129,1)');
+
+        // Target crosshair
+        drawCrosshair(target.x,target.y,'rgba(255,255,255,0.4)');
+
+        // Desired vector (green)
+        let desired=Vec.sub(target,v.pos);
+        if(desired.mag()>1){
+            let dNorm=desired.copy().setMag(Math.min(desired.mag(),60));
+            drawArrow(v.pos.x,v.pos.y,v.pos.x+dNorm.x,v.pos.y+dNorm.y,'rgba(16,185,129,0.6)','desired',1.5);
+        }
+
+        // Velocity vector (cyan)
+        let velScale=12;
+        drawArrow(v.pos.x,v.pos.y,v.pos.x+v.vel.x*velScale,v.pos.y+v.vel.y*velScale,'#06b6d4','velocity',1.5);
+
+        // Steering vector (orange)
+        let steerViz=steer.copy().mult(60);
+        drawArrow(v.pos.x+v.vel.x*velScale,v.pos.y+v.vel.y*velScale,v.pos.x+v.vel.x*velScale+steerViz.x,v.pos.y+v.vel.y*velScale+steerViz.y,'#f97316','steer',1.5);
+
+        // Vehicle
+        drawVehicleShape(v,'rgba(16,185,129,0.9)');
+
+        updateStats(v.vel.mag(),lastSteerMag,dist);
+    }
+
+    function drawArrive(){
+        clearCanvas(); frame++;
+        let v=arriveVehicle;
+        let target=new Vec(mouseInCanvas?mx:W/2,mouseInCanvas?my:H/2);
+        let slowRadius=100;
+
+        let steer=v.arrive(target,slowRadius);
+        lastSteerMag=steer.mag();
+        v.applyForce(steer);
+        v.update();
+        v.addTrail(40);
+
+        let dist=Vec.sub(target,v.pos).mag();
+
+        // Trail
+        drawTrail(v.trail,'rgba(16,185,129,1)');
+
+        // Slowing radius
+        let radiusAlpha=0.08;
+        if(dist<slowRadius) radiusAlpha=mapVal(dist,0,slowRadius,0.2,0.08);
+        ctx.strokeStyle=`rgba(16,185,129,${radiusAlpha+0.1})`;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+        ctx.beginPath();ctx.arc(target.x,target.y,slowRadius,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle=`rgba(16,185,129,${radiusAlpha*0.3})`;
+        ctx.beginPath();ctx.arc(target.x,target.y,slowRadius,0,TWO_PI);ctx.fill();
+
+        // Target
+        drawCrosshair(target.x,target.y,'rgba(255,255,255,0.5)');
+
+        // Label
+        ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='500 10px JetBrains Mono,monospace';ctx.textAlign='center';
+        ctx.fillText('slow radius',target.x,target.y+slowRadius+16);
+
+        // Speed indicator
+        let speedRatio=v.vel.mag()/v.maxSpeed;
+        let speedColor=`hsl(${mapVal(speedRatio,0,1,0,140)},70%,55%)`;
+
+        // Vehicle
+        drawVehicleShape(v,speedColor);
+
+        // Stats
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`speed: ${v.vel.mag().toFixed(2)} / ${v.maxSpeed.toFixed(1)}`,16,20);
+        ctx.fillText(`distance: ${dist.toFixed(1)}`,16,38);
+        if(dist<slowRadius) { ctx.fillStyle='#f59e0b'; ctx.fillText('SLOWING',16,56); }
+
+        updateStats(v.vel.mag(),lastSteerMag,dist);
+    }
+
+    function drawFlee(){
+        clearCanvas(); frame++;
+        let target=new Vec(mouseInCanvas?mx:W/2,mouseInCanvas?my:H/2);
+        let perceptionRadius=120;
+        let nearestDist=Infinity;
+
+        for(let v of fleeVehicles){
+            let dist=Vec.sub(v.pos,target).mag();
+            let fleeing=dist<perceptionRadius;
+
+            // Wander when not fleeing
+            if(!fleeing){
+                let wAngle=noise3D(v.pos.x*0.005,v.pos.y*0.005,frame*0.01)*TWO_PI*2;
+                let wForce=new Vec(Math.cos(wAngle),Math.sin(wAngle));
+                wForce.setMag(v.maxForce*0.3);
+                v.applyForce(wForce);
+            } else {
+                let steer=v.flee(target,perceptionRadius);
+                v.applyForce(steer);
+                lastSteerMag=steer.mag();
+            }
+
+            v.update(); v.edges(W,H);
+            if(dist<nearestDist) nearestDist=dist;
+
+            // Perception radius (dashed)
+            let pAlpha=fleeing?0.2:0.06;
+            ctx.strokeStyle=`rgba(${fleeing?'239,68,68':'255,255,255'},${pAlpha})`;
+            ctx.lineWidth=1;ctx.setLineDash([3,3]);
+            ctx.beginPath();ctx.arc(v.pos.x,v.pos.y,perceptionRadius,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);
+
+            // Vehicle
+            let color=fleeing?'rgba(239,68,68,0.85)':'rgba(16,185,129,0.7)';
+            drawVehicleShape(v,color);
+        }
+
+        // Mouse threat indicator
+        ctx.fillStyle='rgba(239,68,68,0.3)';
+        ctx.beginPath();ctx.arc(target.x,target.y,6,0,TWO_PI);ctx.fill();
+        ctx.strokeStyle='rgba(239,68,68,0.5)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(target.x,target.y,10,0,TWO_PI);ctx.stroke();
+
+        updateStats(fleeVehicles[0]?fleeVehicles[0].vel.mag():0,lastSteerMag,nearestDist===Infinity?0:nearestDist);
+    }
+
+    function drawFlowFieldViz(){
+        clearCanvas(); frame++;
+        noiseZ+=0.003;
+        flowField.update(noiseZ);
+
+        let res=flowField.resolution;
+        for(let r=0;r<flowField.rows;r++){
+            for(let c=0;c<flowField.cols;c++){
+                let v=flowField.grid[r][c];
+                let cx=c*res+res/2, cy=r*res+res/2;
+                let angle=Math.atan2(v.y,v.x);
+                let hue=(angle+PI)/(TWO_PI)*360;
+                let arrowLen=res*0.35;
+
+                ctx.strokeStyle=`hsla(${hue},60%,55%,0.5)`;
+                ctx.fillStyle=`hsla(${hue},60%,55%,0.5)`;
+                ctx.lineWidth=1;
+
+                let ex=cx+Math.cos(angle)*arrowLen, ey=cy+Math.sin(angle)*arrowLen;
+                ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);ctx.stroke();
+
+                // Tiny arrowhead
+                let hl=3;
+                ctx.beginPath();
+                ctx.moveTo(ex,ey);
+                ctx.lineTo(ex-hl*Math.cos(angle-0.5),ey-hl*Math.sin(angle-0.5));
+                ctx.lineTo(ex-hl*Math.cos(angle+0.5),ey-hl*Math.sin(angle+0.5));
+                ctx.closePath();ctx.fill();
+            }
+        }
+
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='600 12px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`resolution: ${res}px`,16,20);
+        ctx.fillText(`cells: ${flowField.cols} × ${flowField.rows}`,16,38);
+        ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='500 11px Inter,sans-serif';
+        ctx.fillText('Perlin noise → angle → vector per cell',16,58);
+
+        updateStats(0,0,0);
+    }
+
+    function drawFlowFieldFollow(){
+        clearCanvas(); frame++;
+        noiseZ+=0.002;
+        flowField.update(noiseZ);
+
+        // Draw faint field
+        let res=flowField.resolution;
+        for(let r=0;r<flowField.rows;r++){
+            for(let c=0;c<flowField.cols;c++){
+                let fv=flowField.grid[r][c];
+                let cx=c*res+res/2, cy=r*res+res/2;
+                let angle=Math.atan2(fv.y,fv.x);
+                let arrowLen=res*0.25;
+                ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+                ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(angle)*arrowLen,cy+Math.sin(angle)*arrowLen);ctx.stroke();
+            }
+        }
+
+        let avgSpeed=0, avgSteer=0;
+        for(let v of flowVehicles){
+            let steer=v.follow(flowField);
+            v.applyForce(steer);
+            v.update(); v.edges(W,H);
+            v.addTrail(20);
+            avgSpeed+=v.vel.mag();
+            avgSteer+=steer.mag();
+
+            // Trail
+            drawTrail(v.trail,'rgba(16,185,129,1)');
+            drawVehicleShape(v,'rgba(16,185,129,0.8)');
+        }
+        avgSpeed/=flowVehicles.length;
+        avgSteer/=flowVehicles.length;
+
+        updateStats(avgSpeed,avgSteer,0);
+    }
+
+    function drawCombined(){
+        clearCanvas(); frame++;
+        let foodTarget=new Vec(mouseInCanvas?mx:W/2,mouseInCanvas?my:H/2);
+
+        // Update predator (wander toward random targets)
+        if(Vec.sub(predator.pos,predatorTarget).mag()<30 || frame%300===0){
+            predatorTarget=new Vec(Math.random()*W,Math.random()*H);
+        }
+        let predSeek=predator.seek(predatorTarget);
+        predator.applyForce(predSeek);
+        predator.update(); predator.edges(W,H);
+
+        let fleeingCount=0;
+        for(let v of combinedVehicles){
+            let seekF=v.seek(foodTarget);
+            let fleeF=v.flee(predator.pos,100);
+            let isFleeing=fleeF.mag()>0.01;
+            if(isFleeing) fleeingCount++;
+
+            seekF.mult(1.0);
+            fleeF.mult(2.0);
+            v.applyForce(seekF);
+            v.applyForce(fleeF);
+            v.update(); v.edges(W,H);
+
+            let color=isFleeing?'rgba(249,115,22,0.85)':'rgba(16,185,129,0.8)';
+            drawVehicleShape(v,color);
+        }
+
+        // Food target
+        drawCrosshair(foodTarget.x,foodTarget.y,'rgba(16,185,129,0.5)',6);
+        ctx.fillStyle='rgba(16,185,129,0.3)';
+        ctx.beginPath();ctx.arc(foodTarget.x,foodTarget.y,4,0,TWO_PI);ctx.fill();
+
+        // Predator
+        drawVehicleShape(predator,'rgba(239,68,68,0.85)',predator.r);
+
+        // Predator danger radius
+        ctx.strokeStyle='rgba(239,68,68,0.1)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.arc(predator.pos.x,predator.pos.y,100,0,TWO_PI);ctx.stroke();ctx.setLineDash([]);
+
+        // Labels
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='500 11px JetBrains Mono,monospace';ctx.textAlign='left';ctx.textBaseline='top';
+        ctx.fillText(`seeking: ${combinedVehicles.length-fleeingCount}  fleeing: ${fleeingCount}`,16,20);
+
+        updateStats(combinedVehicles[0]?combinedVehicles[0].vel.mag():0,lastSteerMag,Vec.sub(predator.pos,foodTarget).mag());
+    }
+
+    // ============ MAIN LOOP ============
+    function animate() { ctx.clearRect(0,0,W,H); slides[currentSlide].draw(); requestAnimationFrame(animate); }
+    init();
+    </script>
+</body>
+</html>

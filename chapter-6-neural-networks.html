@@ -22,516 +22,85 @@
             --accent-orange: #f97316;
             --accent-purple: #8b5cf6;
             --accent-red: #ef4444;
-            --accent-teal: #14b8a6;
-            --accent-pink: #ec4899;
             --border-light: #e2e8f0;
             --border-medium: #cbd5e1;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        header {
-            background: var(--bg-white);
-            border-bottom: 1px solid var(--border-light);
-            padding: 0 32px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 0;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .back-btn:hover {
-            background: var(--bg-canvas);
-            color: var(--text-primary);
-        }
-
-        .back-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .chapter-badge {
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-teal));
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 6px;
-        }
-
-        .chapter-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .header-tabs {
-            display: flex;
-            gap: 0;
-        }
-
-        .tab-link {
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab-link:hover {
-            color: var(--text-secondary);
-        }
-
-        .tab-link.active {
-            color: var(--accent-pink);
-            border-bottom-color: var(--accent-pink);
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .progress-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .progress-bar {
-            width: 120px;
-            height: 4px;
-            background: var(--border-light);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-pink), var(--accent-teal));
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        main {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            min-height: calc(100vh - 100px);
-        }
-
-        .content-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .slide-number {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--accent-pink);
-            font-weight: 500;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .slide-title {
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 24px;
-            line-height: 1.2;
-        }
-
-        .slide-content {
-            flex: 1;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .slide-text {
-            font-size: 16.5px;
-            line-height: 1.8;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-
-        .slide-text strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .slide-text code {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            background: var(--bg-canvas);
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: var(--accent-pink);
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(20, 184, 166, 0.08));
-            border: 1px solid rgba(236, 72, 153, 0.18);
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin: 20px 0;
-        }
-
-        .highlight-box h4 {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent-pink);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .highlight-box p {
-            font-size: 15px;
-            line-height: 1.6;
-            color: var(--text-primary);
-        }
-
-        .code-block {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin: 20px 0;
-            overflow-x: auto;
-        }
-
-        .code-block pre {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #e2e8f0;
-            margin: 0;
-        }
-
-        .code-block .kw {
-            color: #c084fc;
-        }
-
-        .code-block .fn {
-            color: #67e8f9;
-        }
-
-        .code-block .num {
-            color: #fbbf24;
-        }
-
-        .code-block .cm {
-            color: #64748b;
-        }
-
-        .code-block .str {
-            color: #86efac;
-        }
-
-        .code-block .prop {
-            color: #93c5fd;
-        }
-
-        .code-block .op {
-            color: #f472b6;
-        }
-
-        .formula-box {
-            background: var(--bg-white);
-            border: 2px solid var(--border-light);
-            border-radius: 12px;
-            padding: 24px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .formula {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 18px;
-            color: var(--text-primary);
-            line-height: 1.7;
-        }
-
-        .formula .var {
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
-        .formula .op {
-            color: var(--accent-pink);
-            font-weight: 600;
-        }
-
-        .nav-controls {
-            display: flex;
-            gap: 12px;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-light);
-        }
-
-        .nav-btn {
-            flex: 1;
-            padding: 14px 24px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-
-        .nav-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .nav-btn.primary {
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-teal));
-            color: white;
-            border: none;
-            box-shadow: var(--shadow-md);
-        }
-
-        .nav-btn.primary:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .nav-btn.secondary {
-            background: var(--bg-white);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-medium);
-        }
-
-        .nav-btn.secondary:hover {
-            background: var(--bg-canvas);
-            color: var(--text-primary);
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .canvas-panel {
-            background: var(--bg-white);
-            border-radius: 20px;
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .canvas-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .canvas-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .canvas-hint {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .canvas-hint svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .canvas-wrapper {
-            flex: 1;
-            position: relative;
-            background: #111827;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .canvas-overlay {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px 20px;
-            border-radius: 30px;
-            box-shadow: var(--shadow-md);
-            font-size: 13px;
-            color: var(--text-secondary);
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .canvas-overlay svg {
-            width: 16px;
-            height: 16px;
-            color: var(--accent-pink);
-        }
-
-        .stats-bar {
-            padding: 12px 24px;
-            background: var(--bg-white);
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .stat-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .slide-dots {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .slide-dot {
-            width: 32px;
-            height: 4px;
-            background: var(--border-light);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .slide-dot:hover {
-            background: var(--border-medium);
-        }
-
-        .slide-dot.active {
-            background: var(--accent-pink);
-        }
-
-        .slide-dot.completed {
-            background: var(--accent-teal);
-        }
-
-        @media (max-width: 1024px) {
-            main {
-                grid-template-columns: 1fr;
-                padding: 24px;
-            }
-
-            .canvas-panel {
-                min-height: 420px;
-                order: -1;
-            }
-        }
-
-        @media (max-width: 640px) {
-            header {
-                padding: 0 16px;
-            }
-
-            .slide-title {
-                font-size: 24px;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+
+        header { background:var(--bg-white); border-bottom:1px solid var(--border-light); padding:0 32px; position:sticky; top:0; z-index:100; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; padding:8px 12px; border-radius:8px; transition:all .2s; }
+        .back-btn:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .back-btn svg { width:16px; height:16px; }
+        .chapter-badge { background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
+        .chapter-title { font-size:16px; font-weight:600; }
+        .header-tabs { display:flex; gap:0; }
+        .tab-link { padding:12px 24px; font-size:14px; font-weight:500; color:var(--text-muted); text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; }
+        .tab-link:hover { color:var(--text-secondary); }
+        .tab-link.active { color:var(--accent-green); border-bottom-color:var(--accent-green); }
+        .progress-container { display:flex; align-items:center; gap:12px; }
+        .progress-text { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-secondary); }
+        .progress-bar { width:120px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent-green),var(--accent-cyan)); border-radius:2px; transition:width .3s ease; }
+
+        main { max-width:1400px; margin:0 auto; padding:40px; display:grid; grid-template-columns:1fr 1fr; gap:40px; min-height:calc(100vh - 100px); }
+
+        .content-panel { display:flex; flex-direction:column; }
+        .slide-number { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-green); font-weight:500; margin-bottom:8px; letter-spacing:.5px; }
+        .slide-title { font-size:30px; font-weight:700; margin-bottom:24px; line-height:1.2; }
+        .slide-content { flex:1; }
+        .slide-text { font-size:16.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:20px; }
+        .slide-text strong { color:var(--text-primary); font-weight:600; }
+        .highlight-box { background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(6,182,212,.08)); border:1px solid rgba(16,185,129,.2); border-radius:12px; padding:20px 24px; margin:20px 0; }
+        .highlight-box h4 { font-size:13px; font-weight:600; color:var(--accent-green); margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .highlight-box p { font-size:15px; line-height:1.6; color:var(--text-primary); }
+        .code-block { background:#1e293b; border-radius:12px; padding:20px 24px; margin:20px 0; overflow-x:auto; }
+        .code-block pre { font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:#e2e8f0; margin:0; }
+        .code-block .kw { color:#c084fc; } .code-block .fn { color:#67e8f9; } .code-block .num { color:#fbbf24; }
+        .code-block .cm { color:#64748b; } .code-block .str { color:#86efac; } .code-block .prop { color:#93c5fd; }
+        .formula-box { background:var(--bg-white); border:2px solid var(--border-light); border-radius:12px; padding:24px; margin:20px 0; text-align:center; }
+        .formula { font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--text-primary); letter-spacing:1px; }
+        .formula .var { color:var(--accent-cyan); font-weight:600; } .formula .op { color:var(--accent-green); }
+
+        .nav-controls { display:flex; gap:12px; margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light); }
+        .nav-btn { flex:1; padding:14px 24px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .nav-btn svg { width:18px; height:18px; }
+        .nav-btn.primary { background:linear-gradient(135deg,var(--accent-green),var(--accent-cyan)); color:white; border:none; box-shadow:var(--shadow-md); }
+        .nav-btn.primary:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+        .nav-btn.secondary { background:var(--bg-white); color:var(--text-secondary); border:1px solid var(--border-medium); }
+        .nav-btn.secondary:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .nav-btn:disabled { opacity:.4; cursor:not-allowed; transform:none!important; }
+
+        .canvas-panel { background:var(--bg-white); border-radius:20px; border:1px solid var(--border-light); box-shadow:var(--shadow-lg); overflow:hidden; display:flex; flex-direction:column; }
+        .canvas-header { padding:16px 24px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; }
+        .canvas-title { font-size:13px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+        .canvas-hint { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .canvas-hint svg { width:16px; height:16px; }
+        .canvas-wrapper { flex:1; position:relative; background:#1e293b; }
+        canvas { display:block; width:100%; height:100%; }
+        .canvas-overlay { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.95); padding:10px 20px; border-radius:30px; box-shadow:var(--shadow-md); font-size:13px; color:var(--text-secondary); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+        .canvas-overlay svg { width:16px; height:16px; color:var(--accent-green); }
+        .stats-bar { padding:12px 24px; background:var(--bg-white); border-top:1px solid var(--border-light); display:flex; gap:24px; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:8px; }
+        .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .stat-value { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--text-primary); }
+        .stat-dot { width:8px; height:8px; border-radius:50%; }
+
+        .slide-dots { display:flex; gap:8px; margin-bottom:24px; }
+        .slide-dot { width:32px; height:4px; background:var(--border-light); border-radius:2px; cursor:pointer; transition:all .2s; }
+        .slide-dot:hover { background:var(--border-medium); }
+        .slide-dot.active { background:var(--accent-green); }
+        .slide-dot.completed { background:var(--accent-cyan); }
+
+        @media (max-width:1024px) { main { grid-template-columns:1fr; padding:24px; } .canvas-panel { min-height:400px; order:-1; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:24px; } }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .slide-content { animation:fadeIn .4s ease; }
     </style>
 </head>
 
@@ -540,7 +109,7 @@
         <div class="header-top">
             <div class="header-left">
                 <a href="index.html" class="back-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     Back
                 </a>
                 <div class="chapter-badge">Chapter 6</div>
@@ -554,6 +123,7 @@
         <div class="header-tabs">
             <a href="chapter-6-neural-networks.html" class="tab-link active">Slides</a>
             <a href="chapter-6-notes.html" class="tab-link">Notes</a>
+            <a href="exercise-6.html" class="tab-link">Exercise</a>
         </div>
     </header>
 
@@ -561,14 +131,14 @@
         <div class="content-panel">
             <div class="slide-dots" id="slideDots"></div>
             <div class="slide-number" id="slideNumber">SLIDE 01</div>
-            <h1 class="slide-title" id="slideTitle">Why Neural Networks?</h1>
+            <h1 class="slide-title" id="slideTitle">What Is a Neural Network?</h1>
             <div class="slide-content" id="slideContent"></div>
             <div class="nav-controls">
                 <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg> Previous
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous
                 </button>
                 <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
-                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </div>
@@ -576,1113 +146,720 @@
         <div class="canvas-panel">
             <div class="canvas-header">
                 <span class="canvas-title" id="canvasTitle">Interactive Demo</span>
-                <span class="canvas-hint" id="canvasHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> Watch the perceptron think</span>
+                <span class="canvas-hint" id="canvasHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Watch signals flow through the neuron</span>
             </div>
             <div class="canvas-wrapper">
                 <canvas id="canvas"></canvas>
                 <div class="canvas-overlay" id="canvasOverlay">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                    <span id="overlayText">Inputs become a binary decision</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span id="overlayText">Inputs × Weights → Sum → Activation → Output</span>
                 </div>
             </div>
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-dot" id="statDotA" style="background:var(--accent-pink)"></div>
-                    <span class="stat-label" id="statLabelA">Inputs</span>
-                    <span class="stat-value" id="statValueA">3</span>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-dot" id="statDotB" style="background:var(--accent-teal)"></div>
-                    <span class="stat-label" id="statLabelB">Model</span>
-                    <span class="stat-value" id="statValueB">Perceptron</span>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-dot" id="statDotC" style="background:var(--accent-blue)"></div>
-                    <span class="stat-label" id="statLabelC">Output</span>
-                    <span class="stat-value" id="statValueC">+1 / -1</span>
-                </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-green)"></div><span class="stat-label">Trained</span><span class="stat-value" id="statTrained">0</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-cyan)"></div><span class="stat-label">Accuracy</span><span class="stat-value" id="statAccuracy">—</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-orange)"></div><span class="stat-label">Status</span><span class="stat-value" id="statStatus">Idle</span></div>
             </div>
         </div>
     </main>
 
     <footer style="text-align:center; padding:20px 32px; border-top:1px solid var(--border-light); background:var(--bg-white);">
-        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Last updated: April 15, 2026</p>
+        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Last updated: February 24, 2026</p>
     </footer>
 
     <script>
-        const TWO_PI = Math.PI * 2;
+    const TWO_PI = Math.PI * 2;
+    const PI = Math.PI;
+    const HALF_PI = Math.PI / 2;
 
-        function mapVal(value, inMin, inMax, outMin, outMax) {
-            return outMin + (outMax - outMin) * ((value - inMin) / (inMax - inMin));
+    // ============ PERCEPTRON CLASS ============
+    class Perceptron {
+        constructor(n, lr) {
+            this.weights = [];
+            this.lr = lr;
+            for (let i = 0; i < n; i++) this.weights[i] = Math.random() * 2 - 1;
         }
-
-        function clamp(value, min, max) {
-            return Math.max(min, Math.min(max, value));
+        feedforward(inputs) {
+            let sum = 0;
+            for (let i = 0; i < this.weights.length; i++) sum += inputs[i] * this.weights[i];
+            return sum >= 0 ? 1 : -1;
         }
-
-        function lerp(a, b, t) {
-            return a + (b - a) * t;
+        getSum(inputs) {
+            let sum = 0;
+            for (let i = 0; i < this.weights.length; i++) sum += inputs[i] * this.weights[i];
+            return sum;
         }
-
-        function labelFor(value) {
-            return value === 1 ? "Admit" : "Reject";
+        train(inputs, target) {
+            let guess = this.feedforward(inputs);
+            let error = target - guess;
+            for (let i = 0; i < this.weights.length; i++) this.weights[i] += error * inputs[i] * this.lr;
+            return error;
         }
-
-        function signed(value, digits = 2) {
-            const fixed = value.toFixed(digits);
-            return value >= 0 ? "+" + fixed : fixed;
-        }
-
-        class Perceptron {
-            constructor(numInputs, learningRate) {
-                this.weights = [];
-                this.learningRate = learningRate;
-                for (let i = 0; i < numInputs; i++) {
-                    this.weights[i] = Math.random() * 2 - 1;
-                }
-            }
-
-            feedforward(inputs) {
-                let sum = 0;
-                for (let i = 0; i < this.weights.length; i++) {
-                    sum += inputs[i] * this.weights[i];
-                }
-                return this.activate(sum);
-            }
-
-            activate(sum) {
-                return sum >= 0 ? 1 : -1;
-            }
-
-            train(inputs, target) {
-                const guess = this.feedforward(inputs);
-                const error = target - guess;
-                for (let i = 0; i < this.weights.length; i++) {
-                    this.weights[i] += error * inputs[i] * this.learningRate;
-                }
-                return { guess, error };
-            }
-
-            weightedSum(inputs) {
-                let sum = 0;
-                for (let i = 0; i < this.weights.length; i++) {
-                    sum += inputs[i] * this.weights[i];
-                }
-                return sum;
-            }
-        }
-
-        function buildAdmissionsDataset() {
-            const rawAdmitted = [
-                [85, 75], [72, 80], [90, 65], [60, 85], [78, 70], [88, 60], [65, 90], [70, 75],
-                [80, 72], [75, 78], [82, 68], [68, 82], [92, 58], [55, 88], [77, 73], [85, 62],
-                [73, 77], [95, 55], [62, 80], [80, 80]
-            ];
-            const rawRejected = [
-                [45, 50], [30, 60], [50, 40], [35, 55], [40, 45], [55, 35], [25, 65], [48, 42],
-                [38, 52], [42, 48], [50, 30], [60, 25], [33, 58], [28, 50], [52, 38], [20, 55],
-                [45, 40], [35, 45], [55, 30], [40, 35]
-            ];
-
-            function processData(rows, label, targetArray) {
-                for (const row of rows) {
-                    targetArray.push({
-                        exam1: row[0],
-                        exam2: row[1],
-                        x: mapVal(row[0], 0, 100, -1, 1),
-                        y: mapVal(row[1], 0, 100, -1, 1),
-                        label
-                    });
-                }
-            }
-
-            const trainingData = [];
-            const testingData = [];
-            const backgroundPoints = [];
-
-            processData(rawAdmitted.slice(0, 16), 1, trainingData);
-            processData(rawRejected.slice(0, 16), -1, trainingData);
-            processData(rawAdmitted.slice(16), 1, testingData);
-            processData(rawRejected.slice(16), -1, testingData);
-
-            for (let px = 0; px <= 100; px += 4) {
-                for (let py = 0; py <= 100; py += 4) {
-                    backgroundPoints.push({
-                        exam1: px,
-                        exam2: py,
-                        x: mapVal(px, 0, 100, -1, 1),
-                        y: mapVal(py, 0, 100, -1, 1)
-                    });
-                }
-            }
-
-            return {
-                trainingData,
-                testingData,
-                backgroundPoints,
-                allData: trainingData.concat(testingData)
-            };
-        }
-
-        function accuracyFor(perceptron, data) {
-            let correct = 0;
-            for (const row of data) {
-                if (perceptron.feedforward([row.x, row.y, 1]) === row.label) {
-                    correct++;
-                }
-            }
-            return correct / data.length;
-        }
-
-        const dataset = buildAdmissionsDataset();
-
-        function createReferencePerceptron() {
-            const p = new Perceptron(3, 0.01);
-            for (let i = 0; i < 6000; i++) {
-                const row = dataset.trainingData[i % dataset.trainingData.length];
-                p.train([row.x, row.y, 1], row.label);
-                if ((i + 1) % dataset.trainingData.length === 0 && accuracyFor(p, dataset.trainingData) === 1) {
-                    break;
-                }
-            }
-            return p;
-        }
-
-        function createAdmissionsSim() {
-            return {
-                perceptron: new Perceptron(3, 0.01),
-                trainIndex: 0,
-                trained: 0,
-                converged: false,
-                trainAccuracy: 0,
-                testAccuracy: 0,
-                convergedFrames: 0
-            };
-        }
-
-        function createLearningPreview() {
-            return {
-                perceptron: new Perceptron(3, 0.03),
-                index: 0,
-                example: dataset.trainingData[0],
-                beforeWeights: [0, 0, 0],
-                afterWeights: [0, 0, 0],
-                guess: 0,
-                target: 0,
-                error: 0
-            };
-        }
-
-        function stepLearningPreview(state) {
-            const row = dataset.trainingData[state.index];
-            const inputs = [row.x, row.y, 1];
-            state.example = row;
-            state.beforeWeights = state.perceptron.weights.slice();
-            state.guess = state.perceptron.feedforward(inputs);
-            state.target = row.label;
-            state.error = state.target - state.guess;
-            state.perceptron.train(inputs, row.label);
-            state.afterWeights = state.perceptron.weights.slice();
-            state.index = (state.index + 1) % dataset.trainingData.length;
-        }
-
-        let referencePerceptron = createReferencePerceptron();
-        let admissionsSim = createAdmissionsSim();
-        let learningPreview = createLearningPreview();
-        let currentSlide = 0;
-        let slideFrame = 0;
-
-        const slides = [
-            {
-                number: "SLIDE 01",
-                title: "Why Neural Networks?",
-                canvasTitle: "From Inputs to Decision",
-                hint: "Watch signals flow into one artificial neuron",
-                overlay: "Inputs become a binary decision",
-                content: `<p class="slide-text">A <strong>neural network</strong> is a computational model inspired by the idea that many simple units can work together to make decisions. We are not trying to copy the biological brain in detail. We are building a system that takes numbers in and produces a useful output.</p>
-                <p class="slide-text">For this course, we begin with the smallest possible neural network: a <strong>single artificial neuron</strong> called a <strong>perceptron</strong>. Even one neuron can learn a simple yes/no classification rule from examples.</p>
-                <div class="highlight-box"><h4>Scope for This Chapter</h4><p>We will stop at the perceptron: inputs, weights, bias, feedforward, supervised learning, and a train/test split. No hand classifier, no multi-layer networks, and no heavy UI controls yet.</p></div>`,
-                draw: drawIntroNetwork
-            },
-            {
-                number: "SLIDE 02",
-                title: "The Perceptron",
-                canvasTitle: "Admissions Example",
-                hint: "Exam 1, Exam 2, and bias flow into one neuron",
-                overlay: "Three inputs, one output",
-                content: `<p class="slide-text">A <strong>perceptron</strong> has inputs, weights, a bias input, and one output. Each input is multiplied by a weight, all the weighted values are added, and the sign of that total becomes the decision.</p>
-                <p class="slide-text">In our admissions example, the inputs are <strong>Exam 1</strong>, <strong>Exam 2</strong>, and a <strong>bias</strong> value of <code>1</code>. The output is a binary guess: <strong>admit</strong> (<code>+1</code>) or <strong>reject</strong> (<code>-1</code>).</p>
-                <div class="formula-box"><div class="formula"><span class="var">sum</span> <span class="op">=</span> <span class="var">x0</span><span class="op">*</span><span class="var">w0</span> <span class="op">+</span> <span class="var">x1</span><span class="op">*</span><span class="var">w1</span> <span class="op">+</span> <span class="var">1</span><span class="op">*</span><span class="var">wBias</span></div></div>`,
-                draw: drawPerceptronAnatomy
-            },
-            {
-                number: "SLIDE 03",
-                title: "Weight, Sum, Activate",
-                canvasTitle: "Feedforward Steps",
-                hint: "Watch the perceptron process one student",
-                overlay: "Weight -> sum -> sign",
-                content: `<p class="slide-text">Every feedforward pass follows three steps. First, <strong>weight</strong> each input. Second, <strong>sum</strong> the weighted inputs. Third, run the total through an <strong>activation function</strong> that returns either <code>+1</code> or <code>-1</code>.</p>
-                <div class="code-block"><pre><span class="fn">feedforward</span>(inputs) {
-  <span class="kw">let</span> sum = <span class="num">0</span>;
-  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="kw">this</span>.<span class="prop">weights</span>.length; i++) {
-    sum <span class="op">+=</span> inputs[i] <span class="op">*</span> <span class="kw">this</span>.<span class="prop">weights</span>[i];
-  }
-  <span class="kw">return</span> sum <span class="op">&gt;=</span> <span class="num">0</span> ? <span class="num">1</span> : <span class="num">-1</span>;
-}</pre></div>
-                <div class="highlight-box"><h4>Important Idea</h4><p>The perceptron does not output a probability here. It makes a hard decision: one side or the other, admit or reject.</p></div>`,
-                draw: drawWeightedSum
-            },
-            {
-                number: "SLIDE 04",
-                title: "Learning from Error",
-                canvasTitle: "Supervised Learning",
-                hint: "The teacher tells the perceptron the correct answer",
-                overlay: "error = target - guess",
-                content: `<p class="slide-text">A perceptron learns through <strong>supervised learning</strong>. We show it an example with a known answer, let it guess, compare the guess to the correct answer, and then adjust the weights.</p>
-                <div class="formula-box"><div class="formula"><span class="var">newWeight</span> <span class="op">=</span> <span class="var">weight</span> <span class="op">+</span> (<span class="var">error</span> <span class="op">*</span> <span class="var">input</span>) <span class="op">*</span> <span class="var">learningRate</span></div></div>
-                <p class="slide-text">If the perceptron is wrong, the <strong>error</strong> nudges the weights in a better direction. The <strong>learning rate</strong> controls how big each nudge is.</p>`,
-                draw: drawLearningStep
-            },
-            {
-                number: "SLIDE 05",
-                title: "Training Data vs Testing Data",
-                canvasTitle: "Train / Test Split",
-                hint: "Circles are seen during training, squares stay hidden",
-                overlay: "32 train students, 8 hidden test students",
-                content: `<p class="slide-text">In the class exercise, the perceptron does <strong>not</strong> learn from every student. We split the dataset into <strong>training data</strong> and <strong>testing data</strong>.</p>
-                <p class="slide-text">The model trains on <strong>32 students</strong> and keeps <strong>8 students hidden</strong> until the end. That is the point of the test set: check whether the perceptron learned a useful rule instead of only memorizing what it already saw.</p>
-                <div class="highlight-box"><h4>Reading the Plot</h4><p><strong>Circles</strong> are training examples. <strong>Squares</strong> are hidden test examples. Blue points are admitted students, orange points are rejected students.</p></div>`,
-                draw: drawTrainTestSplit
-            },
-            {
-                number: "SLIDE 06",
-                title: "The Complete Perceptron Demo",
-                canvasTitle: "Admissions Perceptron",
-                hint: "Click the canvas to restart training",
-                overlay: "Background colors show the current guesses",
-                content: `<p class="slide-text">This is the full class exercise. The perceptron trains only on the <strong>training set</strong>, updating its weights one example at a time. The colored background shows its current guesses over the score space.</p>
-                <p class="slide-text">Once training accuracy reaches <strong>100%</strong> on the visible training set, we stop and grade the <strong>hidden test set</strong>. The circles stay as the training examples; the squares are the final exam.</p>
-                <div class="highlight-box"><h4>What the Boundary Means</h4><p>The thin line marks the perceptron's current decision boundary. Everything on one side is classified as admit, and everything on the other side is classified as reject. We care about the idea of a boundary here, not the slope algebra behind it.</p></div>`,
-                draw: drawAdmissionsTraining
-            },
-            {
-                number: "SLIDE 07",
-                title: "The Perceptron Class",
-                canvasTitle: "Short Code, Big Idea",
-                hint: "A full neuron fits in a very small class",
-                overlay: "Random weights + feedforward + train",
-                content: `<p class="slide-text">The powerful part of this chapter is how little code the core model needs. A complete perceptron stores an array of weights, computes a weighted sum, applies a sign activation, and updates the weights during training.</p>
-                <div class="code-block"><pre><span class="kw">class</span> <span class="fn">Perceptron</span> {
-  <span class="fn">constructor</span>(n, learningRate) {
-    <span class="kw">this</span>.<span class="prop">weights</span> = [];
-    <span class="kw">this</span>.<span class="prop">learningRate</span> = learningRate;
-    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; n; i++) {
-      <span class="kw">this</span>.<span class="prop">weights</span>[i] = <span class="fn">random</span>(-<span class="num">1</span>, <span class="num">1</span>);
     }
+
+    // ============ DATA ============
+    const rawAdmitted = [[85,75],[72,80],[90,65],[60,85],[78,70],[88,60],[65,90],[70,75],[80,72],[75,78],[82,68],[68,82],[92,58],[55,88],[77,73],[85,62],[73,77],[95,55],[62,80],[80,80]];
+    const rawRejected = [[45,50],[30,60],[50,40],[35,55],[40,45],[55,35],[25,65],[48,42],[38,52],[42,48],[50,30],[60,25],[33,58],[28,50],[52,38],[20,55],[45,40],[35,45],[55,30],[40,35]];
+
+    let trainingData = [], testingData = [], bgTestPoints = [];
+    let perceptron, demoPerceptron;
+    let trainIndex = 0, trained = 0, converged = false;
+    let trainAccuracy = 0, testAccuracy = 0;
+    let demoTrainIdx = 0, demoTrained = 0, demoData = [], demoConverged = false, demoAccuracy = 0;
+
+    function initData() {
+        trainingData = []; testingData = []; bgTestPoints = [];
+        function proc(arr, start, end, label, target) {
+            for (let i = start; i < end; i++) {
+                let r = arr[i];
+                target.push({ e1: r[0], e2: r[1], x: mapVal(r[0], 0, 100, -1, 1), y: mapVal(r[1], 0, 100, -1, 1), label: label });
+            }
+        }
+        proc(rawAdmitted, 0, 16, 1, trainingData);
+        proc(rawRejected, 0, 16, -1, trainingData);
+        proc(rawAdmitted, 16, 20, 1, testingData);
+        proc(rawRejected, 16, 20, -1, testingData);
+        for (let px = 0; px <= 100; px += 4) {
+            for (let py = 0; py <= 100; py += 4) {
+                bgTestPoints.push({ e1: px, e2: py, x: mapVal(px, 0, 100, -1, 1), y: mapVal(py, 0, 100, -1, 1) });
+            }
+        }
+        perceptron = new Perceptron(3, 0.01);
+        trainIndex = 0; trained = 0; converged = false; trainAccuracy = 0; testAccuracy = 0;
+
+        demoData = [];
+        for (let i = 0; i < 30; i++) {
+            let x = Math.random() * 2 - 1, y = Math.random() * 2 - 1;
+            demoData.push({ x, y, label: (y > 0.5 * x + 0.1) ? 1 : -1 });
+        }
+        demoPerceptron = new Perceptron(3, 0.01);
+        demoTrainIdx = 0; demoTrained = 0; demoConverged = false; demoAccuracy = 0;
+    }
+
+    // ============ SLIDE DATA ============
+    const slides = [
+        { number:"SLIDE 01", title:"What Is a Neural Network?", canvasTitle:"Biological → Artificial", hint:"Watch signals flow through the neuron", overlay:"Inputs × Weights → Sum → Activation → Output",
+            content:`<p class="slide-text">The human brain contains roughly <strong>100 billion neurons</strong>, each connected to thousands of others. These biological neurons receive electrical signals, process them, and fire their own signals onward. Neural networks are computational models <em>inspired</em> by this biology.</p>
+            <p class="slide-text">An <strong>artificial neural network</strong> takes the core idea—nodes connected by weighted pathways—and turns it into math a computer can execute. The simplest possible network is a single neuron: the <strong>perceptron</strong>.</p>
+            <div class="highlight-box"><h4>The Core Idea</h4><p>A neuron receives inputs, multiplies each by a weight, sums them, and passes the result through an activation function to produce an output. That's it—every neural network, from a single perceptron to ChatGPT, is built from this building block.</p></div>`,
+            draw: drawNeuronDiagram },
+
+        { number:"SLIDE 02", title:"The Perceptron", canvasTitle:"Perceptron Architecture", hint:"Watch the signal path light up", overlay:"Invented by Frank Rosenblatt, 1957",
+            content:`<p class="slide-text">Invented in 1957 by <strong>Frank Rosenblatt</strong>, a perceptron takes multiple inputs (each multiplied by a weight), sums the weighted inputs, and passes the sum through an <strong>activation function</strong> to produce a single output.</p>
+            <p class="slide-text">We also add a <strong>bias</strong> input—an extra input that's always 1, with its own weight. The bias lets the perceptron shift its decision boundary away from the origin, so it can classify the point (0, 0) correctly.</p>
+            <div class="code-block"><pre><span class="kw">class</span> <span class="fn">Perceptron</span> {
+  <span class="fn">constructor</span>(numInputs, learningRate) {
+    <span class="kw">this</span>.<span class="prop">weights</span> = [];
+    <span class="kw">this</span>.<span class="prop">lr</span> = learningRate;
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < numInputs; i++)
+      <span class="kw">this</span>.<span class="prop">weights</span>[i] = <span class="fn">random</span>(<span class="num">-1</span>, <span class="num">1</span>);
   }
-
-  <span class="fn">feedforward</span>(inputs) { ... }
-  <span class="fn">activate</span>(sum) { ... }
-  <span class="fn">train</span>(inputs, target) { ... }
 }</pre></div>
-                <div class="highlight-box"><h4>The Key Lesson</h4><p>The perceptron is small enough to understand completely. That makes it the perfect first step before larger neural networks.</p></div>`,
-                draw: drawPerceptronCodeFlow
-            },
-            {
-                number: "SLIDE 08",
-                title: "What a Single Perceptron Can Learn",
-                canvasTitle: "One Boundary, One Limitation",
-                hint: "Compare linearly separable data to XOR",
-                overlay: "A single perceptron draws one straight boundary",
-                content: `<p class="slide-text">A single perceptron can learn a problem only when one straight decision boundary is enough to separate the classes. That works for the admissions example because the two groups are roughly split by one line.</p>
-                <p class="slide-text">But some problems, like <strong>XOR</strong>, cannot be separated by one line. That is why larger neural networks stack more neurons together. For now, though, the perceptron gives us the core ideas: inputs, weights, bias, output, and learning from examples.</p>
-                <div class="highlight-box"><h4>Takeaway</h4><p>Perceptrons are simple, limited, and incredibly important. Once you understand one neuron well, the jump to multi-neuron networks becomes much easier.</p></div>`,
-                draw: drawPerceptronLimit
+            <div class="highlight-box"><h4>3 Inputs for 2D Classification</h4><p><strong>x₁</strong> = first feature, <strong>x₂</strong> = second feature, <strong>bias = 1</strong>. The weights start random—the perceptron has to <em>learn</em> the right values.</p></div>`,
+            draw: drawPerceptronDiagram },
+
+        { number:"SLIDE 03", title:"Feedforward: Making a Guess", canvasTitle:"Numbers Flow Through", hint:"Move mouse to change input values", overlay:"sum = Σ(input × weight) → sign(sum)",
+            content:`<p class="slide-text"><strong>Feedforward</strong> is the process of computing the output from the inputs. For each input, multiply it by its weight. Sum all the weighted inputs. Pass the sum through the activation function.</p>
+            <div class="formula-box"><div class="formula"><span class="var">output</span> <span class="op">=</span> sign( <span class="var">x₁</span>·<span class="var">w₁</span> + <span class="var">x₂</span>·<span class="var">w₂</span> + <span class="var">1</span>·<span class="var">w<sub>b</sub></span> )</div></div>
+            <div class="code-block"><pre><span class="fn">feedforward</span>(inputs) {
+  <span class="kw">let</span> sum = <span class="num">0</span>;
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="kw">this</span>.<span class="prop">weights</span>.length; i++)
+    sum += inputs[i] * <span class="kw">this</span>.<span class="prop">weights</span>[i];
+  <span class="kw">return</span> <span class="kw">this</span>.<span class="fn">activate</span>(sum);
+}</pre></div>
+            <p class="slide-text">The demo on the right maps your mouse position to input values and runs them through a perceptron in real time. Watch the weighted sum and output change as you move.</p>`,
+            draw: drawFeedforward },
+
+        { number:"SLIDE 04", title:"The Sign Activation Function", canvasTitle:"Step Function Graph", hint:"Watch the marker trace the function", overlay:"sum ≥ 0 → fire (+1), sum < 0 → don't fire (−1)",
+            content:`<p class="slide-text">The activation function decides whether the neuron "fires." Our perceptron uses the simplest possible activation: the <strong>sign function</strong>.</p>
+            <div class="formula-box"><div class="formula">sign(<span class="var">sum</span>) <span class="op">=</span> <span class="var">sum</span> ≥ 0 ? <span class="var">+1</span> : <span class="var">−1</span></div></div>
+            <p class="slide-text">If the weighted sum is positive (or zero), the perceptron outputs <strong>+1</strong> (fire). If negative, it outputs <strong>−1</strong> (don't fire). This binary output classifies the input into one of two categories.</p>
+            <div class="code-block"><pre><span class="fn">activate</span>(sum) {
+  <span class="kw">if</span> (sum >= <span class="num">0</span>) <span class="kw">return</span>  <span class="num">1</span>;
+  <span class="kw">else</span>           <span class="kw">return</span> <span class="num">-1</span>;
+}</pre></div>
+            <div class="highlight-box"><h4>Why Not Something Fancier?</h4><p>Real-world neural networks use smooth activation functions like sigmoid or ReLU. But for a single perceptron doing binary classification, the sign function is all we need. Fire or don't fire—just like a biological neuron.</p></div>`,
+            draw: drawActivation },
+
+        { number:"SLIDE 05", title:"Training: Learning from Mistakes", canvasTitle:"Error → Weight Adjustment", hint:"Watch the perceptron correct itself", overlay:"error = desired − guess → adjust weights",
+            content:`<p class="slide-text"><strong>Supervised learning</strong>: we show the perceptron inputs with <em>known</em> answers. It guesses, checks, and adjusts. The error is simply the difference between the desired answer and the guess.</p>
+            <div class="formula-box"><div class="formula"><span class="var">error</span> <span class="op">=</span> <span class="var">desired</span> <span class="op">−</span> <span class="var">guess</span></div></div>
+            <p class="slide-text">Since both desired and guess are +1 or −1, the error can only be <strong>0</strong> (correct), <strong>+2</strong> (should be +1, guessed −1), or <strong>−2</strong> (should be −1, guessed +1). Then we nudge each weight:</p>
+            <div class="code-block"><pre><span class="fn">train</span>(inputs, target) {
+  <span class="kw">let</span> guess = <span class="kw">this</span>.<span class="fn">feedforward</span>(inputs);
+  <span class="kw">let</span> error = target - guess;
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="kw">this</span>.<span class="prop">weights</span>.length; i++)
+    <span class="kw">this</span>.<span class="prop">weights</span>[i] += error * inputs[i] * <span class="kw">this</span>.<span class="prop">lr</span>;
+}</pre></div>
+            <div class="highlight-box"><h4>The Learning Rate</h4><p>The learning rate (0.01 in our code) controls how big each adjustment is. Too high = overshooting. Too low = slow learning. It's the same trade-off as max steering force from Chapter 5.</p></div>`,
+            draw: drawTraining },
+
+        { number:"SLIDE 06", title:"The Decision Boundary", canvasTitle:"Line Converges to Separate Data", hint:"Watch the perceptron find the line", overlay:"The perceptron learns a line that separates two classes",
+            content:`<p class="slide-text">What is the perceptron actually learning? It's finding a <strong>line</strong> (called a decision boundary) that separates the two classes. Points on one side → +1, points on the other → −1.</p>
+            <p class="slide-text">The weights <em>define</em> this line. As training adjusts the weights, the line rotates and shifts until it correctly separates the data. The demo trains a perceptron on random data in real time—watch the green line converge.</p>
+            <div class="highlight-box"><h4>Linear Separability</h4><p>A perceptron can only solve <strong>linearly separable</strong> problems—ones where a straight line can divide the data. For more complex patterns (like XOR), you need multiple layers of neurons. But for our admissions classifier, a line is exactly what we need.</p></div>
+            <p class="slide-text">The decision boundary equation comes directly from the weights: <code>w₀·x + w₁·y + w₂·1 = 0</code>, which rearranges to <code>y = -(w₀/w₁)·x - (w₂/w₁)</code>.</p>`,
+            draw: drawDecisionBoundary },
+
+        { number:"SLIDE 07", title:"Train / Test Split", canvasTitle:"80% Train · 20% Test", hint:"Circles = train, Squares = test", overlay:"Never test on what you trained on",
+            content:`<p class="slide-text">If we test the perceptron on the <em>same</em> data it was trained on, it might just be memorizing—not actually learning patterns. That's called <strong>overfitting</strong>.</p>
+            <p class="slide-text">The fix: <strong>split the data</strong>. We use 80% (32 students) for training and hold back 20% (8 students) as a "final exam" the perceptron has never seen.</p>
+            <div class="code-block"><pre><span class="cm">// 80% Train (16 of each class)</span>
+processData(admitted.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">16</span>), <span class="num">1</span>,  trainingData);
+processData(rejected.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">16</span>), <span class="num">-1</span>, trainingData);
+
+<span class="cm">// 20% Test (4 of each class)</span>
+processData(admitted.<span class="fn">slice</span>(<span class="num">16</span>, <span class="num">20</span>), <span class="num">1</span>,  testingData);
+processData(rejected.<span class="fn">slice</span>(<span class="num">16</span>, <span class="num">20</span>), <span class="num">-1</span>, testingData);</pre></div>
+            <div class="highlight-box"><h4>Why This Matters</h4><p><strong>Training accuracy</strong> tells you how well the perceptron memorized. <strong>Testing accuracy</strong> tells you how well it actually <em>learned</em>. If train = 100% but test = 50%, it memorized without understanding.</p></div>`,
+            draw: drawTrainTestSplit },
+
+        { number:"SLIDE 08", title:"Class Demo: University Admissions", canvasTitle:"Live Admissions Classifier", hint:"Watch the perceptron train live", overlay:"32 train (●) + 8 test (■) → decision boundary",
+            content:`<p class="slide-text">This is the complete exercise from class. Two exam scores per student, 40 students total. <strong>Blue</strong> = admitted, <strong>orange</strong> = rejected. The perceptron trains on 32 students and is tested on 8 unseen students.</p>
+            <p class="slide-text">The background colors show the perceptron's current classification regions. The <strong>green line</strong> is the decision boundary. Training data is shown as <strong>circles</strong>, testing data as <strong>squares</strong>. Green outline = correctly classified, red outline = misclassified.</p>
+            <div class="code-block"><pre>perceptron = <span class="kw">new</span> <span class="fn">Perceptron</span>(<span class="num">3</span>, <span class="num">0.01</span>);
+<span class="cm">// 3 inputs (x, y, bias), 0.01 learning rate</span>
+
+<span class="cm">// Each frame, train on one example:</span>
+<span class="kw">let</span> d = trainingData[trainIndex];
+perceptron.<span class="fn">train</span>([d.<span class="prop">x</span>, d.<span class="prop">y</span>, <span class="num">1</span>], d.<span class="prop">label</span>);
+trainIndex = (trainIndex + <span class="num">1</span>) % trainingData.length;</pre></div>
+            <div class="highlight-box"><h4>The Full Picture</h4><p>Random weights → feedforward → error → weight update → repeat. After enough iterations, the line settles into the right position. Then we run the "final exam" on the 8 unseen students.</p></div>`,
+            draw: drawAdmissions }
+    ];
+
+    // ============ STATE ============
+    let currentSlide = 0;
+    let frame = 0;
+    let mx = 0, my = 0;
+    let ffWeights = [0.6, -0.4, 0.3];
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    // ============ INIT ============
+    function init() { resize(); initData(); updateUI(); generateDots(); animate(); }
+    function resize() {
+        const r = canvas.parentElement.getBoundingClientRect();
+        W = canvas.width = r.width; H = canvas.height = r.height;
+        resetSim();
+    }
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousemove', (e) => { const r = canvas.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; });
+
+    function resetSim() {
+        frame = 0;
+        if (currentSlide === 5) {
+            demoPerceptron = new Perceptron(3, 0.01);
+            demoData = [];
+            for (let i = 0; i < 30; i++) {
+                let x = Math.random() * 2 - 1, y = Math.random() * 2 - 1;
+                demoData.push({ x, y, label: (y > 0.5 * x + 0.1) ? 1 : -1 });
             }
-        ];
-
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        let W = 0;
-        let H = 0;
-
-        function roundedRectPath(x, y, w, h, r) {
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-            ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-            ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y);
-            ctx.closePath();
+            demoTrainIdx = 0; demoTrained = 0; demoConverged = false; demoAccuracy = 0;
         }
-
-        function drawRoundedRect(x, y, w, h, r, fillStyle, strokeStyle, lineWidth) {
-            roundedRectPath(x, y, w, h, r);
-            if (fillStyle) {
-                ctx.fillStyle = fillStyle;
-                ctx.fill();
-            }
-            if (strokeStyle) {
-                ctx.lineWidth = lineWidth || 1;
-                ctx.strokeStyle = strokeStyle;
-                ctx.stroke();
-            }
+        if (currentSlide === 7) {
+            perceptron = new Perceptron(3, 0.01);
+            trainIndex = 0; trained = 0; converged = false; trainAccuracy = 0; testAccuracy = 0;
         }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, W, H);
-            const grad = ctx.createLinearGradient(0, 0, W, H);
-            grad.addColorStop(0, "#0f172a");
-            grad.addColorStop(1, "#111827");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H);
-
-            ctx.fillStyle = "rgba(255,255,255,0.03)";
-            for (let i = 0; i < 18; i++) {
-                const x = (i * 97) % W;
-                const y = (i * 61) % H;
-                ctx.beginPath();
-                ctx.arc(x, y, 1.5, 0, TWO_PI);
-                ctx.fill();
-            }
-        }
-
-        function drawArrow(x1, y1, x2, y2, color, lineWidth) {
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            const head = 10;
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = lineWidth || 2;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawSignal(x1, y1, x2, y2, t, color) {
-            ctx.strokeStyle = "rgba(255,255,255,0.12)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-
-            const px = lerp(x1, x2, t);
-            const py = lerp(y1, y2, t);
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(px, py, 6, 0, TWO_PI);
-            ctx.fill();
-        }
-
-        function drawNode(x, y, radius, label, sublabel, color) {
-            const grad = ctx.createRadialGradient(x - 8, y - 8, 2, x, y, radius);
-            grad.addColorStop(0, color);
-            grad.addColorStop(1, "rgba(255,255,255,0.12)");
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, TWO_PI);
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgba(255,255,255,0.3)";
-            ctx.stroke();
-
-            ctx.fillStyle = "white";
-            ctx.font = "600 14px Inter";
-            ctx.textAlign = "center";
-            ctx.fillText(label, x, y - 2);
-            ctx.fillStyle = "rgba(226,232,240,0.8)";
-            ctx.font = "12px Inter";
-            ctx.fillText(sublabel, x, y + 16);
-        }
-
-        function drawPill(x, y, text, bg, color) {
-            ctx.font = "12px JetBrains Mono";
-            const width = ctx.measureText(text).width + 20;
-            drawRoundedRect(x, y, width, 28, 14, bg, null, 0);
-            ctx.fillStyle = color;
-            ctx.textAlign = "center";
-            ctx.fillText(text, x + width / 2, y + 18);
-        }
-
-        function setStats(items) {
-            const ids = ["A", "B", "C"];
-            for (let i = 0; i < ids.length; i++) {
-                const item = items[i];
-                document.getElementById("statLabel" + ids[i]).textContent = item.label;
-                document.getElementById("statValue" + ids[i]).textContent = item.value;
-                document.getElementById("statDot" + ids[i]).style.background = item.color;
-            }
-        }
-
-        function getSampleStudent() {
-            const index = Math.floor(slideFrame / 120) % dataset.allData.length;
-            return { student: dataset.allData[index], index };
-        }
-
-        function getPlotRect() {
-            return {
-                left: 70,
-                right: W - 28,
-                top: 28,
-                bottom: H - 86
-            };
-        }
-
-        function plotX(value, plot) {
-            return mapVal(value, 0, 100, plot.left, plot.right);
-        }
-
-        function plotY(value, plot) {
-            return mapVal(value, 0, 100, plot.bottom, plot.top);
-        }
-
-        function drawPlotAxes(plot) {
-            drawRoundedRect(plot.left - 12, plot.top - 12, plot.right - plot.left + 24, plot.bottom - plot.top + 24, 16, "rgba(15,23,42,0.36)", "rgba(255,255,255,0.08)", 1);
-
-            ctx.strokeStyle = "rgba(255,255,255,0.08)";
-            ctx.lineWidth = 1;
-            for (let tick = 0; tick <= 100; tick += 20) {
-                const x = plotX(tick, plot);
-                const y = plotY(tick, plot);
-                ctx.beginPath();
-                ctx.moveTo(x, plot.top);
-                ctx.lineTo(x, plot.bottom);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(plot.left, y);
-                ctx.lineTo(plot.right, y);
-                ctx.stroke();
-            }
-
-            ctx.strokeStyle = "rgba(255,255,255,0.35)";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(plot.left, plot.bottom);
-            ctx.lineTo(plot.right, plot.bottom);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(plot.left, plot.bottom);
-            ctx.lineTo(plot.left, plot.top);
-            ctx.stroke();
-
-            ctx.fillStyle = "rgba(226,232,240,0.85)";
-            ctx.font = "12px Inter";
-            ctx.textAlign = "center";
-            ctx.fillText("Exam 1 Score", (plot.left + plot.right) / 2, plot.bottom + 34);
-
-            ctx.save();
-            ctx.translate(plot.left - 40, (plot.top + plot.bottom) / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText("Exam 2 Score", 0, 0);
-            ctx.restore();
-        }
-
-        function drawStudentPoint(student, plot, asSquare, strokeColor, fillColor, size, lineWidth) {
-            const x = plotX(student.exam1, plot);
-            const y = plotY(student.exam2, plot);
-            ctx.strokeStyle = strokeColor;
-            ctx.fillStyle = fillColor;
-            ctx.lineWidth = lineWidth || 2;
-            if (asSquare) {
-                ctx.beginPath();
-                ctx.rect(x - size / 2, y - size / 2, size, size);
-                ctx.fill();
-                ctx.stroke();
-            } else {
-                ctx.beginPath();
-                ctx.arc(x, y, size / 2, 0, TWO_PI);
-                ctx.fill();
-                ctx.stroke();
-            }
-        }
-
-        function drawLegend(plot) {
-            const y = plot.top + 14;
-            drawPill(plot.left + 10, y, "Train: circle", "rgba(15,23,42,0.78)", "#e2e8f0");
-            drawPill(plot.left + 134, y, "Test: square", "rgba(15,23,42,0.78)", "#e2e8f0");
-            drawPill(plot.left + 270, y, "Blue = admit", "rgba(20,184,166,0.18)", "#99f6e4");
-            drawPill(plot.left + 402, y, "Orange = reject", "rgba(249,115,22,0.18)", "#fdba74");
-        }
-
-        function drawDecisionGrid(sim, plot) {
-            const cellW = (plot.right - plot.left) / 25;
-            const cellH = (plot.bottom - plot.top) / 25;
-            for (const point of dataset.backgroundPoints) {
-                const guess = sim.perceptron.feedforward([point.x, point.y, 1]);
-                ctx.fillStyle = guess === 1 ? "rgba(20,184,166,0.12)" : "rgba(244,63,94,0.12)";
-                ctx.fillRect(plotX(point.exam1, plot) - cellW * 0.25, plotY(point.exam2, plot) - cellH * 0.25, cellW, cellH);
-            }
-        }
-
-        function drawDecisionBoundary(weights, plot) {
-            if (Math.abs(weights[1]) < 0.0001) {
-                return;
-            }
-            const xA = -1;
-            const xB = 1;
-            const yA = -(weights[0] * xA + weights[2]) / weights[1];
-            const yB = -(weights[0] * xB + weights[2]) / weights[1];
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
-            ctx.clip();
-
-            ctx.strokeStyle = "rgba(255,255,255,0.9)";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 6]);
-            ctx.beginPath();
-            ctx.moveTo(mapVal(xA, -1, 1, plot.left, plot.right), mapVal(yA, -1, 1, plot.bottom, plot.top));
-            ctx.lineTo(mapVal(xB, -1, 1, plot.left, plot.right), mapVal(yB, -1, 1, plot.bottom, plot.top));
-            ctx.stroke();
-            ctx.restore();
-            ctx.setLineDash([]);
-        }
-
-        function updateAdmissionsTraining(stepsPerFrame) {
-            if (!admissionsSim.converged) {
-                for (let i = 0; i < stepsPerFrame; i++) {
-                    const row = dataset.trainingData[admissionsSim.trainIndex];
-                    admissionsSim.perceptron.train([row.x, row.y, 1], row.label);
-                    admissionsSim.trainIndex = (admissionsSim.trainIndex + 1) % dataset.trainingData.length;
-                    admissionsSim.trained++;
-
-                    if (admissionsSim.trainIndex === 0) {
-                        admissionsSim.trainAccuracy = accuracyFor(admissionsSim.perceptron, dataset.trainingData);
-                        if (admissionsSim.trainAccuracy >= 1) {
-                            admissionsSim.converged = true;
-                            admissionsSim.testAccuracy = accuracyFor(admissionsSim.perceptron, dataset.testingData);
-                            admissionsSim.convergedFrames = 0;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                admissionsSim.convergedFrames++;
-                if (admissionsSim.convergedFrames > 240) {
-                    admissionsSim = createAdmissionsSim();
-                }
-            }
-        }
-
-        function drawIntroNetwork() {
-            clearCanvas();
-            setStats([
-                { label: "Inputs", value: "3", color: "var(--accent-pink)" },
-                { label: "Model", value: "Perceptron", color: "var(--accent-teal)" },
-                { label: "Output", value: "+1 / -1", color: "var(--accent-blue)" }
-            ]);
-
-            const leftX = W * 0.18;
-            const centerX = W * 0.55;
-            const rightX = W * 0.82;
-            const topY = H * 0.26;
-            const midY = H * 0.5;
-            const bottomY = H * 0.74;
-            const pulse = (slideFrame % 180) / 180;
-
-            drawSignal(leftX, topY, centerX, midY - 90, pulse, "#f472b6");
-            drawSignal(leftX, midY, centerX, midY, (pulse + 0.25) % 1, "#2dd4bf");
-            drawSignal(leftX, bottomY, centerX, midY + 90, (pulse + 0.5) % 1, "#60a5fa");
-            drawSignal(centerX + 44, midY, rightX - 46, midY, (pulse + 0.15) % 1, "#f8fafc");
-
-            drawNode(leftX, topY, 34, "Exam 1", "score", "rgba(244,114,182,0.85)");
-            drawNode(leftX, midY, 34, "Exam 2", "score", "rgba(45,212,191,0.85)");
-            drawNode(leftX, bottomY, 34, "Bias", "always 1", "rgba(96,165,250,0.85)");
-            drawNode(centerX, midY, 52, "Neuron", "weighted sum", "rgba(236,72,153,0.9)");
-            drawNode(rightX, midY, 40, "Output", "+1 or -1", "rgba(20,184,166,0.9)");
-
-            ctx.fillStyle = "rgba(226,232,240,0.88)";
-            ctx.font = "600 20px Inter";
-            ctx.textAlign = "center";
-            ctx.fillText("One artificial neuron can already make a classification decision.", W / 2, H - 34);
-        }
-
-        function drawPerceptronAnatomy() {
-            clearCanvas();
-            const sampleData = getSampleStudent();
-            const student = sampleData.student;
-            const weights = referencePerceptron.weights;
-            const inputs = [student.x, student.y, 1];
-            const guess = referencePerceptron.feedforward(inputs);
-
-            setStats([
-                { label: "Student", value: "#" + (sampleData.index + 1), color: "var(--accent-pink)" },
-                { label: "Guess", value: labelFor(guess), color: "var(--accent-teal)" },
-                { label: "Target", value: labelFor(student.label), color: "var(--accent-blue)" }
-            ]);
-
-            const inputBoxes = [
-                { label: "Exam 1", value: student.exam1.toString(), y: H * 0.26, color: "rgba(244,114,182,0.22)" },
-                { label: "Exam 2", value: student.exam2.toString(), y: H * 0.5, color: "rgba(45,212,191,0.22)" },
-                { label: "Bias", value: "1", y: H * 0.74, color: "rgba(96,165,250,0.22)" }
-            ];
-
-            ctx.font = "14px Inter";
-            for (let i = 0; i < inputBoxes.length; i++) {
-                const box = inputBoxes[i];
-                drawRoundedRect(56, box.y - 38, 138, 76, 18, box.color, "rgba(255,255,255,0.1)", 1);
-                ctx.fillStyle = "#f8fafc";
-                ctx.textAlign = "left";
-                ctx.font = "600 14px Inter";
-                ctx.fillText(box.label, 74, box.y - 6);
-                ctx.fillStyle = "rgba(226,232,240,0.82)";
-                ctx.font = "13px JetBrains Mono";
-                ctx.fillText("value = " + box.value, 74, box.y + 18);
-
-                const weightText = "w" + i + " = " + signed(weights[i], 2);
-                drawArrow(202, box.y, W * 0.49, H * 0.5, "rgba(255,255,255,0.28)", 2);
-                drawPill(240, box.y - 14, weightText, "rgba(15,23,42,0.84)", "#f8fafc");
-            }
-
-            drawNode(W * 0.56, H * 0.5, 62, "Perceptron", "adds weighted inputs", "rgba(236,72,153,0.9)");
-            drawArrow(W * 0.63, H * 0.5, W * 0.82, H * 0.5, "rgba(255,255,255,0.4)", 2.5);
-
-            drawRoundedRect(W * 0.78, H * 0.5 - 48, 128, 96, 18, guess === 1 ? "rgba(20,184,166,0.22)" : "rgba(244,63,94,0.22)", "rgba(255,255,255,0.14)", 1);
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 14px Inter";
-            ctx.fillText("Output", W * 0.78 + 64, H * 0.5 - 10);
-            ctx.font = "700 22px Inter";
-            ctx.fillText(labelFor(guess), W * 0.78 + 64, H * 0.5 + 20);
-            ctx.font = "12px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.78)";
-            ctx.fillText(guess === 1 ? "+1" : "-1", W * 0.78 + 64, H * 0.5 + 40);
-        }
-
-        function drawWeightedSum() {
-            clearCanvas();
-            const sampleData = getSampleStudent();
-            const student = sampleData.student;
-            const weights = referencePerceptron.weights;
-            const inputs = [student.x, student.y, 1];
-            const contributions = inputs.map((value, i) => value * weights[i]);
-            const sum = contributions[0] + contributions[1] + contributions[2];
-            const guess = sum >= 0 ? 1 : -1;
-
-            setStats([
-                { label: "Sum", value: signed(sum, 3), color: "var(--accent-pink)" },
-                { label: "Activation", value: guess === 1 ? "+1" : "-1", color: "var(--accent-teal)" },
-                { label: "Bias", value: signed(weights[2], 2), color: "var(--accent-blue)" }
-            ]);
-
-            const rows = [
-                { label: "Exam 1", input: student.x, weight: weights[0], contribution: contributions[0], y: 120, color: "#f472b6" },
-                { label: "Exam 2", input: student.y, weight: weights[1], contribution: contributions[1], y: 210, color: "#2dd4bf" },
-                { label: "Bias", input: 1, weight: weights[2], contribution: contributions[2], y: 300, color: "#60a5fa" }
-            ];
-
-            for (const row of rows) {
-                drawRoundedRect(48, row.y - 32, W * 0.58, 62, 14, "rgba(15,23,42,0.45)", "rgba(255,255,255,0.08)", 1);
-                ctx.textAlign = "left";
-                ctx.fillStyle = row.color;
-                ctx.font = "600 14px Inter";
-                ctx.fillText(row.label, 68, row.y - 6);
-                ctx.fillStyle = "#e2e8f0";
-                ctx.font = "13px JetBrains Mono";
-                ctx.fillText(signed(row.input, 2) + " x " + signed(row.weight, 2) + " = " + signed(row.contribution, 3), 68, row.y + 18);
-
-                const barX = W * 0.48;
-                const barW = W * 0.16;
-                const magnitude = clamp(Math.abs(row.contribution), 0, 1) * barW;
-                ctx.fillStyle = "rgba(255,255,255,0.08)";
-                ctx.fillRect(barX, row.y - 10, barW, 20);
-                ctx.fillStyle = row.color;
-                if (row.contribution >= 0) {
-                    ctx.fillRect(barX + barW / 2, row.y - 10, magnitude, 20);
-                } else {
-                    ctx.fillRect(barX + barW / 2 - magnitude, row.y - 10, magnitude, 20);
-                }
-                ctx.strokeStyle = "rgba(255,255,255,0.18)";
-                ctx.beginPath();
-                ctx.moveTo(barX + barW / 2, row.y - 14);
-                ctx.lineTo(barX + barW / 2, row.y + 14);
-                ctx.stroke();
-            }
-
-            drawRoundedRect(W * 0.7, 134, W * 0.22, 110, 18, "rgba(236,72,153,0.12)", "rgba(236,72,153,0.24)", 1.5);
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 15px Inter";
-            ctx.fillText("Weighted Sum", W * 0.81, 165);
-            ctx.font = "700 28px JetBrains Mono";
-            ctx.fillText(signed(sum, 2), W * 0.81, 208);
-
-            drawArrow(W * 0.81, 250, W * 0.81, 308, "rgba(255,255,255,0.34)", 2);
-
-            drawRoundedRect(W * 0.7, 326, W * 0.22, 112, 18, guess === 1 ? "rgba(20,184,166,0.16)" : "rgba(244,63,94,0.16)", "rgba(255,255,255,0.12)", 1.5);
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 15px Inter";
-            ctx.fillText("Activation", W * 0.81, 358);
-            ctx.font = "700 28px Inter";
-            ctx.fillText(labelFor(guess), W * 0.81, 396);
-            ctx.font = "13px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.82)";
-            ctx.fillText(guess === 1 ? "sum >= 0 -> +1" : "sum < 0 -> -1", W * 0.81, 420);
-        }
-
-        function drawLearningStep() {
-            clearCanvas();
-            if (slideFrame === 1 || slideFrame % 70 === 0) {
-                stepLearningPreview(learningPreview);
-            }
-
-            const before = learningPreview.beforeWeights;
-            const after = learningPreview.afterWeights;
-            const example = learningPreview.example;
-
-            setStats([
-                { label: "Guess", value: labelFor(learningPreview.guess), color: "var(--accent-pink)" },
-                { label: "Target", value: labelFor(learningPreview.target), color: "var(--accent-teal)" },
-                { label: "Error", value: learningPreview.error.toString(), color: "var(--accent-blue)" }
-            ]);
-
-            drawRoundedRect(48, 44, W - 96, 90, 18, "rgba(15,23,42,0.44)", "rgba(255,255,255,0.08)", 1);
-            ctx.textAlign = "left";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 16px Inter";
-            ctx.fillText("Current training example", 72, 76);
-            ctx.font = "13px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.82)";
-            ctx.fillText("Exam 1 = " + example.exam1 + "   Exam 2 = " + example.exam2 + "   Target = " + labelFor(example.label), 72, 104);
-            ctx.fillText("Update rule: weight += error * input * learningRate", 72, 126);
-
-            const names = ["w0", "w1", "wBias"];
-            const colors = ["#f472b6", "#2dd4bf", "#60a5fa"];
-            for (let i = 0; i < 3; i++) {
-                const x = 96 + i * 170;
-                drawRoundedRect(x, 180, 120, 220, 18, "rgba(15,23,42,0.44)", "rgba(255,255,255,0.08)", 1);
-                ctx.textAlign = "center";
-                ctx.fillStyle = colors[i];
-                ctx.font = "600 15px Inter";
-                ctx.fillText(names[i], x + 60, 210);
-                ctx.fillStyle = "#e2e8f0";
-                ctx.font = "12px JetBrains Mono";
-                ctx.fillText("before", x + 60, 238);
-                ctx.font = "700 20px JetBrains Mono";
-                ctx.fillText(signed(before[i], 2), x + 60, 270);
-                ctx.font = "16px Inter";
-                ctx.fillText("->", x + 60, 306);
-                ctx.font = "12px JetBrains Mono";
-                ctx.fillStyle = "rgba(226,232,240,0.8)";
-                ctx.fillText("after", x + 60, 334);
-                ctx.font = "700 20px JetBrains Mono";
-                ctx.fillStyle = "#f8fafc";
-                ctx.fillText(signed(after[i], 2), x + 60, 366);
-            }
-
-            drawRoundedRect(W * 0.72, 190, W * 0.18, 200, 18, learningPreview.error === 0 ? "rgba(20,184,166,0.14)" : "rgba(236,72,153,0.14)", "rgba(255,255,255,0.08)", 1);
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 16px Inter";
-            ctx.fillText("Teacher Feedback", W * 0.81, 224);
-            ctx.font = "13px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.82)";
-            ctx.fillText("guess  = " + labelFor(learningPreview.guess), W * 0.81, 266);
-            ctx.fillText("target = " + labelFor(learningPreview.target), W * 0.81, 294);
-            ctx.fillText("error  = " + learningPreview.error, W * 0.81, 322);
-            ctx.font = "12px Inter";
-            ctx.fillStyle = "rgba(226,232,240,0.72)";
-            ctx.fillText(learningPreview.error === 0 ? "No update needed." : "Wrong guess -> weights are nudged.", W * 0.81, 356);
-        }
-
-        function drawTrainTestSplit() {
-            clearCanvas();
-            setStats([
-                { label: "Train", value: "32", color: "var(--accent-pink)" },
-                { label: "Test", value: "8", color: "var(--accent-teal)" },
-                { label: "Goal", value: "Generalize", color: "var(--accent-blue)" }
-            ]);
-
-            const plot = getPlotRect();
-            drawPlotAxes(plot);
-            drawLegend(plot);
-
-            for (const row of dataset.trainingData) {
-                drawStudentPoint(row, plot, false, "rgba(255,255,255,0.78)", row.label === 1 ? "rgba(56,189,248,0.9)" : "rgba(251,146,60,0.9)", 13, 1.5);
-            }
-            for (const row of dataset.testingData) {
-                drawStudentPoint(row, plot, true, "rgba(255,255,255,0.9)", row.label === 1 ? "rgba(56,189,248,0.92)" : "rgba(251,146,60,0.92)", 13, 1.8);
-            }
-
-            drawRoundedRect(plot.right - 158, plot.top + 18, 136, 72, 16, "rgba(15,23,42,0.76)", "rgba(255,255,255,0.08)", 1);
-            ctx.textAlign = "left";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 14px Inter";
-            ctx.fillText("Split Summary", plot.right - 138, plot.top + 42);
-            ctx.font = "12px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.82)";
-            ctx.fillText("train = 16 + 16", plot.right - 138, plot.top + 64);
-            ctx.fillText("test  =  4 +  4", plot.right - 138, plot.top + 82);
-        }
-
-        function drawAdmissionsTraining() {
-            clearCanvas();
-            updateAdmissionsTraining(6);
-
-            setStats([
-                { label: "Trained", value: admissionsSim.trained.toString(), color: "var(--accent-pink)" },
-                { label: "Train Acc", value: (admissionsSim.trainAccuracy * 100).toFixed(1) + "%", color: "var(--accent-teal)" },
-                { label: "Test Acc", value: admissionsSim.converged ? Math.round(admissionsSim.testAccuracy * 100) + "%" : "--", color: "var(--accent-blue)" }
-            ]);
-
-            const plot = getPlotRect();
-            drawPlotAxes(plot);
-            drawDecisionGrid(admissionsSim, plot);
-            drawDecisionBoundary(admissionsSim.perceptron.weights, plot);
-
-            for (const row of dataset.trainingData) {
-                const correct = admissionsSim.perceptron.feedforward([row.x, row.y, 1]) === row.label;
-                drawStudentPoint(row, plot, false, correct ? "rgba(74,222,128,0.95)" : "rgba(248,113,113,0.96)", row.label === 1 ? "rgba(56,189,248,0.95)" : "rgba(251,146,60,0.95)", 14, correct ? 1.6 : 3);
-            }
-
-            for (const row of dataset.testingData) {
-                const correct = admissionsSim.perceptron.feedforward([row.x, row.y, 1]) === row.label;
-                drawStudentPoint(row, plot, true, correct ? "rgba(74,222,128,0.95)" : "rgba(248,113,113,0.96)", row.label === 1 ? "rgba(56,189,248,0.95)" : "rgba(251,146,60,0.95)", 14, correct ? 2 : 3.5);
-            }
-
-            drawLegend(plot);
-
-            drawRoundedRect(plot.left, plot.bottom + 18, plot.right - plot.left, 46, 14, "rgba(15,23,42,0.82)", "rgba(255,255,255,0.08)", 1);
-            ctx.textAlign = "left";
-            ctx.font = "13px JetBrains Mono";
-            ctx.fillStyle = admissionsSim.converged ? "#86efac" : "rgba(226,232,240,0.82)";
-            const message = admissionsSim.converged
-                ? "CONVERGED: training = 100%  |  hidden test = " + Math.round(admissionsSim.testAccuracy * 100) + "%"
-                : "Training on 32 students only... hidden test set stays untouched.";
-            ctx.fillText(message, plot.left + 16, plot.bottom + 47);
-
-            if (admissionsSim.converged) {
-                drawPill(plot.right - 174, plot.top + 18, "click to restart", "rgba(236,72,153,0.18)", "#fbcfe8");
-            }
-        }
-
-        function drawPerceptronCodeFlow() {
-            clearCanvas();
-            const weights = referencePerceptron.weights;
-
-            setStats([
-                { label: "w0", value: signed(weights[0], 2), color: "var(--accent-pink)" },
-                { label: "w1", value: signed(weights[1], 2), color: "var(--accent-teal)" },
-                { label: "wBias", value: signed(weights[2], 2), color: "var(--accent-blue)" }
-            ]);
-
-            const cards = [
-                {
-                    x: 44,
-                    title: "1. feedforward()",
-                    lines: ["read inputs", "multiply by weights", "add everything"],
-                    color: "rgba(236,72,153,0.16)"
-                },
-                {
-                    x: W * 0.36,
-                    title: "2. activate()",
-                    lines: ["if sum >= 0 -> +1", "else -> -1", "binary decision"],
-                    color: "rgba(20,184,166,0.16)"
-                },
-                {
-                    x: W * 0.68,
-                    title: "3. train()",
-                    lines: ["guess", "compare to target", "update weights"],
-                    color: "rgba(59,130,246,0.16)"
-                }
-            ];
-
-            for (const card of cards) {
-                drawRoundedRect(card.x, 120, W * 0.24, 210, 18, card.color, "rgba(255,255,255,0.12)", 1);
-                ctx.textAlign = "left";
-                ctx.fillStyle = "#f8fafc";
-                ctx.font = "600 16px Inter";
-                ctx.fillText(card.title, card.x + 20, 154);
-                ctx.font = "13px JetBrains Mono";
-                ctx.fillStyle = "rgba(226,232,240,0.82)";
-                for (let i = 0; i < card.lines.length; i++) {
-                    ctx.fillText(card.lines[i], card.x + 20, 196 + i * 30);
-                }
-            }
-
-            drawArrow(W * 0.29, 226, W * 0.36, 226, "rgba(255,255,255,0.35)", 2);
-            drawArrow(W * 0.61, 226, W * 0.68, 226, "rgba(255,255,255,0.35)", 2);
-
-            drawRoundedRect(48, H - 130, W - 96, 78, 18, "rgba(15,23,42,0.52)", "rgba(255,255,255,0.08)", 1);
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 16px Inter";
-            ctx.fillText("The whole model fits in one class because the core idea is simple.", W / 2, H - 94);
-            ctx.font = "13px JetBrains Mono";
-            ctx.fillStyle = "rgba(226,232,240,0.82)";
-            ctx.fillText("weights -> sum -> sign -> error -> updated weights", W / 2, H - 66);
-        }
-
-        function drawPerceptronLimit() {
-            clearCanvas();
-            setStats([
-                { label: "Boundary", value: "1 line", color: "var(--accent-pink)" },
-                { label: "Works", value: "Linear split", color: "var(--accent-teal)" },
-                { label: "Fails", value: "XOR", color: "var(--accent-blue)" }
-            ]);
-
-            const leftPlot = { left: 40, right: W * 0.47, top: 56, bottom: H - 86 };
-            const rightPlot = { left: W * 0.53, right: W - 40, top: 56, bottom: H - 86 };
-            drawPlotAxes(leftPlot);
-            drawPlotAxes(rightPlot);
-
-            ctx.fillStyle = "#f8fafc";
-            ctx.font = "600 16px Inter";
-            ctx.textAlign = "center";
-            ctx.fillText("Linearly Separable", (leftPlot.left + leftPlot.right) / 2, 34);
-            ctx.fillText("XOR", (rightPlot.left + rightPlot.right) / 2, 34);
-
-            const linearAdmit = [
-                { exam1: 72, exam2: 78 }, { exam1: 80, exam2: 70 }, { exam1: 86, exam2: 64 }, { exam1: 68, exam2: 84 }
-            ];
-            const linearReject = [
-                { exam1: 36, exam2: 42 }, { exam1: 28, exam2: 56 }, { exam1: 52, exam2: 34 }, { exam1: 42, exam2: 46 }
-            ];
-
-            for (const row of linearAdmit) {
-                drawStudentPoint(row, leftPlot, false, "rgba(255,255,255,0.78)", "rgba(56,189,248,0.95)", 14, 1.6);
-            }
-            for (const row of linearReject) {
-                drawStudentPoint(row, leftPlot, false, "rgba(255,255,255,0.78)", "rgba(251,146,60,0.95)", 14, 1.6);
-            }
-            ctx.strokeStyle = "rgba(255,255,255,0.88)";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 6]);
-            ctx.beginPath();
-            ctx.moveTo(plotX(54, leftPlot), plotY(90, leftPlot));
-            ctx.lineTo(plotX(70, leftPlot), plotY(18, leftPlot));
-            ctx.stroke();
-            ctx.setLineDash([]);
-            drawPill(leftPlot.left + 18, leftPlot.top + 16, "one line works", "rgba(20,184,166,0.18)", "#99f6e4");
-
-            const xorBlue = [
-                { exam1: 28, exam2: 28 }, { exam1: 74, exam2: 74 }
-            ];
-            const xorOrange = [
-                { exam1: 28, exam2: 74 }, { exam1: 74, exam2: 28 }
-            ];
-            for (const row of xorBlue) {
-                drawStudentPoint(row, rightPlot, false, "rgba(255,255,255,0.78)", "rgba(56,189,248,0.95)", 16, 1.8);
-            }
-            for (const row of xorOrange) {
-                drawStudentPoint(row, rightPlot, false, "rgba(255,255,255,0.78)", "rgba(251,146,60,0.95)", 16, 1.8);
-            }
-            ctx.strokeStyle = "rgba(255,255,255,0.65)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(plotX(44, rightPlot), plotY(92, rightPlot));
-            ctx.lineTo(plotX(58, rightPlot), plotY(12, rightPlot));
-            ctx.stroke();
-            ctx.font = "700 44px Inter";
-            ctx.fillStyle = "rgba(248,113,113,0.9)";
-            ctx.fillText("X", (rightPlot.left + rightPlot.right) / 2, H * 0.58);
-            drawPill(rightPlot.left + 18, rightPlot.top + 16, "one line fails", "rgba(244,63,94,0.16)", "#fecdd3");
-        }
-
-        function resize() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            W = canvas.width = rect.width;
-            H = canvas.height = rect.height;
-            slideFrame = 0;
-        }
-
-        function resetSlideState() {
-            slideFrame = 0;
-            referencePerceptron = createReferencePerceptron();
-            admissionsSim = createAdmissionsSim();
-            learningPreview = createLearningPreview();
-        }
-
-        function nextSlide() {
-            if (currentSlide < slides.length - 1) {
-                currentSlide++;
-                resetSlideState();
-                updateUI();
-            }
-        }
-
-        function prevSlide() {
-            if (currentSlide > 0) {
-                currentSlide--;
-                resetSlideState();
-                updateUI();
-            }
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            resetSlideState();
-            updateUI();
-        }
-
-        function updateUI() {
-            const slide = slides[currentSlide];
-            document.getElementById("slideNumber").textContent = slide.number;
-            document.getElementById("slideTitle").textContent = slide.title;
-            document.getElementById("slideContent").innerHTML = slide.content;
-            document.getElementById("canvasTitle").textContent = slide.canvasTitle;
-            document.getElementById("canvasHint").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>' + slide.hint;
-            document.getElementById("overlayText").textContent = slide.overlay;
-            document.getElementById("progressText").textContent = (currentSlide + 1) + " / " + slides.length;
-            document.getElementById("progressFill").style.width = (((currentSlide + 1) / slides.length) * 100) + "%";
-            document.getElementById("btnPrev").disabled = currentSlide === 0;
-            document.getElementById("btnNext").disabled = currentSlide === slides.length - 1;
-            document.querySelectorAll(".slide-dot").forEach((dot, index) => {
-                dot.classList.remove("active", "completed");
-                if (index === currentSlide) {
-                    dot.classList.add("active");
-                } else if (index < currentSlide) {
-                    dot.classList.add("completed");
-                }
-            });
-        }
-
-        function generateDots() {
-            const container = document.getElementById("slideDots");
-            container.innerHTML = "";
-            for (let i = 0; i < slides.length; i++) {
-                const dot = document.createElement("button");
-                dot.className = "slide-dot" + (i === 0 ? " active" : "");
-                dot.setAttribute("aria-label", "Go to slide " + (i + 1));
-                dot.onclick = () => goToSlide(i);
-                container.appendChild(dot);
-            }
-        }
-
-        function animate() {
-            slideFrame++;
-            slides[currentSlide].draw();
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener("resize", resize);
-        canvas.addEventListener("click", () => {
-            if (currentSlide === 5) {
-                admissionsSim = createAdmissionsSim();
-            }
+    }
+
+    // ============ NAVIGATION ============
+    function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; resetSim(); updateUI(); } }
+    function prevSlide() { if (currentSlide > 0) { currentSlide--; resetSim(); updateUI(); } }
+    function goToSlide(i) { currentSlide = i; resetSim(); updateUI(); }
+    function updateUI() {
+        const s = slides[currentSlide];
+        document.getElementById('slideNumber').textContent = s.number;
+        document.getElementById('slideTitle').textContent = s.title;
+        document.getElementById('slideContent').innerHTML = s.content;
+        document.getElementById('canvasTitle').textContent = s.canvasTitle;
+        document.getElementById('canvasHint').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>${s.hint}`;
+        document.getElementById('overlayText').textContent = s.overlay;
+        document.getElementById('progressText').textContent = `${currentSlide + 1} / ${slides.length}`;
+        document.getElementById('progressFill').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+        document.getElementById('btnPrev').disabled = currentSlide === 0;
+        document.getElementById('btnNext').disabled = currentSlide === slides.length - 1;
+        document.querySelectorAll('.slide-dot').forEach((d, i) => { d.classList.remove('active', 'completed'); if (i === currentSlide) d.classList.add('active'); else if (i < currentSlide) d.classList.add('completed'); });
+    }
+    function generateDots() { const c = document.getElementById('slideDots'); c.innerHTML = ''; slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'slide-dot' + (i === 0 ? ' active' : ''); d.onclick = () => goToSlide(i); c.appendChild(d); }); }
+
+    // ============ DRAWING HELPERS ============
+    function mapVal(v, a1, a2, b1, b2) { return b1 + ((v - a1) / (a2 - a1)) * (b2 - b1); }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function clearCanvas(bg = '#1e293b') { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+    function drawArrow(x1, y1, x2, y2, color, label, lw = 3) {
+        const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy); if (len < 2) return;
+        const angle = Math.atan2(dy, dx), headLen = Math.min(10, len * 0.3);
+        ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - headLen * Math.cos(angle - PI / 6), y2 - headLen * Math.sin(angle - PI / 6)); ctx.lineTo(x2 - headLen * Math.cos(angle + PI / 6), y2 - headLen * Math.sin(angle + PI / 6)); ctx.closePath(); ctx.fill();
+        if (label) { ctx.font = '600 11px Inter,sans-serif'; const lx = (x1 + x2) / 2, ly = (y1 + y2) / 2; const perpX = -Math.sin(angle) * 14, perpY = Math.cos(angle) * 14; ctx.fillText(label, lx + perpX, ly + perpY); }
+        ctx.restore();
+    }
+    function updateStats(trained, accuracy, status) {
+        document.getElementById('statTrained').textContent = trained;
+        document.getElementById('statAccuracy').textContent = accuracy;
+        document.getElementById('statStatus').textContent = status;
+    }
+
+    // ============ SLIDE 01: NEURON DIAGRAM ============
+    function drawNeuronDiagram() {
+        clearCanvas(); frame++;
+        const cx = W / 2, cy = H / 2, r = Math.min(W, H) * 0.12;
+        const pulse = (frame % 120) / 120;
+
+        const inputs = [{ y: cy - r * 2.5, label: 'x₁' }, { y: cy, label: 'x₂' }, { y: cy + r * 2.5, label: 'bias' }];
+        const inX = cx - W * 0.28, somaX = cx - W * 0.04, outX = cx + W * 0.28;
+
+        inputs.forEach((inp, idx) => {
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(inX + 30, inp.y); ctx.lineTo(somaX - r, cy); ctx.stroke();
+
+            const t = (pulse + idx * 0.25) % 1;
+            const px = inX + 30 + (somaX - r - inX - 30) * t;
+            const py = inp.y + (cy - inp.y) * t;
+            const glow = Math.sin(t * PI) * 0.8;
+            ctx.fillStyle = `rgba(16,185,129,${glow})`; ctx.beginPath(); ctx.arc(px, py, 5, 0, TWO_PI); ctx.fill();
+
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(inX, inp.y, 16, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#1e293b'; ctx.font = '600 11px JetBrains Mono,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(inp.label, inX, inp.y);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '500 10px JetBrains Mono,monospace';
+            ctx.fillText('w' + (idx + 1), (inX + 30 + somaX - r) / 2, (inp.y + cy) / 2 - 10);
         });
 
-        function init() {
-            resize();
-            generateDots();
-            updateUI();
-            animate();
+        ctx.fillStyle = 'rgba(16,185,129,0.3)'; ctx.strokeStyle = 'rgba(16,185,129,0.7)'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(somaX, cy, r, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 16px JetBrains Mono,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Σ', somaX, cy);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(somaX + r, cy); ctx.lineTo(outX - 20, cy); ctx.stroke();
+
+        const outPulse = (pulse + 0.75) % 1;
+        const opx = somaX + r + (outX - 20 - somaX - r) * outPulse;
+        const outGlow = Math.sin(outPulse * PI) * 0.8;
+        ctx.fillStyle = `rgba(6,182,212,${outGlow})`; ctx.beginPath(); ctx.arc(opx, cy, 5, 0, TWO_PI); ctx.fill();
+
+        ctx.fillStyle = 'rgba(6,182,212,0.5)'; ctx.strokeStyle = 'rgba(6,182,212,0.8)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(outX, cy, 18, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 12px JetBrains Mono,monospace';
+        ctx.fillText('+1', outX, cy);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 11px Inter,sans-serif'; ctx.textBaseline = 'top';
+        ctx.fillText('inputs', inX, cy + r * 3.2);
+        ctx.fillText('weighted sum', somaX, cy + r + 20);
+        ctx.fillText('output', outX, cy + 32);
+
+        updateStats(0, '—', 'Diagram');
+    }
+
+    // ============ SLIDE 02: PERCEPTRON DIAGRAM ============
+    function drawPerceptronDiagram() {
+        clearCanvas(); frame++;
+        const cx = W / 2, cy = H / 2;
+        const phase = Math.floor(frame / 60) % 4;
+
+        const inX = W * 0.12, sumX = W * 0.45, actX = W * 0.65, outX = W * 0.85;
+        const nodes = [{ y: cy - H * 0.22, label: 'x₁', val: '0.7' }, { y: cy, label: 'x₂', val: '-0.3' }, { y: cy + H * 0.22, label: '1', val: 'bias' }];
+        const wLabels = ['w₁', 'w₂', 'w_b'];
+
+        nodes.forEach((n, i) => {
+            const highlight = (phase === 0 || phase === i);
+            ctx.strokeStyle = highlight ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = highlight ? 2 : 1;
+            ctx.beginPath(); ctx.moveTo(inX + 22, n.y); ctx.lineTo(sumX - 22, cy); ctx.stroke();
+
+            ctx.fillStyle = highlight ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.08)';
+            ctx.font = '500 10px JetBrains Mono,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = highlight ? 'rgba(16,185,129,0.8)' : 'rgba(255,255,255,0.3)';
+            ctx.fillText(wLabels[i], (inX + 22 + sumX - 22) / 2, (n.y + cy) / 2 - 10);
+
+            ctx.fillStyle = highlight ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)';
+            ctx.strokeStyle = highlight ? 'rgba(16,185,129,0.6)' : 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(inX, n.y, 20, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#1e293b'; ctx.font = '600 12px JetBrains Mono,monospace';
+            ctx.fillText(n.label, inX, n.y);
+        });
+
+        ctx.strokeStyle = 'rgba(16,185,129,0.3)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(sumX + 22, cy); ctx.lineTo(actX - 22, cy); ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(6,182,212,0.3)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(actX + 22, cy); ctx.lineTo(outX - 22, cy); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(16,185,129,0.2)'; ctx.strokeStyle = 'rgba(16,185,129,0.6)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(sumX, cy, 22, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 16px JetBrains Mono,monospace'; ctx.textAlign = 'center';
+        ctx.fillText('Σ', sumX, cy);
+
+        ctx.fillStyle = 'rgba(249,115,22,0.15)'; ctx.strokeStyle = 'rgba(249,115,22,0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(actX, cy, 22, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f97316'; ctx.font = '600 11px JetBrains Mono,monospace';
+        ctx.fillText('sign', actX, cy);
+
+        ctx.fillStyle = 'rgba(6,182,212,0.3)'; ctx.strokeStyle = 'rgba(6,182,212,0.7)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(outX, cy, 22, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 14px JetBrains Mono,monospace';
+        ctx.fillText('±1', outX, cy);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '500 10px Inter,sans-serif'; ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
+        ctx.fillText('inputs', inX, cy + H * 0.3);
+        ctx.fillText('sum', sumX, cy + 32);
+        ctx.fillText('activate', actX, cy + 32);
+        ctx.fillText('output', outX, cy + 32);
+
+        updateStats(0, '—', 'Architecture');
+    }
+
+    // ============ SLIDE 03: FEEDFORWARD ============
+    function drawFeedforward() {
+        clearCanvas(); frame++;
+        const x1 = mapVal(clamp(mx, 0, W), 0, W, -1, 1);
+        const x2 = mapVal(clamp(my, 0, H), 0, H, -1, 1);
+        const bias = 1;
+        const w = ffWeights;
+
+        const products = [x1 * w[0], x2 * w[1], bias * w[2]];
+        const sum = products[0] + products[1] + products[2];
+        const output = sum >= 0 ? +1 : -1;
+
+        const startX = W * 0.05, midX = W * 0.5, endX = W * 0.88;
+        const rows = [H * 0.2, H * 0.5, H * 0.8];
+
+        const labels = [`x₁ = ${x1.toFixed(2)}`, `x₂ = ${x2.toFixed(2)}`, `bias = 1.00`];
+        const wLabels = [`w₁ = ${w[0].toFixed(2)}`, `w₂ = ${w[1].toFixed(2)}`, `w_b = ${w[2].toFixed(2)}`];
+        const pLabels = [products[0].toFixed(3), products[1].toFixed(3), products[2].toFixed(3)];
+
+        rows.forEach((y, i) => {
+            ctx.fillStyle = 'rgba(16,185,129,0.12)'; ctx.strokeStyle = 'rgba(16,185,129,0.4)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(startX + 30, y, 16, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '500 11px JetBrains Mono,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(labels[i].split(' = ')[0], startX + 30, y);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono,monospace'; ctx.textAlign = 'left';
+            ctx.fillText(labels[i].split(' = ')[1], startX + 52, y);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(startX + 52, y + 6); ctx.lineTo(midX - 40, H / 2); ctx.stroke();
+
+            ctx.fillStyle = 'rgba(249,115,22,0.7)'; ctx.font = '500 9px JetBrains Mono,monospace'; ctx.textAlign = 'center';
+            ctx.fillText(wLabels[i], (startX + 50 + midX - 40) / 2, (y + H / 2) / 2 - 8);
+
+            ctx.fillStyle = 'rgba(6,182,212,0.8)'; ctx.font = '600 11px JetBrains Mono,monospace';
+            ctx.fillText(pLabels[i], midX - 60, y);
+        });
+
+        ctx.fillStyle = 'rgba(16,185,129,0.2)'; ctx.strokeStyle = 'rgba(16,185,129,0.6)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(midX, H / 2, 24, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 15px JetBrains Mono,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Σ', midX, H / 2);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '600 12px JetBrains Mono,monospace'; ctx.textAlign = 'left';
+        ctx.fillText(`sum = ${sum.toFixed(3)}`, midX + 34, H / 2 - 6);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(midX + 24, H / 2); ctx.lineTo(endX - 24, H / 2); ctx.stroke();
+
+        const outCol = output === 1 ? '#10b981' : '#ef4444';
+        ctx.fillStyle = outCol + '33'; ctx.strokeStyle = outCol; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(endX, H / 2, 26, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 18px JetBrains Mono,monospace'; ctx.textAlign = 'center';
+        ctx.fillText(output > 0 ? '+1' : '−1', endX, H / 2);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 10px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('sign(' + sum.toFixed(2) + ') = ' + output, endX, H / 2 + 34);
+
+        updateStats(0, '—', output > 0 ? 'Fire (+1)' : 'Don\'t fire (−1)');
+    }
+
+    // ============ SLIDE 04: ACTIVATION FUNCTION ============
+    function drawActivation() {
+        clearCanvas(); frame++;
+        const plotL = W * 0.15, plotR = W * 0.85, plotT = H * 0.12, plotB = H * 0.88;
+        const plotW = plotR - plotL, plotH = plotB - plotT;
+        const midX = (plotL + plotR) / 2, midY = (plotT + plotB) / 2;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, midY); ctx.lineTo(plotR, midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX, plotT); ctx.lineTo(midX, plotB); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 11px JetBrains Mono,monospace'; ctx.textAlign = 'center';
+        ctx.fillText('sum', plotR + 20, midY + 4);
+        ctx.fillText('output', midX, plotT - 8);
+        ctx.fillText('−3', plotL, midY + 16); ctx.fillText('+3', plotR, midY + 16);
+        ctx.fillText('+1', midX - 20, plotT + plotH * 0.15); ctx.fillText('−1', midX - 20, plotB - plotH * 0.15);
+
+        const yPlus1 = plotT + plotH * 0.15, yMinus1 = plotB - plotH * 0.15;
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(plotL, yMinus1); ctx.lineTo(midX, yMinus1); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX, yPlus1); ctx.lineTo(plotR, yPlus1); ctx.stroke();
+
+        ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(midX, yPlus1, 5, 0, TWO_PI); ctx.fill();
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(midX, yMinus1, 5, 0, TWO_PI); ctx.fill(); ctx.stroke();
+
+        const t = Math.sin(frame * 0.03) * 3;
+        const markerX = mapVal(t, -3, 3, plotL, plotR);
+        const markerY = t >= 0 ? yPlus1 : yMinus1;
+
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(markerX, midY); ctx.lineTo(markerX, markerY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.arc(markerX, markerY, 7, 0, TWO_PI); ctx.fill();
+        ctx.fillStyle = 'rgba(249,115,22,0.3)'; ctx.beginPath(); ctx.arc(markerX, midY, 5, 0, TWO_PI); ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '600 13px JetBrains Mono,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(`sum = ${t.toFixed(2)}`, 16, 16);
+        ctx.fillStyle = t >= 0 ? '#10b981' : '#ef4444';
+        ctx.fillText(`output = ${t >= 0 ? '+1' : '−1'}`, 16, 36);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '500 10px Inter,sans-serif';
+        ctx.fillText('● = included   ○ = excluded', 16, H - 20);
+
+        updateStats(0, '—', 'Sign Function');
+    }
+
+    // ============ SLIDE 05: TRAINING ============
+    function drawTraining() {
+        clearCanvas(); frame++;
+        const plotL = W * 0.1, plotR = W * 0.9, plotT = H * 0.1, plotB = H * 0.7;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotR, plotB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotL, plotT); ctx.stroke();
+
+        const simpleData = [
+            { x: 0.8, y: 0.7, label: 1 }, { x: 0.6, y: 0.9, label: 1 }, { x: 0.3, y: 0.8, label: 1 },
+            { x: 0.7, y: 0.5, label: 1 }, { x: 0.9, y: 0.6, label: 1 }, { x: 0.4, y: 0.7, label: 1 },
+            { x: 0.1, y: 0.2, label: -1 }, { x: 0.3, y: 0.1, label: -1 }, { x: 0.2, y: 0.4, label: -1 },
+            { x: 0.5, y: 0.2, label: -1 }, { x: 0.4, y: 0.3, label: -1 }, { x: 0.6, y: 0.1, label: -1 }
+        ];
+
+        const step = Math.floor(frame / 40) % simpleData.length;
+        const d = simpleData[step];
+        const px = mapVal(d.x, 0, 1, plotL, plotR), py = mapVal(d.y, 0, 1, plotB, plotT);
+
+        simpleData.forEach((p, i) => {
+            const dpx = mapVal(p.x, 0, 1, plotL, plotR), dpy = mapVal(p.y, 0, 1, plotB, plotT);
+            ctx.fillStyle = p.label === 1 ? 'rgba(100,200,255,0.5)' : 'rgba(255,150,80,0.5)';
+            ctx.strokeStyle = i === step ? '#fff' : 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = i === step ? 3 : 1;
+            ctx.beginPath(); ctx.arc(dpx, dpy, i === step ? 10 : 7, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        });
+
+        const guess = d.y > (0.5 * d.x + 0.35) ? 1 : -1;
+        const error = d.label - guess;
+        const isCorrect = error === 0;
+
+        const infoY = H * 0.78;
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '600 12px JetBrains Mono,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(`Point: (${d.x.toFixed(1)}, ${d.y.toFixed(1)})`, 16, infoY);
+        ctx.fillText(`Desired: ${d.label > 0 ? '+1' : '−1'}`, 16, infoY + 18);
+        ctx.fillStyle = isCorrect ? '#10b981' : '#ef4444';
+        ctx.fillText(`Guess: ${guess > 0 ? '+1' : '−1'}`, W * 0.35, infoY);
+        ctx.fillText(`Error: ${error}`, W * 0.35, infoY + 18);
+        ctx.fillStyle = isCorrect ? '#10b981' : '#f97316';
+        ctx.fillText(isCorrect ? '✓ Correct — no adjustment' : '✗ Wrong — adjust weights!', W * 0.6, infoY + 9);
+
+        if (!isCorrect) {
+            const ringPhase = (frame % 40) / 40;
+            ctx.strokeStyle = `rgba(239,68,68,${0.5 - ringPhase * 0.5})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(px, py, 10 + ringPhase * 20, 0, TWO_PI); ctx.stroke();
         }
 
-        init();
+        updateStats(step + 1, '—', isCorrect ? 'Correct' : 'Adjusting');
+    }
+
+    // ============ SLIDE 06: DECISION BOUNDARY ============
+    function drawDecisionBoundary() {
+        clearCanvas(); frame++;
+        const plotL = W * 0.1, plotR = W * 0.9, plotT = H * 0.08, plotB = H * 0.82;
+
+        if (!demoConverged && frame % 2 === 0) {
+            let d = demoData[demoTrainIdx];
+            demoPerceptron.train([d.x, d.y, 1], d.label);
+            demoTrainIdx = (demoTrainIdx + 1) % demoData.length;
+            demoTrained++;
+            if (demoTrainIdx === 0) {
+                let correct = 0;
+                for (let dd of demoData) { if (demoPerceptron.feedforward([dd.x, dd.y, 1]) === dd.label) correct++; }
+                demoAccuracy = correct / demoData.length;
+                if (demoAccuracy >= 1.0) demoConverged = true;
+            }
+        }
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotR, plotB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotL, plotT); ctx.stroke();
+
+        let w = demoPerceptron.weights;
+        if (w && w.length === 3 && Math.abs(w[1]) > 0.0001) {
+            let m = -(w[0] / w[1]), b = -(w[2] / w[1]);
+            let y1 = m * -1 + b, y2 = m * 1 + b;
+            let lx1 = plotL, ly1 = mapVal(mapVal(y1, -1, 1, 0, 1), 0, 1, plotB, plotT);
+            let lx2 = plotR, ly2 = mapVal(mapVal(y2, -1, 1, 0, 1), 0, 1, plotB, plotT);
+            ctx.strokeStyle = 'rgba(16,185,129,0.7)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(lx1, ly1); ctx.lineTo(lx2, ly2); ctx.stroke();
+        }
+
+        for (let d of demoData) {
+            let dpx = mapVal(d.x, -1, 1, plotL, plotR), dpy = mapVal(d.y, -1, 1, plotB, plotT);
+            let correct = demoPerceptron.feedforward([d.x, d.y, 1]) === d.label;
+            ctx.strokeStyle = correct ? 'rgba(16,185,129,0.6)' : 'rgba(239,68,68,0.8)';
+            ctx.lineWidth = correct ? 1.5 : 2.5;
+            ctx.fillStyle = d.label === 1 ? 'rgba(100,200,255,0.6)' : 'rgba(255,150,80,0.6)';
+            ctx.beginPath(); ctx.arc(dpx, dpy, 7, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(`trained: ${demoTrained}`, 16, H * 0.86);
+        ctx.fillText(`accuracy: ${(demoAccuracy * 100).toFixed(0)}%`, 16, H * 0.86 + 16);
+        if (demoConverged) { ctx.fillStyle = '#10b981'; ctx.fillText('CONVERGED ✓', W * 0.5, H * 0.86 + 8); }
+
+        updateStats(demoTrained, (demoAccuracy * 100).toFixed(0) + '%', demoConverged ? 'Converged' : 'Training...');
+    }
+
+    // ============ SLIDE 07: TRAIN/TEST SPLIT ============
+    function drawTrainTestSplit() {
+        clearCanvas(); frame++;
+        const plotL = W * 0.1, plotR = W * 0.9, plotT = H * 0.08, plotB = H * 0.8;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotR, plotB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotL, plotT); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '500 10px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('Exam 1 Score', (plotL + plotR) / 2, plotB + 8);
+        ctx.save(); ctx.translate(plotL - 16, (plotT + plotB) / 2); ctx.rotate(-HALF_PI);
+        ctx.fillText('Exam 2 Score', 0, 0); ctx.restore();
+
+        for (let d of trainingData) {
+            let px = mapVal(d.e1, 0, 100, plotL, plotR), py = mapVal(d.e2, 0, 100, plotB, plotT);
+            ctx.fillStyle = d.label === 1 ? 'rgba(100,200,255,0.6)' : 'rgba(255,150,80,0.6)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(px, py, 7, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        }
+
+        for (let t of testingData) {
+            let px = mapVal(t.e1, 0, 100, plotL, plotR), py = mapVal(t.e2, 0, 100, plotB, plotT);
+            ctx.fillStyle = t.label === 1 ? 'rgba(100,200,255,0.8)' : 'rgba(255,150,80,0.8)';
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+            ctx.save(); ctx.translate(px, py); ctx.fillRect(-6, -6, 12, 12); ctx.strokeRect(-6, -6, 12, 12); ctx.restore();
+        }
+
+        const legendY = H * 0.86;
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 11px JetBrains Mono,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.beginPath(); ctx.arc(16, legendY + 5, 5, 0, TWO_PI); ctx.fill();
+        ctx.fillText('Train: 32 students (80%)', 28, legendY);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(W * 0.45, legendY, 10, 10); ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1; ctx.strokeRect(W * 0.45, legendY, 10, 10);
+        ctx.fillText('Test: 8 students (20%)', W * 0.45 + 16, legendY);
+
+        ctx.fillStyle = 'rgba(100,200,255,0.6)'; ctx.beginPath(); ctx.arc(16, legendY + 22, 5, 0, TWO_PI); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Admitted (+1)', 28, legendY + 17);
+        ctx.fillStyle = 'rgba(255,150,80,0.6)'; ctx.beginPath(); ctx.arc(W * 0.45, legendY + 27, 5, 0, TWO_PI); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Rejected (−1)', W * 0.45 + 16, legendY + 17);
+
+        updateStats('32 / 8', '—', 'Data Split');
+    }
+
+    // ============ SLIDE 08: ADMISSIONS DEMO ============
+    function drawAdmissions() {
+        clearCanvas(); frame++;
+        const plotL = W * 0.1, plotR = W * 0.9, plotT = H * 0.06, plotB = H * 0.78;
+
+        if (!converged) {
+            for (let step = 0; step < 4; step++) {
+                let d = trainingData[trainIndex];
+                perceptron.train([d.x, d.y, 1], d.label);
+                trainIndex = (trainIndex + 1) % trainingData.length;
+                trained++;
+                if (trainIndex === 0) {
+                    let correct = 0;
+                    for (let dd of trainingData) { if (perceptron.feedforward([dd.x, dd.y, 1]) === dd.label) correct++; }
+                    trainAccuracy = correct / trainingData.length;
+                    if (trainAccuracy >= 1.0) {
+                        converged = true;
+                        let testCorrect = 0;
+                        for (let t of testingData) { if (perceptron.feedforward([t.x, t.y, 1]) === t.label) testCorrect++; }
+                        testAccuracy = testCorrect / testingData.length;
+                    }
+                }
+            }
+        }
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotR, plotB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotL, plotT); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '500 10px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('Exam 1 Score', (plotL + plotR) / 2, plotB + 6);
+        ctx.save(); ctx.translate(plotL - 14, (plotT + plotB) / 2); ctx.rotate(-HALF_PI); ctx.fillText('Exam 2 Score', 0, 0); ctx.restore();
+
+        for (let tp of bgTestPoints) {
+            let guess = perceptron.feedforward([tp.x, tp.y, 1]);
+            let px = mapVal(tp.e1, 0, 100, plotL, plotR), py = mapVal(tp.e2, 0, 100, plotB, plotT);
+            ctx.fillStyle = guess === 1 ? 'rgba(100,255,150,0.06)' : 'rgba(255,100,80,0.06)';
+            ctx.fillRect(px - 2, py - 2, 8, 8);
+        }
+
+        let w = perceptron.weights;
+        if (w && w.length === 3 && Math.abs(w[1]) > 0.0001) {
+            let gm = -(w[0] / w[1]), gb = -(w[2] / w[1]);
+            let na = mapVal(0, 0, 100, -1, 1), nb = mapVal(100, 0, 100, -1, 1);
+            let lx1 = mapVal(0, 0, 100, plotL, plotR), ly1 = mapVal(mapVal(gm * na + gb, -1, 1, 0, 100), 0, 100, plotB, plotT);
+            let lx2 = mapVal(100, 0, 100, plotL, plotR), ly2 = mapVal(mapVal(gm * nb + gb, -1, 1, 0, 100), 0, 100, plotB, plotT);
+            ctx.strokeStyle = 'rgba(16,185,129,0.8)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(lx1, ly1); ctx.lineTo(lx2, ly2); ctx.stroke();
+        }
+
+        for (let d of trainingData) {
+            let px = mapVal(d.e1, 0, 100, plotL, plotR), py = mapVal(d.e2, 0, 100, plotB, plotT);
+            let correct = perceptron.feedforward([d.x, d.y, 1]) === d.label;
+            ctx.strokeStyle = correct ? 'rgba(16,185,129,0.8)' : 'rgba(239,68,68,0.9)';
+            ctx.lineWidth = correct ? 1.5 : 2.5;
+            ctx.fillStyle = d.label === 1 ? 'rgba(100,200,255,0.6)' : 'rgba(255,150,80,0.6)';
+            ctx.beginPath(); ctx.arc(px, py, 7, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        }
+
+        for (let t of testingData) {
+            let px = mapVal(t.e1, 0, 100, plotL, plotR), py = mapVal(t.e2, 0, 100, plotB, plotT);
+            let correct = perceptron.feedforward([t.x, t.y, 1]) === t.label;
+            ctx.strokeStyle = correct ? 'rgba(16,185,129,0.8)' : 'rgba(239,68,68,0.9)';
+            ctx.lineWidth = correct ? 2 : 3;
+            ctx.fillStyle = t.label === 1 ? 'rgba(100,200,255,0.7)' : 'rgba(255,150,80,0.7)';
+            ctx.save(); ctx.translate(px, py);
+            ctx.fillRect(-6, -6, 12, 12); ctx.strokeRect(-6, -6, 12, 12);
+            ctx.restore();
+        }
+
+        const hudY = H * 0.82;
+        ctx.fillStyle = 'rgba(30,41,59,0.9)'; ctx.fillRect(plotL, hudY, plotR - plotL, H - hudY - 4);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 11px JetBrains Mono,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('Train: ●   Test: ■', plotL + 8, hudY + 6);
+
+        if (converged) {
+            ctx.fillStyle = '#10b981'; ctx.font = '600 11px JetBrains Mono,monospace';
+            ctx.fillText(`CONVERGED ✓  Train: 100%  Test: ${(testAccuracy * 100).toFixed(0)}%`, plotL + 160, hudY + 6);
+        } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText(`Training... Acc: ${(trainAccuracy * 100).toFixed(1)}%`, plotL + 160, hudY + 6);
+        }
+
+        updateStats(trained, converged ? `Train 100% / Test ${(testAccuracy * 100).toFixed(0)}%` : `${(trainAccuracy * 100).toFixed(1)}%`, converged ? 'Converged' : 'Training...');
+    }
+
+    // ============ MAIN LOOP ============
+    function animate() { ctx.clearRect(0, 0, W, H); slides[currentSlide].draw(); requestAnimationFrame(animate); }
+    init();
     </script>
 </body>
-
 </html>

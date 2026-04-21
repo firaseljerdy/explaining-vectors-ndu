@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 – Chapter 7: CNN & Digit Recognition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+
+        header { background:var(--bg-white); border-bottom:1px solid var(--border-light); padding:0 32px; position:sticky; top:0; z-index:100; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:16px 0; }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; font-size:14px; font-weight:500; padding:8px 12px; border-radius:8px; transition:all .2s; }
+        .back-btn:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .back-btn svg { width:16px; height:16px; }
+        .chapter-badge { background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
+        .chapter-title { font-size:16px; font-weight:600; }
+        .progress-container { display:flex; align-items:center; gap:12px; }
+        .progress-text { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-secondary); }
+        .progress-bar { width:120px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent-purple),var(--accent-cyan)); border-radius:2px; transition:width .3s ease; }
+
+        main { max-width:1400px; margin:0 auto; padding:32px 40px; display:grid; grid-template-columns:1fr 1fr; gap:32px; min-height:calc(100vh - 100px); }
+
+        .content-panel { display:flex; flex-direction:column; }
+        .slide-number { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-purple); font-weight:500; margin-bottom:8px; letter-spacing:.5px; }
+        .slide-title { font-size:28px; font-weight:700; margin-bottom:20px; line-height:1.2; }
+        .slide-content { flex:1; }
+        .slide-text { font-size:15.5px; line-height:1.75; color:var(--text-secondary); margin-bottom:16px; }
+        .slide-text strong { color:var(--text-primary); font-weight:600; }
+        .slide-text code { font-family:'JetBrains Mono',monospace; font-size:13px; background:var(--bg-canvas); padding:2px 6px; border-radius:4px; color:var(--accent-purple); }
+        .highlight-box { background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(6,182,212,.08)); border:1px solid rgba(139,92,246,.2); border-radius:12px; padding:16px 20px; margin:16px 0; }
+        .highlight-box h4 { font-size:12px; font-weight:600; color:var(--accent-purple); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+        .highlight-box p { font-size:14px; line-height:1.6; color:var(--text-primary); }
+        .code-block { background:#0f172a; border-radius:12px; padding:16px 20px; margin:16px 0; overflow-x:auto; border:1px solid #1e293b; }
+        .code-block pre { font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.7; color:#e2e8f0; margin:0; }
+        .code-block .kw { color:#c084fc; } .code-block .fn { color:#67e8f9; } .code-block .num { color:#fbbf24; }
+        .code-block .cm { color:#64748b; font-style:italic; } .code-block .str { color:#86efac; } .code-block .prop { color:#93c5fd; }
+
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+        .info-card { background:var(--bg-white); border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; }
+        .info-card h5 { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-cyan); font-weight:600; margin-bottom:4px; letter-spacing:.5px; }
+        .info-card p { font-size:13px; line-height:1.5; color:var(--text-secondary); }
+
+        .nav-controls { display:flex; gap:12px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border-light); }
+        .nav-btn { flex:1; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .nav-btn svg { width:16px; height:16px; }
+        .nav-btn.primary { background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan)); color:white; border:none; box-shadow:var(--shadow-md); }
+        .nav-btn.primary:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+        .nav-btn.secondary { background:var(--bg-white); color:var(--text-secondary); border:1px solid var(--border-medium); }
+        .nav-btn.secondary:hover { background:var(--bg-canvas); color:var(--text-primary); }
+        .nav-btn:disabled { opacity:.4; cursor:not-allowed; transform:none!important; }
+
+        .canvas-panel { background:var(--bg-white); border-radius:20px; border:1px solid var(--border-light); box-shadow:var(--shadow-lg); overflow:hidden; display:flex; flex-direction:column; position:sticky; top:90px; height:calc(100vh - 120px); max-height:760px; }
+        .canvas-header { padding:14px 20px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; }
+        .canvas-title { font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.5px; }
+        .canvas-hint { font-size:11.5px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .canvas-hint svg { width:14px; height:14px; }
+        .canvas-wrapper { flex:1; position:relative; background:#0f172a; }
+        canvas { display:block; width:100%; height:100%; }
+        .canvas-overlay { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.95); padding:8px 16px; border-radius:30px; box-shadow:var(--shadow-md); font-size:12.5px; color:var(--text-secondary); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; max-width:90%; overflow:hidden; text-overflow:ellipsis; }
+        .canvas-overlay svg { width:14px; height:14px; color:var(--accent-purple); flex-shrink:0; }
+        .stats-bar { padding:10px 20px; background:var(--bg-white); border-top:1px solid var(--border-light); display:flex; gap:20px; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:6px; }
+        .stat-label { font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .stat-value { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:var(--text-primary); }
+        .stat-dot { width:7px; height:7px; border-radius:50%; }
+
+        .slide-dots { display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; }
+        .slide-dot { width:22px; height:4px; background:var(--border-light); border-radius:2px; cursor:pointer; transition:all .2s; }
+        .slide-dot:hover { background:var(--border-medium); }
+        .slide-dot.active { background:var(--accent-purple); width:30px; }
+        .slide-dot.completed { background:var(--accent-cyan); }
+
+        @media (max-width:1024px) { main { grid-template-columns:1fr; padding:20px; } .canvas-panel { position:relative; top:0; height:440px; order:-1; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:22px; } }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .slide-content { animation:fadeIn .4s ease; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 7</div>
+                <div class="chapter-title">CNN &amp; Digit Recognition</div>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text" id="progressText">1 / 18</span>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:5.5%"></div></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-panel">
+            <div class="slide-dots" id="slideDots"></div>
+            <div class="slide-number" id="slideNumber">SLIDE 01</div>
+            <h1 class="slide-title" id="slideTitle">Handwritten Digit Recognition</h1>
+            <div class="slide-content" id="slideContent"></div>
+            <div class="nav-controls">
+                <button class="nav-btn secondary" id="btnPrev" onclick="prevSlide()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Previous
+                </button>
+                <button class="nav-btn primary" id="btnNext" onclick="nextSlide()">
+                    Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <span class="canvas-title" id="canvasTitle">Interactive Demo</span>
+                <span class="canvas-hint" id="canvasHint"></span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <span id="overlayText">You draw a digit. The network reads it.</span>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-purple)"></div><span class="stat-label">Layer</span><span class="stat-value" id="statLayer">—</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-cyan)"></div><span class="stat-label">Shape</span><span class="stat-value" id="statShape">—</span></div>
+                <div class="stat-item"><div class="stat-dot" style="background:var(--accent-orange)"></div><span class="stat-label">Status</span><span class="stat-value" id="statStatus">Idle</span></div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align:center; padding:20px 32px; border-top:1px solid var(--border-light); background:var(--bg-white);">
+        <p style="font-size:12px; color:var(--text-muted);">By <strong style="color:var(--text-secondary);">Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Session 3 &middot; Nature of Code Ch. 10</p>
+    </footer>
+
+    <script>
+    const TWO_PI = Math.PI * 2;
+    const PI = Math.PI;
+    const HALF_PI = Math.PI / 2;
+
+    // ============ SAMPLE DIGIT (the digit "4" as 28x28 grayscale) ============
+    // Hand-authored rough bitmap of a "4" for visualization
+    const DIGIT_4 = (() => {
+        const g = Array.from({length:28},()=>new Array(28).fill(0));
+        // Left vertical stroke
+        for (let y=6; y<18; y++) { g[y][8]=0.9; g[y][9]=0.95; g[y][10]=0.8; }
+        // Horizontal stroke
+        for (let x=8; x<21; x++) { g[16][x]=0.9; g[17][x]=0.95; g[18][x]=0.8; }
+        // Right vertical (full)
+        for (let y=5; y<24; y++) { g[y][17]=0.85; g[y][18]=0.95; g[y][19]=0.85; }
+        return g;
+    })();
+
+    const DIGIT_3 = (() => {
+        const g = Array.from({length:28},()=>new Array(28).fill(0));
+        // Top curve
+        for (let x=8; x<18; x++) { g[6][x]=0.9; g[7][x]=0.95; }
+        // Right side top
+        for (let y=6; y<13; y++) { g[y][17]=0.85; g[y][18]=0.95; }
+        // Middle
+        for (let x=10; x<18; x++) { g[13][x]=0.9; g[14][x]=0.95; }
+        // Right side bottom
+        for (let y=14; y<22; y++) { g[y][17]=0.85; g[y][18]=0.95; }
+        // Bottom curve
+        for (let x=8; x<18; x++) { g[21][x]=0.9; g[22][x]=0.95; }
+        return g;
+    })();
+
+    // ============ SLIDE CONTENT ============
+    const slides = [
+        {
+            number:"SLIDE 01", title:"Handwritten Digit Recognition",
+            canvasTitle:"The Full Pipeline", hint:"Data flows left → right",
+            overlay:"Draw → Shrink → CNN → Prediction",
+            content:`<p class="slide-text">Today we build a <strong>Convolutional Neural Network</strong> that reads handwriting. You draw a digit with your mouse. The network tells you what it sees. In real time.</p>
+            <p class="slide-text">The whole system runs in your browser. No server, no Python, no GPU farm. Just <code>p5.js</code> for drawing and <code>TensorFlow.js</code> for the brain. About 20 lines of code for the model itself.</p>
+            <div class="info-grid">
+                <div class="info-card"><h5>INPUT</h5><p>A 280×280 canvas you sketch on with your mouse.</p></div>
+                <div class="info-card"><h5>OUTPUT</h5><p>10 probabilities — one per digit 0–9.</p></div>
+                <div class="info-card"><h5>TRAINING DATA</h5><p>15,000 real handwritten digits from MNIST.</p></div>
+                <div class="info-card"><h5>ACCURACY</h5><p>~97% on digits it has never seen before.</p></div>
+            </div>
+            <div class="highlight-box"><h4>Session 3 &middot; Chapter 10</h4><p>Same core idea as our perceptron: <em>inputs × weights → sum → activation → output</em>. But scaled up massively — from 3 weights to 56,714.</p></div>`,
+            drawFn:"drawPipelineHero"
+        },
+        {
+            number:"SLIDE 02", title:"The Story So Far",
+            canvasTitle:"Course Progression", hint:"Each step: same idea, bigger scale",
+            overlay:"1 neuron → 56,714 weights",
+            content:`<p class="slide-text">Last session we built a <strong>Perceptron</strong> — the simplest neural network possible. One neuron. 3 inputs. <code>weights × inputs → sum → sign() → +1 or −1</code>.</p>
+            <p class="slide-text">It learned to classify university admissions from exam scores. It learned to paint shapes based on mouse position. But it could only draw <em>straight lines</em>. Anything curved or enclosed — it failed.</p>
+            <div class="info-grid">
+                <div class="info-card" style="border-color:var(--accent-green);"><h5 style="color:var(--accent-green)">✓ SESSION 1 &middot; PERCEPTRON</h5><p>1 neuron, 3 weights. Straight lines only.</p></div>
+                <div class="info-card" style="border-color:var(--accent-green);"><h5 style="color:var(--accent-green)">✓ SESSION 2 &middot; SHAPE PAINTER</h5><p>Applied the perceptron. Saw the limitation.</p></div>
+                <div class="info-card" style="border-color:var(--accent-purple); background:rgba(139,92,246,.05);"><h5 style="color:var(--accent-purple)">← TODAY &middot; CNN</h5><p>7 layers, 56,714 weights. Recognizes handwriting.</p></div>
+                <div class="info-card"><h5>NEXT &middot; NEUROEVOLUTION</h5><p>Evolve NN weights with a genetic algorithm.</p></div>
+            </div>`,
+            drawFn:"drawStoryTimeline"
+        },
+        {
+            number:"SLIDE 03", title:"What Is a CNN?",
+            canvasTitle:"Hierarchical Feature Learning", hint:"Pixels → edges → shapes → digit",
+            overlay:"CNN = Convolutional Neural Network",
+            content:`<p class="slide-text"><strong>CNN = Convolutional Neural Network.</strong> A neural network specially designed for images.</p>
+            <p class="slide-text">A regular neural network sees 784 individual pixels. It doesn't know that pixel 15 is <em>next to</em> pixel 16 — it sees a flat list of numbers. A CNN uses <strong>filters</strong> that slide across the image looking for local patterns: edges, curves, corners. It understands that pixels next to each other matter.</p>
+            <div class="highlight-box"><h4>How your brain sees a digit</h4><p>First you see <strong>lines and edges</strong>. Then <strong>shapes made of edges</strong> — curves, corners, loops. Then you recognize the <strong>number</strong>. A CNN works the same way. This is called <em>hierarchical feature learning</em>.</p></div>
+            <div class="info-grid">
+                <div class="info-card"><h5>LAYER 1</h5><p>Finds raw <strong>edges</strong>.</p></div>
+                <div class="info-card"><h5>LAYER 2</h5><p>Finds <strong>shapes</strong> made of edges.</p></div>
+                <div class="info-card"><h5>LAYERS 3-4</h5><p>Reasons about <strong>features</strong>.</p></div>
+                <div class="info-card"><h5>LAYER 5</h5><p>Picks the <strong>digit</strong>.</p></div>
+            </div>`,
+            drawFn:"drawHierarchy"
+        },
+        {
+            number:"SLIDE 04", title:"What Is TensorFlow?",
+            canvasTitle:"Numbers Flowing Through a Network", hint:"Watch tensors flow between layers",
+            overlay:"TensorFlow = tensors + flow",
+            content:`<p class="slide-text"><strong>TensorFlow</strong> is Google's open-source machine learning library. It powers Google Search, Photos, Translate, Gmail spam filters, YouTube recommendations, and Waymo self-driving cars.</p>
+            <p class="slide-text"><strong>TensorFlow.js</strong> is the JavaScript version. Same engine, runs in your browser. No installation. No Python. No server. Just a <code>&lt;script&gt;</code> tag.</p>
+            <div class="info-grid">
+                <div class="info-card"><h5>TENSOR</h5><p>A multi-dimensional array of numbers.</p></div>
+                <div class="info-card"><h5>FLOW</h5><p>Data flows through a network of operations, layer by layer.</p></div>
+            </div>
+            <div class="highlight-box"><h4>What it gives us</h4><p>Pre-built layer types (<code>conv2d</code>, <code>dense</code>), automatic backpropagation, GPU acceleration (100× faster), <code>model.fit()</code> and <code>model.predict()</code>. Without it, we'd write thousands of lines of calculus. With it, the CNN is ~20 lines.</p></div>`,
+            drawFn:"drawTensorFlow"
+        },
+        {
+            number:"SLIDE 05", title:"What Is a Tensor?",
+            canvasTitle:"0D, 1D, 2D, 4D Tensors", hint:"A tensor is just a container for numbers",
+            overlay:"Scalar → Vector → Matrix → Batch of images",
+            content:`<p class="slide-text">The library is called Tensor-<em>Flow</em>. So what's a <strong>Tensor</strong>? A tensor is just a container for numbers — but it can hold them in different shapes.</p>
+            <div class="code-block"><pre><span class="cm">// 0D — a single number</span>
+tf.<span class="fn">scalar</span>(<span class="num">42</span>)
+
+<span class="cm">// 1D — a list of numbers</span>
+tf.<span class="fn">tensor1d</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>])
+
+<span class="cm">// 2D — a grid (like a grayscale image)</span>
+tf.<span class="fn">tensor2d</span>([[<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>]])
+
+<span class="cm">// 4D — a batch of images (our CNN input)</span>
+tf.<span class="fn">tensor4d</span>(pixels, [<span class="num">1</span>, <span class="num">28</span>, <span class="num">28</span>, <span class="num">1</span>])
+<span class="cm">// 1 image, 28 wide, 28 tall, 1 color channel</span></pre></div>
+            <div class="highlight-box"><h4>Why not use normal JS arrays?</h4><p>Tensors live on the <strong>GPU</strong> — 100× faster for matrix math. TensorFlow can only do its magic on tensors, not on regular arrays.</p></div>`,
+            drawFn:"drawTensorShapes"
+        },
+        {
+            number:"SLIDE 06", title:"Step 1: The Assembly Line",
+            canvasTitle:"tf.sequential() — the empty conveyor", hint:"Data enters left, exits right",
+            overlay:"Pixels in → 7 stations → prediction out",
+            content:`<div class="code-block"><pre>model = tf.<span class="fn">sequential</span>();</pre></div>
+            <p class="slide-text">A <strong>sequential</strong> model is one where data flows in <em>one direction only</em>. Think of a car factory assembly line:</p>
+            <p class="slide-text">Raw steel enters the front door. Station 1 bends it. Station 2 welds. Station 3 paints. Station 4 installs the engine. A finished car drives out the back. Data never goes backward. It never skips a step.</p>
+            <div class="highlight-box"><h4>In our case</h4><p>Raw pixels enter → <strong>7 stations</strong> transform them → a digit prediction comes out. This line creates an empty assembly line. Next we add the stations (layers) one by one with <code>model.add()</code>.</p></div>`,
+            drawFn:"drawAssemblyLine"
+        },
+        {
+            number:"SLIDE 07", title:"Station 1: The First Magnifying Glass",
+            canvasTitle:"Conv2D — a 3×3 filter slides across", hint:"Watch the kernel scan the image",
+            overlay:"Input 28×28×1  →  Output 26×26×16",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">conv2d</span>({
+  inputShape: [<span class="num">28</span>, <span class="num">28</span>, <span class="num">1</span>],
+  kernelSize: <span class="num">3</span>,
+  filters: <span class="num">16</span>,
+  activation: <span class="str">"relu"</span>
+}));</pre></div>
+            <p class="slide-text"><strong>The toilet-paper-tube analogy.</strong> Imagine looking at a giant painting through a toilet paper tube. You can't see the whole picture, but as you slide the tube across, you spot things: a silver line (a bumper), a black curve (a tire), a sharp corner (a window edge).</p>
+            <p class="slide-text">A convolutional filter is that tube — a tiny <strong>3×3 window</strong> that slides across the entire image. At each position it asks: "does this patch look like the edge I'm searching for?"</p>
+            <div class="info-grid">
+                <div class="info-card"><h5>kernelSize: 3</h5><p>My magnifying glass is 3×3 pixels.</p></div>
+                <div class="info-card"><h5>filters: 16</h5><p>16 different tubes — 16 different patterns.</p></div>
+            </div>`,
+            drawFn:"drawConvolution"
+        },
+        {
+            number:"SLIDE 08", title:'What Is activation: "relu"?',
+            canvasTitle:"ReLU vs Sigmoid vs Softmax", hint:"Three ways to squash a number",
+            overlay:"Activation = the neuron's firing rule",
+            content:`<p class="slide-text">Remember our perceptron's activation function? <code>sign()</code> → positive = +1, negative = −1. <strong>ReLU</strong> is the modern upgrade. It stands for <em>Rectified Linear Unit</em>.</p>
+            <div class="info-grid">
+                <div class="info-card" style="border-left:3px solid var(--accent-green);"><h5 style="color:var(--accent-green)">ReLU</h5><p>Negative → 0. Positive → pass through. Used in hidden layers.</p></div>
+                <div class="info-card" style="border-left:3px solid var(--accent-orange);"><h5 style="color:var(--accent-orange)">SIGMOID</h5><p>Squash to 0–1. Used for yes/no probability.</p></div>
+                <div class="info-card" style="border-left:3px solid var(--accent-red);"><h5 style="color:var(--accent-red)">SOFTMAX</h5><p>Outputs share a pie that sums to 100%. Used in the final layer.</p></div>
+            </div>
+            <div class="highlight-box"><h4>Why ReLU?</h4><p>Lightning fast. If a neuron is looking for a loop and doesn't find one, the math goes negative — ReLU zeroes it out and "turns off" that neuron for this input.</p></div>`,
+            drawFn:"drawActivations"
+        },
+        {
+            number:"SLIDE 09", title:"Station 2: The Shrink Ray",
+            canvasTitle:"MaxPooling — keep the brightest per 2×2", hint:"Half the size, same meaning",
+            overlay:"26×26×16  →  13×13×16",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">maxPooling2d</span>({
+  poolSize: <span class="num">2</span>, strides: <span class="num">2</span>
+}));</pre></div>
+            <p class="slide-text">For each 2×2 block of pixels: find the <strong>brightest</strong> pixel, keep it, delete the other three. The image shrinks by 50%.</p>
+            <div class="info-grid">
+                <div class="info-card"><h5>1. SPEED</h5><p>Fewer pixels = faster compute. The next conv layer processes 4× less data.</p></div>
+                <div class="info-card"><h5>2. FOCUS</h5><p>Forces the network to care about <em>what</em> features exist, not exactly <em>where</em>.</p></div>
+            </div>
+            <div class="highlight-box"><h4>Analogy</h4><p>Like squinting your eyes. Or reading a summary instead of a full book. You lose tiny details but keep the important parts. A "3" is still a "3" whether it's shifted 2 pixels to the left.</p></div>`,
+            drawFn:"drawMaxPool"
+        },
+        {
+            number:"SLIDE 10", title:"Stations 3-4: The Detective",
+            canvasTitle:"Deeper Conv + Pool", hint:"More filters, richer features",
+            overlay:"13×13×16 → 11×11×32 → 5×5×32",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">conv2d</span>({
+  kernelSize: <span class="num">3</span>, filters: <span class="num">32</span>, activation: <span class="str">"relu"</span>
+}));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">maxPooling2d</span>({ poolSize: <span class="num">2</span>, strides: <span class="num">2</span> }));</pre></div>
+            <p class="slide-text"><strong>Same pattern, one level deeper.</strong> Layer 1 found raw edges: "a horizontal line here, a curve there." Layer 3 is the <em>detective</em> that combines them:</p>
+            <p class="slide-text">"I see a vertical line AND a horizontal line meeting → that's a corner." "I see a curve looping back on itself → part of a 0, 6, or 9." "I see a straight vertical line with a hook → could be a 1 or 7."</p>
+            <div class="highlight-box"><h4>Why 32 filters this time?</h4><p>There are far more complex shapes (loops, intersections, hooks, T-junctions) than there are basic edges. More filters = more patterns we can detect.</p></div>`,
+            drawFn:"drawDeepConv"
+        },
+        {
+            number:"SLIDE 11", title:"Station 5: The Bridge",
+            canvasTitle:"Flatten — unroll the grid", hint:"2D grid → 1D list",
+            overlay:"5×5×32 grid → 800 numbers",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">flatten</span>());</pre></div>
+            <p class="slide-text">Convolutional layers think in 2D grids. <strong>Dense layers</strong> (the classic neural network) only understand 1D lists. Flatten bridges the gap.</p>
+            <p class="slide-text">It takes the 5×5×32 cube and unrolls it into <strong>800 numbers</strong> in a row. No math happens. No learning happens. It just changes the shape.</p>
+            <div class="highlight-box"><h4>Analogy</h4><p>You have a Sudoku board (a 2D grid). You want to read it to a friend over the phone. You can't text them a grid — so you read it left-to-right, top-to-bottom, as one long sentence of numbers.</p></div>`,
+            drawFn:"drawFlatten"
+        },
+        {
+            number:"SLIDE 12", title:"Station 6: The Brain",
+            canvasTitle:"Dense 64 — fully connected", hint:"Every input touches every neuron",
+            overlay:"800 → 64   (51,264 weights)",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">dense</span>({
+  units: <span class="num">64</span>, activation: <span class="str">"relu"</span>
+}));</pre></div>
+            <p class="slide-text"><strong>This IS the classic neural network.</strong> 64 neurons. Every one of those 800 numbers from the Flatten layer connects to <em>all</em> 64 neurons. That's 800 × 64 = <strong>51,200 connections</strong> (plus 64 biases = 51,264 weights).</p>
+            <p class="slide-text">Same idea as our perceptron: <code>inputs × weights → sum → activation → output</code>. But instead of 1 neuron with 3 inputs, it's 64 neurons each with 800 inputs. Same formula, much bigger.</p>
+            <div class="highlight-box"><h4>What these neurons do</h4><p>They look at the shape features the conv layers extracted and try to figure out which digit those features represent. ReLU zeroes out anything unhelpful.</p></div>`,
+            drawFn:"drawDense64"
+        },
+        {
+            number:"SLIDE 13", title:"Station 7: The Decision Room",
+            canvasTitle:"Dense 10 + Softmax", hint:"10 neurons — one per digit",
+            overlay:"64 → 10 probabilities that sum to 100%",
+            content:`<div class="code-block"><pre>model.<span class="fn">add</span>(tf.layers.<span class="fn">dense</span>({
+  units: <span class="num">10</span>, activation: <span class="str">"softmax"</span>
+}));</pre></div>
+            <p class="slide-text"><strong>One neuron per digit.</strong> Neuron 0 asks "how much does this look like a 0?". Neuron 1 asks about 1. And so on through 9.</p>
+            <p class="slide-text">Each neuron outputs a raw score. But raw scores are meaningless numbers. <strong>Softmax</strong> forces all 10 to share a pie that sums to 100%:</p>
+            <div class="code-block"><pre><span class="cm">// Raw scores → softmax → probabilities</span>
+Neuron <span class="num">3</span>: <span class="num">45</span>  <span class="cm">→ 80.2%  (winner)</span>
+Neuron <span class="num">8</span>: <span class="num">12</span>  <span class="cm">→ 10.1%</span>
+Neuron <span class="num">0</span>:  <span class="num">3</span>  <span class="cm">→  2.3%</span>
+<span class="cm">... (all sum to 100%)</span></pre></div>
+            <div class="highlight-box"><h4>The output IS a probability</h4><p>The highest percentage is our answer. That's what powers the green bar chart in the demo.</p></div>`,
+            drawFn:"drawSoftmax"
+        },
+        {
+            number:"SLIDE 14", title:"Hiring the Teacher",
+            canvasTitle:"Loss + Optimizer", hint:"How the network learns",
+            overlay:"compile() sets up the learning system",
+            content:`<div class="code-block"><pre>model.<span class="fn">compile</span>({
+  optimizer: <span class="str">"adam"</span>,
+  loss: <span class="str">"categoricalCrossentropy"</span>,
+  metrics: [<span class="str">"accuracy"</span>]
+});</pre></div>
+            <p class="slide-text">Building a brain doesn't mean it knows how to learn. <code>compile()</code> sets up the learning system.</p>
+            <div class="info-grid">
+                <div class="info-card" style="border-left:3px solid var(--accent-red);"><h5 style="color:var(--accent-red)">LOSS — THE GRADING RUBRIC</h5><p><strong>categoricalCrossentropy</strong> measures <em>exactly</em> how wrong the AI's guess was compared to the answer key.</p></div>
+                <div class="info-card" style="border-left:3px solid var(--accent-green);"><h5 style="color:var(--accent-green)">OPTIMIZER — THE TEACHER</h5><p><strong>adam</strong> reaches inside the network and tweaks the 56,714 weights to reduce the loss.</p></div>
+            </div>
+            <div class="highlight-box"><h4>Same loop as the perceptron</h4><p><code>error = desired − guess → adjust weights</code>. Adam just does it smarter — with momentum and adaptive learning rates per weight.</p></div>`,
+            drawFn:"drawCompile"
+        },
+        {
+            number:"SLIDE 15", title:"Going to School: model.fit()",
+            canvasTitle:"10 epochs × 15,000 images", hint:"Accuracy climbs every pass",
+            overlay:"150,000 learning steps in ~60 seconds",
+            content:`<div class="code-block"><pre><span class="kw">await</span> model.<span class="fn">fit</span>(trainImages, trainLabels, {
+  epochs: <span class="num">10</span>,
+  batchSize: <span class="num">128</span>,
+  validationData: [testImages, testLabels],
+  callbacks: { onEpochEnd: (e, logs) =&gt; {
+    epoch = e + <span class="num">1</span>;
+    accuracy = logs.val_acc;
+  }}
+});</pre></div>
+            <div class="info-grid">
+                <div class="info-card"><h5>EPOCHS: 10</h5><p>Read the textbook 10 times cover-to-cover.</p></div>
+                <div class="info-card"><h5>BATCH: 128</h5><p>Show 128 flashcards. Guess → grade → adjust. Repeat.</p></div>
+                <div class="info-card"><h5>VALIDATION</h5><p>1,000 unseen images. A pop quiz to catch memorization.</p></div>
+                <div class="info-card"><h5>CALLBACK</h5><p>After each epoch we save accuracy for the UI.</p></div>
+            </div>
+            <div class="highlight-box"><h4>The big number</h4><p>This one function adjusts 56,714 weights by showing the network 15,000 images × 10 times = <strong>150,000 learning steps</strong>.</p></div>`,
+            drawFn:"drawTraining"
+        },
+        {
+            number:"SLIDE 16", title:"The Moment of Truth",
+            canvasTitle:"classifyDrawing() — live inference", hint:"784 pixels through 7 layers in ~1ms",
+            overlay:"Your drawing → tensor → probabilities",
+            content:`<div class="code-block"><pre><span class="cm">// Step 1: extract pixels (standard JS)</span>
+<span class="kw">let</span> imgData = ctx.<span class="fn">getImageData</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">28</span>,<span class="num">28</span>);
+<span class="kw">let</span> pixels = <span class="kw">new</span> <span class="fn">Float32Array</span>(<span class="num">784</span>);
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">784</span>; i++)
+  pixels[i] = imgData.data[i*<span class="num">4</span>] / <span class="num">255.0</span>;
+
+<span class="cm">// Step 2: AI prediction</span>
+tf.<span class="fn">tidy</span>(() =&gt; {
+  <span class="kw">let</span> tensor = tf.<span class="fn">tensor4d</span>(pixels, [<span class="num">1</span>,<span class="num">28</span>,<span class="num">28</span>,<span class="num">1</span>]);
+  <span class="kw">let</span> probs = model.<span class="fn">predict</span>(tensor).<span class="fn">dataSync</span>();
+});</pre></div>
+            <div class="info-grid">
+                <div class="info-card"><h5>/ 255.0</h5><p>Normalize pixel brightness to 0.0–1.0 (what the net was trained on).</p></div>
+                <div class="info-card"><h5>tf.tidy()</h5><p>Garbage-collects GPU tensors. Without it, the browser crashes in seconds.</p></div>
+                <div class="info-card"><h5>model.predict()</h5><p>784 pixels fly through all 7 layers in about 1 millisecond.</p></div>
+                <div class="info-card"><h5>dataSync()</h5><p>Pulls the 10 probabilities off the GPU into regular JS.</p></div>
+            </div>`,
+            drawFn:"drawInference"
+        },
+        {
+            number:"SLIDE 17", title:"The Full Picture: 56,714 Parameters",
+            canvasTitle:"Every layer, every weight", hint:"Where the learnable numbers live",
+            overlay:"7 layers · 10 classes · ~97% accuracy",
+            content:`<p class="slide-text">Here's everything we built, end to end. Notice that <strong>Pool</strong> and <strong>Flatten</strong> have <em>zero</em> learnable weights — they just reshape data. All the learning happens in the Conv and Dense layers.</p>
+            <p class="slide-text">Also notice that the biggest chunk of weights — <strong>51,264</strong> of them — lives in the Dense-64 layer, not the convolutional layers. That's the classic "fully connected" tax.</p>
+            <div class="highlight-box"><h4>Why so few weights per conv layer?</h4><p>A 3×3 filter is only 9 weights. 16 filters × 9 = 144, plus 16 biases = <strong>160</strong>. A convolutional filter is <em>reused</em> at every position on the image — that's why CNNs are so efficient for images.</p></div>`,
+            drawFn:"drawParamTable"
+        },
+        {
+            number:"SLIDE 18", title:"Let's Build It",
+            canvasTitle:"The roadmap", hint:"From starter file to working CNN in class",
+            overlay:"From 784 raw pixels to a prediction — built by you",
+            content:`<p class="slide-text">You now know every piece. In class we'll write the live-code sections of the starter file together.</p>
+            <div class="code-block"><pre><span class="cm">// The whole CNN, in ~20 lines</span>
+model = tf.<span class="fn">sequential</span>();
+model.<span class="fn">add</span>(tf.layers.<span class="fn">conv2d</span>({ inputShape:[<span class="num">28</span>,<span class="num">28</span>,<span class="num">1</span>], kernelSize:<span class="num">3</span>, filters:<span class="num">16</span>, activation:<span class="str">"relu"</span> }));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">maxPooling2d</span>({ poolSize:<span class="num">2</span>, strides:<span class="num">2</span> }));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">conv2d</span>({ kernelSize:<span class="num">3</span>, filters:<span class="num">32</span>, activation:<span class="str">"relu"</span> }));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">maxPooling2d</span>({ poolSize:<span class="num">2</span>, strides:<span class="num">2</span> }));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">flatten</span>());
+model.<span class="fn">add</span>(tf.layers.<span class="fn">dense</span>({ units:<span class="num">64</span>, activation:<span class="str">"relu"</span> }));
+model.<span class="fn">add</span>(tf.layers.<span class="fn">dense</span>({ units:<span class="num">10</span>, activation:<span class="str">"softmax"</span> }));
+model.<span class="fn">compile</span>({ optimizer:<span class="str">"adam"</span>, loss:<span class="str">"categoricalCrossentropy"</span>, metrics:[<span class="str">"accuracy"</span>] });</pre></div>
+            <div class="highlight-box"><h4>Press ENTER and watch</h4><p>Train. Draw digits. The wow moment. From 784 raw pixels to a digit prediction, in real time — built by you.</p></div>`,
+            drawFn:"drawRoadmap"
+        }
+    ];
+
+    // ============ STATE ============
+    let currentSlide = 0;
+    let frame = 0;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    // ============ INIT ============
+    function init() { resize(); updateUI(); generateDots(); animate(); }
+    function resize() {
+        const r = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+        canvas.style.width = r.width + 'px'; canvas.style.height = r.height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        W = r.width; H = r.height;
+    }
+    window.addEventListener('resize', resize);
+
+    // ============ NAV ============
+    function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; frame = 0; updateUI(); } }
+    function prevSlide() { if (currentSlide > 0) { currentSlide--; frame = 0; updateUI(); } }
+    function goToSlide(i) { currentSlide = i; frame = 0; updateUI(); }
+    function updateUI() {
+        const s = slides[currentSlide];
+        document.getElementById('slideNumber').textContent = s.number;
+        document.getElementById('slideTitle').textContent = s.title;
+        document.getElementById('slideContent').innerHTML = s.content;
+        document.getElementById('canvasTitle').textContent = s.canvasTitle;
+        document.getElementById('canvasHint').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>${s.hint}`;
+        document.getElementById('overlayText').textContent = s.overlay;
+        document.getElementById('progressText').textContent = `${currentSlide + 1} / ${slides.length}`;
+        document.getElementById('progressFill').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+        document.getElementById('btnPrev').disabled = currentSlide === 0;
+        document.getElementById('btnNext').disabled = currentSlide === slides.length - 1;
+        document.querySelectorAll('.slide-dot').forEach((d, i) => { d.classList.remove('active', 'completed'); if (i === currentSlide) d.classList.add('active'); else if (i < currentSlide) d.classList.add('completed'); });
+    }
+    function generateDots() { const c = document.getElementById('slideDots'); c.innerHTML = ''; slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'slide-dot' + (i === 0 ? ' active' : ''); d.onclick = () => goToSlide(i); c.appendChild(d); }); }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    // ============ HELPERS ============
+    function clearCanvas(bg = '#0f172a') { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+    function mapVal(v, a1, a2, b1, b2) { return b1 + ((v - a1) / (a2 - a1)) * (b2 - b1); }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+    function updateStats(layer, shape, status) {
+        document.getElementById('statLayer').textContent = layer;
+        document.getElementById('statShape').textContent = shape;
+        document.getElementById('statStatus').textContent = status;
+    }
+    function drawDigit(grid, x, y, cellSize, tint) {
+        tint = tint || [255,255,255];
+        for (let r=0; r<grid.length; r++) {
+            for (let c=0; c<grid[0].length; c++) {
+                const v = grid[r][c];
+                if (v > 0.01) {
+                    ctx.fillStyle = `rgba(${tint[0]},${tint[1]},${tint[2]},${v})`;
+                    ctx.fillRect(x + c*cellSize, y + r*cellSize, cellSize, cellSize);
+                }
+            }
+        }
+    }
+    function drawGridLines(x, y, rows, cols, cellSize, color) {
+        ctx.strokeStyle = color; ctx.lineWidth = 0.5;
+        for (let i=0; i<=rows; i++) { ctx.beginPath(); ctx.moveTo(x, y+i*cellSize); ctx.lineTo(x+cols*cellSize, y+i*cellSize); ctx.stroke(); }
+        for (let i=0; i<=cols; i++) { ctx.beginPath(); ctx.moveTo(x+i*cellSize, y); ctx.lineTo(x+i*cellSize, y+rows*cellSize); ctx.stroke(); }
+    }
+    function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.arcTo(x+w, y, x+w, y+h, r);
+        ctx.arcTo(x+w, y+h, x, y+h, r);
+        ctx.arcTo(x, y+h, x, y, r);
+        ctx.arcTo(x, y, x+w, y, r);
+        ctx.closePath();
+    }
+
+    // ============ SLIDE 01: HERO PIPELINE ============
+    function drawPipelineHero() {
+        clearCanvas(); frame++;
+        const t = (frame % 300) / 300;
+        const stepW = W / 4;
+
+        // Step labels
+        const labels = ['1. Draw', '2. Shrink', '3. CNN', '4. Predict'];
+        const colors = ['#3b82f6', '#06b6d4', '#8b5cf6', '#10b981'];
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.font = '600 11px JetBrains Mono, monospace';
+        for (let i=0; i<4; i++) {
+            ctx.fillStyle = colors[i];
+            ctx.fillText(labels[i], stepW*i + stepW/2, 16);
+        }
+
+        // Step 1: big digit "4" drawing
+        const boxSize = Math.min(stepW*0.7, H*0.45);
+        const bx = stepW*0 + (stepW-boxSize)/2, by = H*0.3;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = 'rgba(59,130,246,0.5)'; ctx.lineWidth = 2;
+        roundRect(bx, by, boxSize, boxSize, 10); ctx.fill(); ctx.stroke();
+        // Hand-drawn 4
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(8, boxSize*0.08); ctx.lineCap = 'round';
+        const cellS = boxSize/28;
+        ctx.beginPath();
+        ctx.moveTo(bx + cellS*10, by + cellS*5);
+        ctx.lineTo(bx + cellS*8, by + cellS*17);
+        ctx.lineTo(bx + cellS*20, by + cellS*17);
+        ctx.moveTo(bx + cellS*17, by + cellS*4);
+        ctx.lineTo(bx + cellS*17, by + cellS*23);
+        ctx.stroke();
+
+        // Step 2: 28x28 pixel preview
+        const pxSize = Math.min(stepW*0.55, H*0.35);
+        const px = stepW*1 + (stepW-pxSize)/2, py = H*0.35;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = 'rgba(6,182,212,0.5)'; ctx.lineWidth = 2;
+        roundRect(px, py, pxSize, pxSize, 6); ctx.fill(); ctx.stroke();
+        const cs = pxSize/28;
+        drawDigit(DIGIT_4, px, py, cs);
+        ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText('28 × 28', px + pxSize/2, py + pxSize + 8);
+
+        // Step 3: CNN layers stack
+        const lx = stepW*2 + stepW*0.2, ly = H*0.25, lw = stepW*0.6, lh = H*0.5;
+        const layerCount = 7;
+        const layerColors = ['#3b82f6','#f59e0b','#3b82f6','#f59e0b','#a855f7','#10b981','#ef4444'];
+        for (let i=0; i<layerCount; i++) {
+            const lyi = ly + (lh/layerCount)*i;
+            const alpha = t > i/layerCount ? 0.9 : 0.3;
+            ctx.fillStyle = layerColors[i] + Math.round(alpha*200).toString(16).padStart(2,'0');
+            ctx.strokeStyle = layerColors[i];
+            ctx.lineWidth = 1;
+            roundRect(lx, lyi+2, lw, lh/layerCount-4, 3); ctx.fill(); ctx.stroke();
+        }
+        ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillText('7 layers', lx + lw/2, ly + lh + 8);
+
+        // Animated pulse traveling through stack
+        const pulsei = Math.floor(t * layerCount) % layerCount;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(lx + lw + 8, ly + (lh/layerCount)*pulsei + (lh/layerCount)/2, 3, 0, TWO_PI);
+        ctx.fill();
+
+        // Step 4: probability bars
+        const prx = stepW*3 + stepW*0.1, pry = H*0.25, prw = stepW*0.8;
+        const probs = [0.001, 0.002, 0.01, 0.008, 0.94, 0.003, 0.004, 0.012, 0.015, 0.005];
+        const barH = (H*0.5)/10;
+        for (let i=0; i<10; i++) {
+            const y = pry + i*barH;
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(prx + 18, y+2, prw-40, barH-4);
+            ctx.fillStyle = i === 4 ? '#10b981' : 'rgba(139,92,246,0.5)';
+            const animProbs = t > 0.7 ? probs[i] : probs[i] * Math.max(0,(t-0.5)/0.2);
+            ctx.fillRect(prx + 18, y+2, (prw-40)*animProbs, barH-4);
+            ctx.fillStyle = i === 4 ? '#10b981' : 'rgba(255,255,255,0.5)';
+            ctx.textAlign = 'right'; ctx.font = '600 9px JetBrains Mono, monospace';
+            ctx.fillText(i, prx + 14, y + barH/2 + 3);
+        }
+        ctx.textAlign = 'center'; ctx.font = '700 11px JetBrains Mono, monospace';
+        ctx.fillStyle = '#10b981';
+        ctx.fillText('→ "4"', prx + prw/2, pry + H*0.5 + 12);
+
+        // Flowing arrows between steps
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+        for (let i=0; i<3; i++) {
+            const ax = stepW*(i+1) - 10, ay = H*0.55;
+            ctx.beginPath(); ctx.moveTo(ax-10, ay); ctx.lineTo(ax+10, ay); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(ax+10, ay); ctx.lineTo(ax+5, ay-4); ctx.lineTo(ax+5, ay+4); ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fill();
+        }
+
+        updateStats('Pipeline', '4 stages', 'Overview');
+    }
+
+    // ============ SLIDE 02: STORY TIMELINE ============
+    function drawStoryTimeline() {
+        clearCanvas(); frame++;
+        const cx = W/2, cy = H/2;
+        const nodes = [
+            { x: W*0.14, label:'Perceptron', sub:'1 neuron · 3 weights', color:'#10b981', done:true, detail:'straight lines' },
+            { x: W*0.38, label:'Shape Painter', sub:'applied perceptron', color:'#10b981', done:true, detail:'saw limits' },
+            { x: W*0.62, label:'CNN', sub:'7 layers · 56,714 w', color:'#8b5cf6', current:true, detail:'reads handwriting' },
+            { x: W*0.86, label:'Neuroevolution', sub:'evolve NN weights', color:'#64748b', future:true, detail:'coming soon' }
+        ];
+
+        // Connection line
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(nodes[0].x, cy); ctx.lineTo(nodes[nodes.length-1].x, cy); ctx.stroke();
+
+        // Progress on line
+        const prog = 0.5 + Math.sin(frame*0.03)*0.02;
+        const gradEnd = nodes[2].x;
+        ctx.strokeStyle = 'rgba(139,92,246,0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(nodes[0].x, cy); ctx.lineTo(gradEnd, cy); ctx.stroke();
+
+        // Nodes
+        nodes.forEach((n,i) => {
+            const r = n.current ? 32 : 26;
+            const pulse = n.current ? (Math.sin(frame*0.08)*0.3 + 0.7) : 1;
+
+            if (n.current) {
+                ctx.fillStyle = 'rgba(139,92,246,0.2)';
+                ctx.beginPath(); ctx.arc(n.x, cy, r+10+Math.sin(frame*0.1)*3, 0, TWO_PI); ctx.fill();
+            }
+
+            ctx.fillStyle = n.color + (n.future ? '40' : 'cc');
+            ctx.strokeStyle = n.color;
+            ctx.lineWidth = n.current ? 3 : 2;
+            ctx.beginPath(); ctx.arc(n.x, cy, r, 0, TWO_PI); ctx.fill(); ctx.stroke();
+
+            if (n.done) {
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(n.x-8, cy); ctx.lineTo(n.x-2, cy+6); ctx.lineTo(n.x+8, cy-6);
+                ctx.stroke();
+            }
+            if (n.current) {
+                ctx.fillStyle = '#fff'; ctx.font = '700 16px JetBrains Mono, monospace';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('★', n.x, cy);
+            }
+            if (n.future) {
+                ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '600 14px Inter, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('?', n.x, cy);
+            }
+
+            // Labels
+            ctx.fillStyle = n.current ? '#fff' : 'rgba(255,255,255,0.8)';
+            ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(n.label, n.x, cy + r + 10);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.fillText(n.sub, n.x, cy + r + 30);
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '400 10px Inter, sans-serif';
+            ctx.fillText(n.detail, n.x, cy + r + 46);
+
+            // Session labels above
+            const sessionLabels = ['SESSION 1','SESSION 2','TODAY','NEXT'];
+            ctx.fillStyle = n.current ? '#f59e0b' : (n.future ? 'rgba(255,255,255,0.25)' : '#10b981');
+            ctx.font = '600 10px JetBrains Mono, monospace';
+            ctx.fillText(sessionLabels[i], n.x, cy - r - 22);
+        });
+
+        // Core idea callout
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('same core idea: inputs × weights → sum → activation → output', W/2, H - 20);
+
+        updateStats('Progression', '1 → 7 layers', 'Chapter 7');
+    }
+
+    // ============ SLIDE 03: HIERARCHICAL FEATURES ============
+    function drawHierarchy() {
+        clearCanvas(); frame++;
+        const cols = 4;
+        const colW = W/cols;
+        const boxH = H*0.5;
+        const topY = H*0.25;
+        const labels = ['Pixels', 'Edges', 'Shapes', 'Digit'];
+        const descriptions = ['784 numbers', 'lines & curves', 'corners & loops', 'classification'];
+
+        for (let i=0; i<cols; i++) {
+            const cx = colW*i + colW/2;
+            const boxSize = Math.min(colW*0.7, boxH*0.9);
+            const bx = cx - boxSize/2, by = topY;
+
+            // Box
+            ctx.fillStyle = '#1e293b';
+            const colors = ['#64748b', '#3b82f6', '#8b5cf6', '#10b981'];
+            ctx.strokeStyle = colors[i]; ctx.lineWidth = 2;
+            roundRect(bx, by, boxSize, boxSize, 8); ctx.fill(); ctx.stroke();
+
+            if (i === 0) {
+                // Raw pixel grid — show the digit
+                const s = boxSize/28;
+                drawDigit(DIGIT_4, bx, by, s);
+            } else if (i === 1) {
+                // Edges — show line segments
+                ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+                const segs = [
+                    [bx+boxSize*0.3, by+boxSize*0.2, bx+boxSize*0.3, by+boxSize*0.6], // vertical
+                    [bx+boxSize*0.2, by+boxSize*0.6, bx+boxSize*0.75, by+boxSize*0.6], // horizontal
+                    [bx+boxSize*0.65, by+boxSize*0.2, bx+boxSize*0.65, by+boxSize*0.85], // vertical 2
+                    [bx+boxSize*0.15, by+boxSize*0.3, bx+boxSize*0.3, by+boxSize*0.45] // diagonal
+                ];
+                segs.forEach((s,j) => {
+                    const alpha = Math.abs(Math.sin(frame*0.04 + j*0.5))*0.5 + 0.5;
+                    ctx.strokeStyle = `rgba(96,165,250,${alpha})`;
+                    ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); ctx.stroke();
+                });
+            } else if (i === 2) {
+                // Shapes — show corners and angles
+                ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+                // Corner shape
+                ctx.beginPath();
+                ctx.moveTo(bx+boxSize*0.25, by+boxSize*0.25);
+                ctx.lineTo(bx+boxSize*0.25, by+boxSize*0.55);
+                ctx.lineTo(bx+boxSize*0.6, by+boxSize*0.55);
+                ctx.stroke();
+                // Another corner / T junction
+                ctx.beginPath();
+                ctx.moveTo(bx+boxSize*0.7, by+boxSize*0.25);
+                ctx.lineTo(bx+boxSize*0.7, by+boxSize*0.8);
+                ctx.stroke();
+                // Pulsing highlight at intersection
+                const pulse = Math.sin(frame*0.1)*0.3 + 0.7;
+                ctx.fillStyle = `rgba(167,139,250,${pulse})`;
+                ctx.beginPath(); ctx.arc(bx+boxSize*0.25, by+boxSize*0.55, 6, 0, TWO_PI); ctx.fill();
+                ctx.beginPath(); ctx.arc(bx+boxSize*0.6, by+boxSize*0.55, 6, 0, TWO_PI); ctx.fill();
+            } else if (i === 3) {
+                // Result — big "4"
+                ctx.fillStyle = '#10b981'; ctx.font = `700 ${boxSize*0.55}px Inter, sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('4', bx+boxSize/2, by+boxSize/2);
+                // 94% confidence badge
+                ctx.fillStyle = 'rgba(16,185,129,0.2)';
+                roundRect(bx+boxSize*0.55, by+boxSize*0.75, boxSize*0.35, 20, 10); ctx.fill();
+                ctx.fillStyle = '#10b981'; ctx.font = '700 11px JetBrains Mono, monospace';
+                ctx.fillText('94%', bx+boxSize*0.55+boxSize*0.175, by+boxSize*0.75+10);
+            }
+
+            // Labels
+            ctx.fillStyle = '#fff'; ctx.font = '700 14px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(labels[i], cx, by + boxSize + 16);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+            ctx.fillText(descriptions[i], cx, by + boxSize + 36);
+
+            // Arrow between boxes
+            if (i < cols-1) {
+                const ax = bx + boxSize + 6, ay = by + boxSize/2;
+                const aw = colW - boxSize - 12;
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + aw, ay); ctx.stroke();
+                // Arrow head
+                ctx.beginPath();
+                ctx.moveTo(ax+aw, ay); ctx.lineTo(ax+aw-5, ay-4); ctx.lineTo(ax+aw-5, ay+4); ctx.closePath();
+                ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fill();
+            }
+        }
+
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('hierarchical feature learning', W/2, H - 18);
+
+        updateStats('Hierarchy', 'low → high features', 'Feature learning');
+    }
+
+    // ============ SLIDE 04: TENSORFLOW ============
+    function drawTensorFlow() {
+        clearCanvas(); frame++;
+        const t = (frame % 240) / 240;
+
+        // Title area
+        ctx.fillStyle = '#f97316'; ctx.font = '700 22px Inter, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('TensorFlow.js', W/2, 28);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.fillText('numbers flowing through a network', W/2, 58);
+
+        // Nodes representing operations
+        const ny = H*0.55;
+        const nodes = [
+            { x: W*0.1, label:'input', color:'#3b82f6' },
+            { x: W*0.3, label:'conv2d', color:'#8b5cf6' },
+            { x: W*0.5, label:'maxPool', color:'#f59e0b' },
+            { x: W*0.7, label:'dense', color:'#06b6d4' },
+            { x: W*0.9, label:'softmax', color:'#10b981' }
+        ];
+
+        // Connections
+        for (let i=0; i<nodes.length-1; i++) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(nodes[i].x+18, ny); ctx.lineTo(nodes[i+1].x-18, ny); ctx.stroke();
+        }
+
+        // Flowing tensors (dots moving along connections)
+        for (let p=0; p<5; p++) {
+            const pt = (t + p*0.2) % 1;
+            const seg = Math.floor(pt * (nodes.length-1));
+            const segT = (pt * (nodes.length-1)) % 1;
+            if (seg < nodes.length-1) {
+                const x1 = nodes[seg].x+18, x2 = nodes[seg+1].x-18;
+                const px = x1 + (x2-x1)*segT;
+                ctx.fillStyle = `rgba(100,200,255,${0.8 - segT*0.3})`;
+                ctx.beginPath(); ctx.arc(px, ny, 4, 0, TWO_PI); ctx.fill();
+
+                // Trail
+                for (let tr=1; tr<5; tr++) {
+                    ctx.fillStyle = `rgba(100,200,255,${0.3 - tr*0.05})`;
+                    ctx.beginPath(); ctx.arc(px - tr*3, ny, 4-tr*0.5, 0, TWO_PI); ctx.fill();
+                }
+            }
+        }
+
+        // Draw nodes
+        nodes.forEach((n,i) => {
+            ctx.fillStyle = n.color + '33';
+            ctx.strokeStyle = n.color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(n.x, ny, 22, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = '600 10px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(n.label, n.x, ny);
+        });
+
+        // Labels below
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.textBaseline = 'top';
+        ctx.fillText('[1,28,28,1]', W*0.1, ny+32);
+        ctx.fillText('[1,26,26,16]', W*0.3, ny+32);
+        ctx.fillText('[1,13,13,16]', W*0.5, ny+32);
+        ctx.fillText('[1,64]', W*0.7, ny+32);
+        ctx.fillText('[1,10]', W*0.9, ny+32);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('TENSOR', W*0.1, ny+48);
+        ctx.fillText('TENSOR', W*0.3, ny+48);
+        ctx.fillText('TENSOR', W*0.5, ny+48);
+        ctx.fillText('TENSOR', W*0.7, ny+48);
+        ctx.fillText('TENSOR', W*0.9, ny+48);
+
+        // Bottom message
+        ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = 'italic 12px Inter, sans-serif';
+        ctx.fillText('Tensor + Flow = data flowing through a network', W/2, H - 48);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('powered by WebGL · 100× faster than CPU', W/2, H - 28);
+
+        updateStats('TensorFlow.js', 'WebGL backend', 'Flowing...');
+    }
+
+    // ============ SLIDE 05: TENSOR SHAPES ============
+    function drawTensorShapes() {
+        clearCanvas(); frame++;
+        const cols = 4;
+        const colW = W/cols;
+        const dims = [0, 1, 2, 4];
+        const labels = ['0D · scalar', '1D · vector', '2D · matrix', '4D · batch'];
+        const shapes = ['42', '[10, 20, 30, 40]', '[[1,2],[3,4]]', '[1, 28, 28, 1]'];
+        const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+
+        for (let i=0; i<cols; i++) {
+            const cx = colW*i + colW/2;
+            const boxSize = Math.min(colW*0.75, H*0.45);
+            const bx = cx - boxSize/2, by = H*0.18;
+
+            // Top label
+            ctx.fillStyle = colors[i]; ctx.font = '700 12px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(labels[i], cx, 16);
+
+            // Box
+            ctx.fillStyle = '#1e293b'; ctx.strokeStyle = colors[i] + '80'; ctx.lineWidth = 1.5;
+            roundRect(bx, by, boxSize, boxSize, 8); ctx.fill(); ctx.stroke();
+
+            if (i === 0) {
+                // 0D — single number in center
+                ctx.fillStyle = colors[i]; ctx.font = `700 ${boxSize*0.4}px JetBrains Mono, monospace`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                const pulse = Math.sin(frame*0.08)*0.2 + 0.8;
+                ctx.globalAlpha = pulse;
+                ctx.fillText('42', cx, by + boxSize/2);
+                ctx.globalAlpha = 1;
+            } else if (i === 1) {
+                // 1D — row of 4 cells
+                const n = 4;
+                const cellS = boxSize*0.18;
+                const totalW = cellS*n;
+                const startX = bx + (boxSize-totalW)/2;
+                const yy = by + boxSize/2 - cellS/2;
+                const vals = [10,20,30,40];
+                for (let k=0; k<n; k++) {
+                    const active = Math.floor((frame/20) % n) === k;
+                    ctx.fillStyle = active ? colors[i] : colors[i] + '44';
+                    roundRect(startX + k*cellS, yy, cellS-2, cellS, 3); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.font = '600 11px JetBrains Mono, monospace';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(vals[k], startX + k*cellS + cellS/2, yy + cellS/2);
+                }
+            } else if (i === 2) {
+                // 2D — 3x3 grid
+                const n = 3;
+                const cellS = boxSize*0.22;
+                const totalS = cellS*n;
+                const startX = bx + (boxSize-totalS)/2;
+                const startY = by + (boxSize-totalS)/2;
+                const vals = [[1,2,3],[4,5,6],[7,8,9]];
+                const active = Math.floor(frame/15) % 9;
+                for (let r=0; r<n; r++) for (let c=0; c<n; c++) {
+                    const idx = r*n+c;
+                    ctx.fillStyle = idx === active ? colors[i] : colors[i] + '33';
+                    roundRect(startX + c*cellS, startY + r*cellS, cellS-2, cellS-2, 3); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.font = '600 10px JetBrains Mono, monospace';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(vals[r][c], startX + c*cellS + cellS/2 - 1, startY + r*cellS + cellS/2 - 1);
+                }
+            } else {
+                // 4D — stacked image
+                const depth = 3;
+                const imgS = boxSize*0.52;
+                const baseX = bx + boxSize*0.22;
+                const baseY = by + boxSize*0.25;
+                const shift = 8;
+                for (let d=depth-1; d>=0; d--) {
+                    ctx.fillStyle = colors[i] + Math.round((30 + d*30)).toString(16).padStart(2,'0');
+                    ctx.strokeStyle = colors[i]; ctx.lineWidth = 1;
+                    roundRect(baseX + d*shift, baseY + d*shift, imgS, imgS, 4); ctx.fill(); ctx.stroke();
+                }
+                // Draw digit in top slice
+                drawDigit(DIGIT_4, baseX, baseY, imgS/28);
+                // Annotation
+                ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 9px JetBrains Mono, monospace';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillText('batch of images', cx, by + boxSize - 20);
+            }
+
+            // Shape annotation
+            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(shapes[i], cx, by + boxSize + 12);
+        }
+
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('a tensor is just a container for numbers, in N dimensions', W/2, H - 20);
+
+        updateStats('Tensor', '0D, 1D, 2D, 4D', 'Containers');
+    }
+
+    // ============ SLIDE 06: ASSEMBLY LINE ============
+    function drawAssemblyLine() {
+        clearCanvas(); frame++;
+        const t = (frame % 400) / 400;
+        const beltY = H*0.55, beltH = 50;
+
+        // Conveyor belt
+        ctx.fillStyle = '#1e293b';
+        roundRect(W*0.05, beltY, W*0.9, beltH, 8); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        roundRect(W*0.05, beltY, W*0.9, beltH, 8); ctx.stroke();
+
+        // Belt treads (animated)
+        for (let i=0; i<40; i++) {
+            const tx = W*0.05 + ((i*25 + frame*2) % (W*0.9));
+            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fillRect(tx, beltY + beltH - 8, 15, 4);
+        }
+
+        // 7 stations above the belt
+        const stations = [
+            { label:'Conv2D', sub:'16 filters', color:'#3b82f6' },
+            { label:'MaxPool', sub:'2×2', color:'#f59e0b' },
+            { label:'Conv2D', sub:'32 filters', color:'#3b82f6' },
+            { label:'MaxPool', sub:'2×2', color:'#f59e0b' },
+            { label:'Flatten', sub:'→ 800', color:'#8b5cf6' },
+            { label:'Dense', sub:'64 · relu', color:'#06b6d4' },
+            { label:'Dense', sub:'10 · softmax', color:'#ef4444' }
+        ];
+        const stW = W*0.85 / 7;
+        const stY = H*0.22, stH = H*0.25;
+        stations.forEach((s,i) => {
+            const sx = W*0.075 + stW*i + stW*0.1;
+            const sw = stW*0.8;
+            ctx.fillStyle = s.color + '22';
+            ctx.strokeStyle = s.color; ctx.lineWidth = 1.5;
+            roundRect(sx, stY, sw, stH, 6); ctx.fill(); ctx.stroke();
+
+            // Station number
+            ctx.fillStyle = s.color; ctx.font = '700 11px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(`#${i+1}`, sx + sw/2, stY + 8);
+
+            // Station label
+            ctx.fillStyle = '#fff'; ctx.font = '600 11px Inter, sans-serif';
+            ctx.fillText(s.label, sx + sw/2, stY + 28);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.fillText(s.sub, sx + sw/2, stY + 46);
+
+            // Connector line to belt
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(sx + sw/2, stY + stH); ctx.lineTo(sx + sw/2, beltY); ctx.stroke();
+        });
+
+        // Moving package (pixels traveling through belt)
+        const pkgX = W*0.05 + t * W*0.9;
+        const pkgStation = Math.floor(t * 7);
+        ctx.fillStyle = '#10b981';
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+        roundRect(pkgX - 16, beltY + 8, 32, 32, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 14px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(['4','4','4','4','4','4','4'][pkgStation] || '4', pkgX, beltY + 24);
+
+        // Entry and exit labels
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('PIXELS IN →', W*0.05, beltY - 8);
+        ctx.textAlign = 'right';
+        ctx.fillText('→ DIGIT OUT', W*0.95, beltY - 8);
+
+        // Bottom caption
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('model = tf.sequential()', W/2, beltY + beltH + 20);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.fillText('data never goes backward · never skips a step', W/2, H - 18);
+
+        updateStats('Sequential', '7 stations', 'Flowing');
+    }
+
+    // ============ SLIDE 07: CONVOLUTION ============
+    function drawConvolution() {
+        clearCanvas(); frame++;
+        // Input grid on left, kernel sliding, output on right
+        const gridSize = Math.min(H*0.7, W*0.35);
+        const cells = 14; // show 14x14 for legibility (half of 28 — same pattern)
+        const cs = gridSize / cells;
+        const leftX = W*0.08, leftY = H*0.2;
+        const rightX = W*0.6, rightY = H*0.2;
+
+        // Draw input grid (show the digit "4" scaled)
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(leftX, leftY, gridSize, gridSize);
+        // Sample digit pattern — use DIGIT_4 downsampled
+        for (let r=0; r<cells; r++) {
+            for (let c=0; c<cells; c++) {
+                const srcR = Math.floor(r*28/cells), srcC = Math.floor(c*28/cells);
+                const v = DIGIT_4[srcR][srcC];
+                if (v > 0.01) {
+                    ctx.fillStyle = `rgba(255,255,255,${v})`;
+                    ctx.fillRect(leftX + c*cs, leftY + r*cs, cs, cs);
+                }
+            }
+        }
+        drawGridLines(leftX, leftY, cells, cells, cs, 'rgba(255,255,255,0.05)');
+
+        // Sliding 3x3 kernel
+        const totalSteps = (cells-2) * (cells-2);
+        const step = Math.floor(frame/3) % totalSteps;
+        const kr = Math.floor(step / (cells-2));
+        const kc = step % (cells-2);
+        const kx = leftX + kc*cs, ky = leftY + kr*cs;
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(kx, ky, cs*3, cs*3);
+        ctx.fillStyle = 'rgba(16,185,129,0.15)';
+        ctx.fillRect(kx, ky, cs*3, cs*3);
+
+        // Labels for left
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('INPUT · 28×28', leftX + gridSize/2, leftY + gridSize + 8);
+        ctx.fillStyle = 'rgba(16,185,129,0.8)'; ctx.font = '600 10px JetBrains Mono, monospace';
+        ctx.fillText('3×3 kernel slides →', leftX + gridSize/2, leftY - 18);
+
+        // Center: show what the kernel is doing (small zoomed 3x3 and multiplication hint)
+        const midX = W*0.47, midY = H*0.4;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+        const zoomS = 18;
+        roundRect(midX - zoomS*1.5 - 4, midY - zoomS*1.5 - 4, zoomS*3+8, zoomS*3+8, 4); ctx.fill(); ctx.stroke();
+        for (let r=0; r<3; r++) {
+            for (let c=0; c<3; c++) {
+                const srcR = Math.floor((kr+r)*28/cells), srcC = Math.floor((kc+c)*28/cells);
+                const v = DIGIT_4[srcR] ? DIGIT_4[srcR][srcC] : 0;
+                ctx.fillStyle = `rgba(255,255,255,${v})`;
+                ctx.fillRect(midX - zoomS*1.5 + c*zoomS, midY - zoomS*1.5 + r*zoomS, zoomS, zoomS);
+                ctx.strokeStyle = 'rgba(16,185,129,0.3)';
+                ctx.strokeRect(midX - zoomS*1.5 + c*zoomS, midY - zoomS*1.5 + r*zoomS, zoomS, zoomS);
+            }
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('3×3 patch', midX, midY + zoomS*1.5 + 10);
+        ctx.fillStyle = 'rgba(16,185,129,0.8)'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.fillText('× filter weights = 1 activation', midX, midY + zoomS*1.5 + 26);
+
+        // Output grid on right
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(rightX, rightY, gridSize, gridSize);
+        const outCells = cells - 2;
+        const ocs = gridSize / outCells;
+        // Fill output progressively based on position
+        for (let r=0; r<outCells; r++) {
+            for (let c=0; c<outCells; c++) {
+                const idx = r*outCells + c;
+                if (idx <= step) {
+                    // Simple activation value based on input patch intensity
+                    const srcR = Math.floor((r+1)*28/cells), srcC = Math.floor((c+1)*28/cells);
+                    const v = (DIGIT_4[srcR] && DIGIT_4[srcR][srcC]) ? DIGIT_4[srcR][srcC] : 0;
+                    // Edge-like response: pulse where there's contrast
+                    const prevR = Math.max(0, srcR-1);
+                    const vdiff = Math.abs(v - (DIGIT_4[prevR] ? DIGIT_4[prevR][srcC] : 0));
+                    const activation = Math.min(1, v*0.5 + vdiff*1.5);
+                    ctx.fillStyle = `rgba(139,92,246,${activation})`;
+                    ctx.fillRect(rightX + c*ocs, rightY + r*ocs, ocs, ocs);
+                }
+            }
+        }
+        drawGridLines(rightX, rightY, outCells, outCells, ocs, 'rgba(139,92,246,0.15)');
+
+        // Current output cell highlight
+        ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2;
+        ctx.strokeRect(rightX + kc*ocs, rightY + kr*ocs, ocs, ocs);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('OUTPUT · 26×26 (1 of 16)', rightX + gridSize/2, rightY + gridSize + 8);
+        ctx.fillStyle = 'rgba(139,92,246,0.8)'; ctx.font = '600 10px JetBrains Mono, monospace';
+        ctx.fillText('activation map', rightX + gridSize/2, rightY - 18);
+
+        // Arrow from left to right
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();
+        ctx.moveTo(leftX + gridSize + 12, leftY + gridSize/2);
+        ctx.lineTo(rightX - 12, rightY + gridSize/2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        updateStats('Conv2D', '28×28×1 → 26×26×16', `step ${step+1}/${totalSteps}`);
+    }
+
+    // ============ SLIDE 08: ACTIVATIONS ============
+    function drawActivations() {
+        clearCanvas(); frame++;
+        const cols = 3;
+        const colW = W/cols;
+        const plotTop = H*0.18, plotBot = H*0.78;
+        const plotH = plotBot - plotTop;
+
+        const activations = [
+            {
+                name:'ReLU', color:'#10b981',
+                fn: x => Math.max(0, x),
+                desc:'x if x>0, else 0',
+                use:'hidden layers'
+            },
+            {
+                name:'Sigmoid', color:'#f97316',
+                fn: x => 1/(1+Math.exp(-x)),
+                desc:'squashes to 0 – 1',
+                use:'binary output'
+            },
+            {
+                name:'Softmax', color:'#ef4444',
+                fn: null, // special
+                desc:'probabilities sum to 1',
+                use:'final classifier'
+            }
+        ];
+
+        for (let i=0; i<cols; i++) {
+            const a = activations[i];
+            const cx = colW*i + colW/2;
+            const plotL = colW*i + colW*0.12, plotR = colW*i + colW*0.88;
+            const plotW = plotR - plotL;
+            const midX = (plotL + plotR)/2, midY = (plotTop + plotBot)/2;
+
+            // Box / title
+            ctx.fillStyle = a.color; ctx.font = '700 14px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(a.name, cx, 18);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.fillText(a.desc, cx, 42);
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(plotL, midY); ctx.lineTo(plotR, midY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(midX, plotTop); ctx.lineTo(midX, plotBot); ctx.stroke();
+
+            // Axis labels
+            ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '500 9px JetBrains Mono, monospace';
+            ctx.fillText('−4', plotL, midY + 6);
+            ctx.fillText('+4', plotR, midY + 6);
+            if (i < 2) {
+                ctx.fillText('+1', midX - 16, plotTop);
+                ctx.fillText(i === 0 ? ' 0' : '-1', midX - 16, plotBot - 8);
+            }
+
+            if (i < 2) {
+                // Plot function
+                ctx.strokeStyle = a.color; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+                ctx.beginPath();
+                for (let px = plotL; px <= plotR; px += 2) {
+                    const xVal = mapVal(px, plotL, plotR, -4, 4);
+                    const yVal = a.fn(xVal);
+                    const yRange = i === 0 ? [0, 4] : [0, 1]; // ReLU unbounded visually
+                    const py = i === 0
+                        ? mapVal(Math.min(yVal, 3), 0, 3, midY, plotTop)
+                        : mapVal(yVal, 0, 1, plotBot, plotTop);
+                    if (px === plotL) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                // Animated marker
+                const t = Math.sin(frame*0.04) * 3;
+                const markerX = mapVal(t, -4, 4, plotL, plotR);
+                const markerYVal = a.fn(t);
+                const markerY = i === 0
+                    ? mapVal(Math.min(markerYVal, 3), 0, 3, midY, plotTop)
+                    : mapVal(markerYVal, 0, 1, plotBot, plotTop);
+                ctx.fillStyle = a.color;
+                ctx.beginPath(); ctx.arc(markerX, markerY, 5, 0, TWO_PI); ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+                ctx.fillText(`x=${t.toFixed(1)} → y=${markerYVal.toFixed(2)}`, cx, plotBot + 8);
+            } else {
+                // Softmax — show as 5 bars that sum to 1
+                const n = 5;
+                const rawScores = [];
+                const bw = plotW / n * 0.7;
+                for (let k=0; k<n; k++) {
+                    rawScores.push(1 + Math.sin(frame*0.03 + k*1.2) * 3);
+                }
+                // softmax
+                const exp = rawScores.map(v => Math.exp(v));
+                const sum = exp.reduce((a,b)=>a+b, 0);
+                const probs = exp.map(v => v/sum);
+                const barBase = plotBot - 10;
+                const maxBarH = plotH * 0.85;
+                for (let k=0; k<n; k++) {
+                    const bx = plotL + k*(plotW/n) + (plotW/n - bw)/2;
+                    const bh = maxBarH * probs[k];
+                    ctx.fillStyle = a.color + '66';
+                    ctx.fillRect(bx, barBase - bh, bw, bh);
+                    ctx.fillStyle = a.color;
+                    ctx.fillRect(bx, barBase - bh, bw, 2);
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '600 9px JetBrains Mono, monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${(probs[k]*100).toFixed(0)}%`, bx + bw/2, barBase - bh - 12);
+                }
+                ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+                ctx.fillText(`sum = 100%`, cx, plotBot + 8);
+            }
+
+            // Use-case label
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.fillText(`use: ${a.use}`, cx, plotBot + 28);
+        }
+
+        updateStats('Activation', 'non-linear', 'ReLU · Sigmoid · Softmax');
+    }
+
+    // ============ SLIDE 09: MAXPOOL ============
+    function drawMaxPool() {
+        clearCanvas(); frame++;
+        const gridSize = Math.min(H*0.75, W*0.38);
+        const inCells = 8;
+        const outCells = 4;
+        const inCS = gridSize / inCells;
+        const outCS = gridSize / outCells;
+
+        const leftX = W*0.08, leftY = H*0.15;
+        const rightX = W*0.62, rightY = H*0.15;
+
+        // Generate a sample activation map (feature map) with varying brightness
+        const actMap = [];
+        for (let r=0; r<inCells; r++) {
+            actMap.push([]);
+            for (let c=0; c<inCells; c++) {
+                const v = (Math.sin((r+c)*0.8 + frame*0.02)*0.3 + 0.5) * (0.4 + Math.random()*0.4);
+                // Seed with consistent pattern via position (don't use random)
+                const val = Math.abs(Math.sin(r*1.3) * Math.cos(c*0.9) + Math.sin((r+c)*0.5));
+                actMap[r].push(clamp(val, 0, 1));
+            }
+        }
+
+        // Draw input feature map
+        for (let r=0; r<inCells; r++) {
+            for (let c=0; c<inCells; c++) {
+                ctx.fillStyle = `rgba(139,92,246,${actMap[r][c]})`;
+                ctx.fillRect(leftX + c*inCS, leftY + r*inCS, inCS, inCS);
+                ctx.fillStyle = `rgba(255,255,255,${actMap[r][c] * 0.8})`;
+                ctx.font = `600 ${inCS*0.3}px JetBrains Mono, monospace`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                if (inCS > 30) {
+                    ctx.fillText(actMap[r][c].toFixed(1), leftX + c*inCS + inCS/2, leftY + r*inCS + inCS/2);
+                }
+            }
+        }
+        drawGridLines(leftX, leftY, inCells, inCells, inCS, 'rgba(255,255,255,0.15)');
+
+        // Animated highlight — current 2x2 block
+        const blockStep = Math.floor(frame/30) % (outCells*outCells);
+        const br = Math.floor(blockStep / outCells);
+        const bc = blockStep % outCells;
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3;
+        ctx.strokeRect(leftX + bc*2*inCS, leftY + br*2*inCS, inCS*2, inCS*2);
+
+        // Find max in current 2x2
+        let maxVal = 0, maxR = 0, maxC = 0;
+        for (let dr=0; dr<2; dr++) for (let dc=0; dc<2; dc++) {
+            const v = actMap[br*2+dr][bc*2+dc];
+            if (v > maxVal) { maxVal = v; maxR = dr; maxC = dc; }
+        }
+        // Highlight the winner cell with a ring
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+        ctx.strokeRect(leftX + (bc*2+maxC)*inCS + 2, leftY + (br*2+maxR)*inCS + 2, inCS-4, inCS-4);
+
+        // Draw output
+        for (let r=0; r<outCells; r++) {
+            for (let c=0; c<outCells; c++) {
+                let mx = 0;
+                for (let dr=0; dr<2; dr++) for (let dc=0; dc<2; dc++) {
+                    mx = Math.max(mx, actMap[r*2+dr][c*2+dc]);
+                }
+                // Only show cells we've computed so far
+                const cellIdx = r*outCells + c;
+                if (cellIdx <= blockStep) {
+                    ctx.fillStyle = `rgba(16,185,129,${mx})`;
+                    ctx.fillRect(rightX + c*outCS, rightY + r*outCS, outCS, outCS);
+                    if (outCS > 30) {
+                        ctx.fillStyle = `rgba(255,255,255,${mx*0.9})`;
+                        ctx.font = `600 ${outCS*0.25}px JetBrains Mono, monospace`;
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(mx.toFixed(1), rightX + c*outCS + outCS/2, rightY + r*outCS + outCS/2);
+                    }
+                } else {
+                    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                    ctx.fillRect(rightX + c*outCS, rightY + r*outCS, outCS, outCS);
+                }
+            }
+        }
+        drawGridLines(rightX, rightY, outCells, outCells, outCS, 'rgba(16,185,129,0.2)');
+
+        // Highlight the current output cell
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3;
+        ctx.strokeRect(rightX + bc*outCS, rightY + br*outCS, outCS, outCS);
+
+        // Labels
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('INPUT · 8×8', leftX + gridSize/2, leftY + gridSize + 8);
+        ctx.fillText('OUTPUT · 4×4', rightX + gridSize/2, rightY + gridSize + 8);
+        ctx.fillStyle = 'rgba(251,191,36,0.9)'; ctx.font = '600 10px JetBrains Mono, monospace';
+        ctx.fillText('pick the brightest of each 2×2', W/2, leftY + gridSize + 30);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 10px Inter, sans-serif';
+        ctx.fillText('50% smaller · keeps the strongest features', W/2, leftY + gridSize + 48);
+
+        // Arrow
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();
+        ctx.moveTo(leftX + gridSize + 12, leftY + gridSize/2);
+        ctx.lineTo(rightX - 12, rightY + gridSize/2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        updateStats('MaxPool', '8×8 → 4×4', `${blockStep+1} / ${outCells*outCells}`);
+    }
+
+    // ============ SLIDE 10: DEEPER CONV ============
+    function drawDeepConv() {
+        clearCanvas(); frame++;
+        const t = (frame % 200) / 200;
+
+        // Three tensor representations side by side showing shrinking + deepening
+        const stages = [
+            { label:'13×13×16', gridSize: 13, channels: 16, color:'#3b82f6', x: W*0.12 },
+            { label:'Conv 3×3 · 32', arrow:true, x: W*0.35 },
+            { label:'11×11×32', gridSize: 11, channels: 32, color:'#8b5cf6', x: W*0.50 },
+            { label:'MaxPool 2×2', arrow:true, x: W*0.72 },
+            { label:'5×5×32', gridSize: 5, channels: 32, color:'#10b981', x: W*0.86 }
+        ];
+
+        const cy = H*0.5;
+
+        stages.forEach((s, idx) => {
+            if (s.arrow) {
+                // Arrow
+                ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+                ctx.setLineDash([3,3]);
+                ctx.beginPath(); ctx.moveTo(s.x - 50, cy); ctx.lineTo(s.x + 50, cy); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#f59e0b'; ctx.font = '600 11px JetBrains Mono, monospace';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                ctx.fillText(s.label, s.x, cy - 14);
+            } else {
+                // Draw stacked feature maps
+                const displayChan = Math.min(s.channels, 6);
+                const baseSize = s.gridSize * 8;
+                const shift = 6;
+
+                for (let c=displayChan-1; c>=0; c--) {
+                    const ox = s.x - baseSize/2 - (displayChan-1)*shift/2 + c*shift;
+                    const oy = cy - baseSize/2 + c*shift;
+                    ctx.fillStyle = s.color + Math.round(50 + c*20).toString(16).padStart(2,'0');
+                    ctx.strokeStyle = s.color;
+                    ctx.lineWidth = 1;
+                    ctx.fillRect(ox, oy, baseSize, baseSize);
+                    ctx.strokeRect(ox, oy, baseSize, baseSize);
+                }
+
+                // Draw the top feature map content (pattern)
+                const topX = s.x - baseSize/2 + (displayChan-1)*shift/2;
+                const topY = cy - baseSize/2 + (displayChan-1)*shift;
+                const cs = baseSize / s.gridSize;
+                for (let r=0; r<s.gridSize; r++) {
+                    for (let col=0; col<s.gridSize; col++) {
+                        const v = Math.abs(Math.sin((r*1.3 + col*0.7 + frame*0.03)*(idx+1)));
+                        ctx.fillStyle = `rgba(255,255,255,${v*0.5})`;
+                        ctx.fillRect(topX + col*cs, topY + r*cs, cs, cs);
+                    }
+                }
+
+                ctx.fillStyle = s.color; ctx.font = '600 11px JetBrains Mono, monospace';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillText(s.label, s.x, cy + baseSize/2 + 20);
+
+                // channel count badge
+                ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 9px JetBrains Mono, monospace';
+                ctx.fillText(`${s.channels} channels`, s.x, cy + baseSize/2 + 36);
+            }
+        });
+
+        // Title context
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('stations 3 & 4 — the detective', W/2, 18);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 10px Inter, sans-serif';
+        ctx.fillText('smaller in space, richer in features', W/2, H - 20);
+
+        updateStats('Conv+Pool', '16 → 32 channels', 'Detective');
+    }
+
+    // ============ SLIDE 11: FLATTEN ============
+    function drawFlatten() {
+        clearCanvas(); frame++;
+        const t = (frame % 240) / 240;
+
+        // Left: 5x5x32 represented as stack
+        const leftCX = W*0.22, leftCY = H*0.5;
+        const n = 5;
+        const cs = 18;
+        const stackDepth = 5;
+        const shift = 4;
+
+        for (let d=stackDepth-1; d>=0; d--) {
+            const ox = leftCX - n*cs/2 + d*shift;
+            const oy = leftCY - n*cs/2 + d*shift;
+            const alpha = 0.3 + d*0.15;
+            ctx.fillStyle = `rgba(139,92,246,${alpha})`;
+            ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 1;
+            ctx.fillRect(ox, oy, n*cs, n*cs);
+            ctx.strokeRect(ox, oy, n*cs, n*cs);
+        }
+
+        // Draw pattern on top slice
+        const topX = leftCX - n*cs/2 + (stackDepth-1)*shift;
+        const topY = leftCY - n*cs/2 + (stackDepth-1)*shift;
+        for (let r=0; r<n; r++) {
+            for (let c=0; c<n; c++) {
+                const v = Math.abs(Math.sin(r*1.3 + c*0.9 + frame*0.03));
+                ctx.fillStyle = `rgba(255,255,255,${v*0.7})`;
+                ctx.fillRect(topX + c*cs, topY + r*cs, cs-1, cs-1);
+            }
+        }
+
+        ctx.fillStyle = '#8b5cf6'; ctx.font = '600 12px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('5 × 5 × 32 grid', leftCX, leftCY + n*cs/2 + 24);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('= 800 numbers', leftCX, leftCY + n*cs/2 + 42);
+
+        // Animate "unrolling" arrow
+        const arrowT = t;
+        ctx.strokeStyle = `rgba(6,182,212,${0.5 + Math.sin(frame*0.1)*0.3})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5,5]);
+        ctx.beginPath();
+        ctx.moveTo(leftCX + n*cs/2 + stackDepth*shift + 20, leftCY);
+        ctx.bezierCurveTo(W*0.45, leftCY - 40, W*0.5, leftCY, W*0.55, leftCY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#06b6d4'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('flatten()', (leftCX + W*0.55)/2, leftCY - 30);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillText('no math — just reshape', (leftCX + W*0.55)/2, leftCY - 14);
+
+        // Right: 1D strip of 800 numbers
+        const stripX = W*0.55, stripY = leftCY - 6;
+        const stripW = W*0.4, stripH = 12;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 1;
+        ctx.fillRect(stripX, stripY, stripW, stripH);
+        ctx.strokeRect(stripX, stripY, stripW, stripH);
+
+        // Fill with color gradient representing 800 values
+        const numCells = 80;
+        const cellW = stripW / numCells;
+        for (let i=0; i<numCells; i++) {
+            const v = Math.abs(Math.sin(i*0.3 + frame*0.03));
+            ctx.fillStyle = `rgba(6,182,212,${v*0.8})`;
+            ctx.fillRect(stripX + i*cellW, stripY+1, cellW-0.5, stripH-2);
+        }
+
+        ctx.fillStyle = '#06b6d4'; ctx.font = '600 12px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('[ 800 numbers ]', stripX + stripW/2, stripY + stripH + 14);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('ready for dense layer', stripX + stripW/2, stripY + stripH + 34);
+
+        // Show a few sample values
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('[ 0.32, 0.71, 0.05, 0.89, ..., 0.14 ]', stripX + stripW/2, stripY - 24);
+
+        // Caption
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.fillText('the Sudoku-board-over-the-phone trick', W/2, H - 20);
+
+        updateStats('Flatten', '5×5×32 → 800', 'Reshape');
+    }
+
+    // ============ SLIDE 12: DENSE 64 ============
+    function drawDense64() {
+        clearCanvas(); frame++;
+        const t = frame;
+
+        // Left: 800 inputs (we'll show ~24 dots abstracted)
+        const inputsN = 20;
+        const hiddenN = 12;
+        const leftX = W*0.15, rightX = W*0.75;
+        const topY = H*0.15, botY = H*0.85;
+        const inYStep = (botY-topY)/inputsN;
+        const hiYStep = (botY-topY)/hiddenN;
+
+        // Draw connections (subtle)
+        ctx.strokeStyle = 'rgba(6,182,212,0.08)'; ctx.lineWidth = 0.5;
+        for (let i=0; i<inputsN; i++) {
+            for (let j=0; j<hiddenN; j++) {
+                ctx.beginPath();
+                ctx.moveTo(leftX + 10, topY + inYStep*i + inYStep/2);
+                ctx.lineTo(rightX - 10, topY + hiYStep*j + hiYStep/2);
+                ctx.stroke();
+            }
+        }
+
+        // Highlight a few active connections
+        for (let k=0; k<8; k++) {
+            const ii = (Math.floor(t/3) + k*3) % inputsN;
+            const jj = (Math.floor(t/4) + k*2) % hiddenN;
+            const alpha = 0.5 + Math.sin(t*0.1 + k)*0.3;
+            ctx.strokeStyle = `rgba(16,185,129,${alpha})`;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(leftX + 10, topY + inYStep*ii + inYStep/2);
+            ctx.lineTo(rightX - 10, topY + hiYStep*jj + hiYStep/2);
+            ctx.stroke();
+        }
+
+        // Draw input nodes
+        for (let i=0; i<inputsN; i++) {
+            const y = topY + inYStep*i + inYStep/2;
+            const active = Math.abs(Math.sin(i*0.8 + t*0.05));
+            ctx.fillStyle = `rgba(6,182,212,${0.3 + active*0.5})`;
+            ctx.beginPath(); ctx.arc(leftX, y, 4, 0, TWO_PI); ctx.fill();
+        }
+
+        // Draw hidden nodes
+        for (let j=0; j<hiddenN; j++) {
+            const y = topY + hiYStep*j + hiYStep/2;
+            const active = Math.abs(Math.sin(j*0.6 + t*0.06));
+            ctx.fillStyle = `rgba(16,185,129,${0.3 + active*0.6})`;
+            ctx.strokeStyle = '#10b981'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(rightX, y, 6, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        }
+
+        // Labels
+        ctx.fillStyle = '#06b6d4'; ctx.font = '700 14px Inter, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('800', leftX, botY + 12);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('flattened inputs', leftX, botY + 32);
+
+        ctx.fillStyle = '#10b981'; ctx.font = '700 14px Inter, sans-serif';
+        ctx.fillText('64', rightX, botY + 12);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('ReLU neurons', rightX, botY + 32);
+
+        // "..." between inputs
+        ctx.fillStyle = 'rgba(6,182,212,0.3)'; ctx.font = '600 14px JetBrains Mono, monospace';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⋮', leftX, topY - 12);
+        ctx.fillText('⋮', leftX, botY + 4);
+
+        // Middle info
+        const midX = (leftX + rightX)/2;
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '700 16px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('fully connected', midX, 36);
+        ctx.fillStyle = '#f59e0b'; ctx.font = '700 22px JetBrains Mono, monospace';
+        ctx.fillText('51,264 weights', midX, H - 60);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 11px JetBrains Mono, monospace';
+        ctx.fillText('800 × 64  +  64 biases', midX, H - 30);
+
+        updateStats('Dense', '800 → 64', 'Fully connected');
+    }
+
+    // ============ SLIDE 13: SOFTMAX BARS ============
+    function drawSoftmax() {
+        clearCanvas(); frame++;
+
+        // Top: 10 neurons
+        const neuronY = H*0.22;
+        const startX = W*0.08, endX = W*0.92;
+        const spacing = (endX - startX)/9;
+        const rawScores = [];
+        for (let i=0; i<10; i++) {
+            // Score: neuron "4" is strongest
+            let base = 0.5;
+            if (i === 4) base = 4;
+            else if (i === 9) base = 1.2;
+            else if (i === 7) base = 1.0;
+            const wiggle = Math.sin(frame*0.04 + i*1.3)*0.3;
+            rawScores.push(base + wiggle);
+        }
+        const exp = rawScores.map(v => Math.exp(v));
+        const sum = exp.reduce((a,b)=>a+b, 0);
+        const probs = exp.map(v => v/sum);
+        const maxIdx = probs.indexOf(Math.max(...probs));
+
+        // Neurons row
+        for (let i=0; i<10; i++) {
+            const x = startX + spacing*i;
+            const isMax = i === maxIdx;
+            ctx.fillStyle = isMax ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.15)';
+            ctx.strokeStyle = isMax ? '#10b981' : 'rgba(239,68,68,0.6)';
+            ctx.lineWidth = isMax ? 2.5 : 1.5;
+            ctx.beginPath(); ctx.arc(x, neuronY, 18, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = '700 13px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(i, x, neuronY);
+
+            // Raw score above
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(rawScores[i].toFixed(1), x, neuronY - 24);
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText('raw scores →', W*0.02, neuronY - 28);
+
+        // Softmax arrow
+        ctx.fillStyle = 'rgba(139,92,246,0.9)'; ctx.font = '700 13px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('softmax ↓', W/2, neuronY + 50);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = 'italic 10px Inter, sans-serif';
+        ctx.fillText('share the pie — all add to 100%', W/2, neuronY + 66);
+
+        // Probability bars
+        const barTop = H*0.52, barBot = H*0.92;
+        const barH = barBot - barTop;
+        const barW = spacing * 0.7;
+        for (let i=0; i<10; i++) {
+            const x = startX + spacing*i - barW/2;
+            const p = probs[i];
+            const h = barH * p * 1.1; // max at 110% visually
+            const isMax = i === maxIdx;
+
+            // Bar background
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.fillRect(x, barBot - barH, barW, barH);
+
+            // Filled bar
+            ctx.fillStyle = isMax ? '#10b981' : 'rgba(139,92,246,0.7)';
+            ctx.fillRect(x, barBot - h, barW, h);
+
+            // Cap
+            ctx.fillStyle = isMax ? '#34d399' : 'rgba(167,139,250,0.9)';
+            ctx.fillRect(x, barBot - h - 2, barW, 2);
+
+            // Percentage
+            ctx.fillStyle = isMax ? '#10b981' : 'rgba(255,255,255,0.7)';
+            ctx.font = `${isMax ? '700' : '500'} 10px JetBrains Mono, monospace`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(`${(p*100).toFixed(1)}%`, x + barW/2, barBot - h - 6);
+
+            // Class label
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.textBaseline = 'top';
+            ctx.fillText(i, x + barW/2, barBot + 4);
+        }
+
+        // Winner indicator
+        const wx = startX + spacing*maxIdx;
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+        ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(wx, neuronY + 20); ctx.lineTo(wx, barTop); ctx.stroke();
+        ctx.setLineDash([]);
+
+        updateStats('Softmax', '10 → probabilities', `winner: ${maxIdx}`);
+    }
+
+    // ============ SLIDE 14: COMPILE ============
+    function drawCompile() {
+        clearCanvas(); frame++;
+        const t = (frame % 180) / 180;
+
+        // Three big blocks: prediction → loss → optimizer → weight update
+        const blocks = [
+            { x: W*0.12, y: H*0.2, w: W*0.2, h: H*0.6, label:'prediction', sub:'[0.2, 0.7, 0.1]', color:'#06b6d4' },
+            { x: W*0.38, y: H*0.2, w: W*0.2, h: H*0.6, label:'loss', sub:'categoricalCrossentropy', color:'#ef4444' },
+            { x: W*0.65, y: H*0.2, w: W*0.25, h: H*0.6, label:'optimizer', sub:'adam', color:'#10b981' }
+        ];
+
+        blocks.forEach((b,i) => {
+            ctx.fillStyle = b.color + '22';
+            ctx.strokeStyle = b.color; ctx.lineWidth = 2;
+            roundRect(b.x, b.y, b.w, b.h, 12); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = b.color; ctx.font = '700 14px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(b.label, b.x + b.w/2, b.y + 16);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.fillText(b.sub, b.x + b.w/2, b.y + 40);
+        });
+
+        // Inside prediction: show probability bars
+        const pb = blocks[0];
+        const predProbs = [0.05, 0.08, 0.10, 0.70, 0.03, 0.01, 0.01, 0.01, 0.005, 0.005];
+        for (let i=0; i<10; i++) {
+            const by = pb.y + 68 + i*((pb.h-90)/10);
+            const bw = (pb.w-40) * predProbs[i];
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(pb.x + 20, by, pb.w-40, 8);
+            ctx.fillStyle = i === 3 ? '#06b6d4' : 'rgba(6,182,212,0.4)';
+            ctx.fillRect(pb.x + 20, by, bw, 8);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 8px JetBrains Mono, monospace';
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(i, pb.x + 16, by + 4);
+        }
+        // target
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('target = class "3"', pb.x + pb.w/2, pb.y + pb.h - 10);
+
+        // Inside loss: show error value pulsing
+        const lb = blocks[1];
+        const lossVal = 0.85 + Math.sin(frame*0.05)*0.1;
+        ctx.fillStyle = '#ef4444'; ctx.font = '700 32px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(lossVal.toFixed(2), lb.x + lb.w/2, lb.y + lb.h/2);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.fillText('how wrong?', lb.x + lb.w/2, lb.y + lb.h/2 + 28);
+
+        // Inside optimizer: show weight adjustment animation
+        const ob = blocks[2];
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.textBaseline = 'top';
+        ctx.fillText('adjusting weights', ob.x + ob.w/2, ob.y + 62);
+
+        const weightCount = 8;
+        for (let i=0; i<weightCount; i++) {
+            const wy = ob.y + 90 + i*((ob.h-120)/weightCount);
+            const wphase = (t + i*0.12) % 1;
+            const wVal = Math.sin(wphase * TWO_PI)*0.5;
+            const wx1 = ob.x + ob.w*0.15;
+            const wx2 = ob.x + ob.w*0.85;
+            const wMid = ob.x + ob.w/2;
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(wx1, wy, wx2-wx1, 4);
+            ctx.fillStyle = wVal > 0 ? '#10b981' : '#f59e0b';
+            if (wVal > 0) ctx.fillRect(wMid, wy, Math.abs(wVal)*(wx2-wMid), 4);
+            else ctx.fillRect(wMid + wVal*(wMid-wx1), wy, Math.abs(wVal)*(wMid-wx1), 4);
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '400 8px JetBrains Mono, monospace';
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(`w${i}`, wx1 - 4, wy + 2);
+        }
+
+        // Flow arrows
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5;
+        for (let i=0; i<2; i++) {
+            const ax1 = blocks[i].x + blocks[i].w + 5;
+            const ax2 = blocks[i+1].x - 5;
+            const ay = blocks[i].y + blocks[i].h/2;
+            ctx.setLineDash([4,4]);
+            ctx.beginPath(); ctx.moveTo(ax1, ay); ctx.lineTo(ax2, ay); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(ax2, ay); ctx.lineTo(ax2-6, ay-4); ctx.lineTo(ax2-6, ay+4); ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fill();
+        }
+
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = 'italic 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('error = desired − guess → adjust weights (same as perceptron, smarter)', W/2, H - 18);
+
+        updateStats('compile()', 'loss + optimizer', 'Ready to learn');
+    }
+
+    // ============ SLIDE 15: TRAINING ============
+    function drawTraining() {
+        clearCanvas(); frame++;
+
+        // Left: epochs progress
+        const leftX = W*0.08, leftY = H*0.15, leftW = W*0.35, leftH = H*0.7;
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        roundRect(leftX, leftY, leftW, leftH, 10); ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('10 EPOCHS', leftX + 16, leftY + 14);
+
+        // Animate through epochs
+        const currentEpoch = Math.floor((frame/24) % 12);
+        const epochsDone = Math.min(currentEpoch, 10);
+
+        const epochValues = [60, 82, 89, 92, 94, 95, 96, 96.5, 97, 97.2];
+        const lineH = (leftH - 50) / 10;
+        for (let e=0; e<10; e++) {
+            const ey = leftY + 40 + e*lineH;
+            const done = e < epochsDone;
+
+            // Epoch label
+            ctx.fillStyle = done ? '#10b981' : 'rgba(255,255,255,0.3)';
+            ctx.font = '500 10px JetBrains Mono, monospace';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(`epoch ${e+1}`, leftX + 16, ey);
+
+            // Progress bar
+            const barX = leftX + 80, barW = leftW - 140;
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(barX, ey-4, barW, 8);
+            const prog = done ? 1 : (e === epochsDone ? ((frame/24) % 1) : 0);
+            ctx.fillStyle = done ? '#10b981' : '#f59e0b';
+            ctx.fillRect(barX, ey-4, barW*prog, 8);
+
+            // Accuracy
+            if (done) {
+                ctx.fillStyle = '#10b981'; ctx.font = '600 10px JetBrains Mono, monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${epochValues[e]}%`, leftX + leftW - 16, ey);
+            }
+        }
+
+        // Right: Accuracy curve
+        const rightX = W*0.48, rightY = H*0.15, rightW = W*0.44, rightH = H*0.7;
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        roundRect(rightX, rightY, rightW, rightH, 10); ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('ACCURACY', rightX + 16, rightY + 14);
+
+        // Axes
+        const plotL = rightX + 40, plotR = rightX + rightW - 20;
+        const plotT = rightY + 40, plotB = rightY + rightH - 30;
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(plotL, plotB); ctx.lineTo(plotR, plotB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(plotL, plotT); ctx.lineTo(plotL, plotB); ctx.stroke();
+
+        // Y-axis ticks
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText('100%', plotL - 4, plotT);
+        ctx.fillText('50%', plotL - 4, (plotT+plotB)/2);
+        ctx.fillText('0%', plotL - 4, plotB);
+
+        // X-axis ticks
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('1', plotL, plotB + 4);
+        ctx.fillText('10', plotR, plotB + 4);
+
+        // Draw accuracy curve
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let e=0; e<=epochsDone; e++) {
+            const px = mapVal(e+1, 1, 10, plotL, plotR);
+            const py = mapVal(epochValues[Math.min(e, 9)], 0, 100, plotB, plotT);
+            if (e === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Dots
+        for (let e=0; e<epochsDone; e++) {
+            const px = mapVal(e+1, 1, 10, plotL, plotR);
+            const py = mapVal(epochValues[e], 0, 100, plotB, plotT);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath(); ctx.arc(px, py, 3, 0, TWO_PI); ctx.fill();
+        }
+
+        // Target line at 97%
+        ctx.strokeStyle = 'rgba(251,191,36,0.4)'; ctx.lineWidth = 1;
+        ctx.setLineDash([3,3]);
+        const targetY = mapVal(97, 0, 100, plotB, plotT);
+        ctx.beginPath(); ctx.moveTo(plotL, targetY); ctx.lineTo(plotR, targetY); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#fbbf24'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('~97% target', plotL + 4, targetY - 2);
+
+        // Batch info at bottom
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '500 10px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(`batchSize: 128  ·  15,000 images  ·  150,000 steps`, W/2, H - 22);
+
+        updateStats('model.fit', `epoch ${epochsDone}/10`, epochsDone >= 10 ? 'Converged' : 'Training...');
+    }
+
+    // ============ SLIDE 16: INFERENCE ============
+    function drawInference() {
+        clearCanvas(); frame++;
+        const t = (frame % 300) / 300;
+
+        // 4 horizontal stages
+        const stageW = W / 4.4;
+        const stageH = H * 0.55;
+        const stageY = H*0.22;
+
+        // Stage 1: user drawing
+        const s1x = W*0.02;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+        roundRect(s1x, stageY, stageW, stageH, 8); ctx.fill(); ctx.stroke();
+        // Hand-drawn 3
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        const cx1 = s1x + stageW/2, cy1 = stageY + stageH/2;
+        const scale1 = stageH * 0.4;
+        ctx.beginPath();
+        ctx.moveTo(cx1 - scale1*0.3, cy1 - scale1*0.6);
+        ctx.quadraticCurveTo(cx1 + scale1*0.4, cy1 - scale1*0.7, cx1 + scale1*0.3, cy1 - scale1*0.2);
+        ctx.quadraticCurveTo(cx1 - scale1*0.1, cy1, cx1 + scale1*0.3, cy1 + scale1*0.2);
+        ctx.quadraticCurveTo(cx1 + scale1*0.4, cy1 + scale1*0.7, cx1 - scale1*0.3, cy1 + scale1*0.6);
+        ctx.stroke();
+        // Label
+        ctx.fillStyle = '#3b82f6'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('1. drawing', cx1, stageY - 22);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillText('280 × 280 canvas', cx1, stageY + stageH + 6);
+
+        // Stage 2: 28x28 pixels
+        const s2x = s1x + stageW + W*0.02;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2;
+        roundRect(s2x, stageY, stageW, stageH, 8); ctx.fill(); ctx.stroke();
+        const pxS = Math.min(stageW, stageH) * 0.75;
+        const p2x = s2x + (stageW - pxS)/2, p2y = stageY + (stageH - pxS)/2;
+        const cs2 = pxS / 28;
+        drawDigit(DIGIT_3, p2x, p2y, cs2);
+        drawGridLines(p2x, p2y, 28, 28, cs2, 'rgba(255,255,255,0.04)');
+        ctx.fillStyle = '#06b6d4'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('2. tensor', s2x + stageW/2, stageY - 22);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillText('[1,28,28,1] · ÷255', s2x + stageW/2, stageY + stageH + 6);
+
+        // Stage 3: model layers
+        const s3x = s2x + stageW + W*0.02;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2;
+        roundRect(s3x, stageY, stageW, stageH, 8); ctx.fill(); ctx.stroke();
+        const layersList = ['conv2d','maxPool','conv2d','maxPool','flatten','dense','softmax'];
+        const lH = (stageH - 20) / 7;
+        const travelStep = Math.floor(t * 7);
+        layersList.forEach((l, i) => {
+            const ly = stageY + 10 + i*lH;
+            const active = i <= travelStep;
+            ctx.fillStyle = active ? 'rgba(139,92,246,0.4)' : 'rgba(139,92,246,0.1)';
+            ctx.strokeStyle = active ? '#8b5cf6' : 'rgba(139,92,246,0.3)';
+            ctx.lineWidth = 1;
+            roundRect(s3x + 10, ly, stageW - 20, lH - 4, 3); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = active ? '#fff' : 'rgba(255,255,255,0.4)';
+            ctx.font = '600 10px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(l, s3x + stageW/2, ly + lH/2 - 2);
+        });
+        ctx.fillStyle = '#8b5cf6'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('3. predict()', s3x + stageW/2, stageY - 22);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillText('~1 millisecond', s3x + stageW/2, stageY + stageH + 6);
+
+        // Stage 4: probabilities
+        const s4x = s3x + stageW + W*0.02;
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+        roundRect(s4x, stageY, stageW, stageH, 8); ctx.fill(); ctx.stroke();
+        const probsD = [0.01,0.01,0.04,0.88,0.01,0.01,0.01,0.01,0.01,0.01];
+        const pBarH = (stageH - 20) / 10;
+        for (let i=0; i<10; i++) {
+            const by = stageY + 10 + i*pBarH;
+            const isMax = i === 3;
+            const visible = t > 0.7 ? 1 : Math.max(0,(t-0.5)*5);
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fillRect(s4x + 22, by + 2, stageW - 44, pBarH - 4);
+            ctx.fillStyle = isMax ? '#10b981' : 'rgba(16,185,129,0.4)';
+            ctx.fillRect(s4x + 22, by + 2, (stageW - 44)*probsD[i]*visible, pBarH - 4);
+            ctx.fillStyle = isMax ? '#10b981' : 'rgba(255,255,255,0.4)';
+            ctx.font = `${isMax ? '700' : '500'} 9px JetBrains Mono, monospace`;
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(i, s4x + 18, by + pBarH/2);
+        }
+        ctx.fillStyle = '#10b981'; ctx.font = '600 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('4. result', s4x + stageW/2, stageY - 22);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '500 9px JetBrains Mono, monospace';
+        ctx.fillText('winner = 3  (88%)', s4x + stageW/2, stageY + stageH + 6);
+
+        // Arrows between
+        for (let i=0; i<3; i++) {
+            const ax = s1x + (i+1)*(stageW + W*0.02) - W*0.01;
+            const ay = stageY + stageH/2;
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(ax - 6, ay); ctx.lineTo(ax + 6, ay); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath(); ctx.moveTo(ax+6, ay); ctx.lineTo(ax+1, ay-3); ctx.lineTo(ax+1, ay+3); ctx.closePath(); ctx.fill();
+        }
+
+        updateStats('Inference', '784 → 10', `~1 ms`);
+    }
+
+    // ============ SLIDE 17: PARAM TABLE ============
+    function drawParamTable() {
+        clearCanvas(); frame++;
+
+        const rows = [
+            { layer:'Conv2D (16)', shape:'28×28×1 → 26×26×16', weights: 160, color:'#3b82f6', job:'find edges' },
+            { layer:'MaxPool',     shape:'26×26×16 → 13×13×16', weights: 0,   color:'#f59e0b', job:'shrink' },
+            { layer:'Conv2D (32)', shape:'13×13×16 → 11×11×32', weights: 4640, color:'#3b82f6', job:'find shapes' },
+            { layer:'MaxPool',     shape:'11×11×32 → 5×5×32',   weights: 0,   color:'#f59e0b', job:'shrink' },
+            { layer:'Flatten',     shape:'5×5×32 → 800',         weights: 0,   color:'#a855f7', job:'reshape' },
+            { layer:'Dense (64)',  shape:'800 → 64',             weights: 51264, color:'#06b6d4', job:'think' },
+            { layer:'Dense (10)',  shape:'64 → 10',              weights: 650, color:'#ef4444', job:'decide' }
+        ];
+        const total = rows.reduce((s,r)=>s+r.weights,0);
+
+        // Header
+        const headerY = 30;
+        const leftP = W*0.03, rightP = W*0.97;
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '600 10px JetBrains Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('LAYER', leftP + 10, headerY);
+        ctx.fillText('SHAPE', leftP + W*0.22, headerY);
+        ctx.textAlign = 'right';
+        ctx.fillText('WEIGHTS', leftP + W*0.65, headerY);
+        ctx.textAlign = 'left';
+        ctx.fillText('JOB', leftP + W*0.72, headerY);
+
+        // Separator
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath(); ctx.moveTo(leftP, headerY + 16); ctx.lineTo(rightP, headerY + 16); ctx.stroke();
+
+        const rowStart = headerY + 30;
+        const rowH = (H * 0.7) / rows.length;
+
+        rows.forEach((r, i) => {
+            const y = rowStart + i*rowH;
+
+            // Left color bar
+            ctx.fillStyle = r.color;
+            ctx.fillRect(leftP, y, 3, rowH - 6);
+
+            // Subtle background
+            if (i % 2 === 0) {
+                ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                ctx.fillRect(leftP + 6, y, rightP - leftP - 6, rowH - 6);
+            }
+
+            // Layer name
+            ctx.fillStyle = r.color; ctx.font = '600 12px JetBrains Mono, monospace';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(r.layer, leftP + 14, y + rowH/2 - 3);
+
+            // Shape
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '500 12px JetBrains Mono, monospace';
+            ctx.fillText(r.shape, leftP + W*0.22, y + rowH/2 - 3);
+
+            // Weights with animated bar
+            ctx.textAlign = 'right';
+            const wStr = r.weights.toLocaleString();
+            ctx.fillStyle = r.weights === 0 ? 'rgba(255,255,255,0.3)' : '#fbbf24';
+            ctx.font = `${r.weights === 0 ? '400' : '700'} 13px JetBrains Mono, monospace`;
+            ctx.fillText(wStr, leftP + W*0.65, y + rowH/2 - 3);
+
+            // Mini bar next to weights
+            if (r.weights > 0) {
+                const barMax = 51264;
+                const barW = 60;
+                const bw = (r.weights / barMax) * barW;
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.fillRect(leftP + W*0.52, y + rowH/2 + 2, barW, 4);
+                ctx.fillStyle = r.color;
+                ctx.fillRect(leftP + W*0.52, y + rowH/2 + 2, bw, 4);
+            }
+
+            // Job
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '500 11px JetBrains Mono, monospace';
+            ctx.fillText(r.job, leftP + W*0.72, y + rowH/2 - 3);
+        });
+
+        // Total
+        const totalY = rowStart + rows.length*rowH + 6;
+        ctx.fillStyle = 'rgba(139,92,246,0.1)'; ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 1;
+        roundRect(leftP, totalY, rightP - leftP, 40, 6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8b5cf6'; ctx.font = '700 13px JetBrains Mono, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(`TOTAL: ${total.toLocaleString()} learnable parameters  ·  7 layers  ·  10 classes  ·  ~97% accuracy`, W/2, totalY + 20);
+
+        updateStats('Architecture', `${total.toLocaleString()} params`, '7 layers');
+    }
+
+    // ============ SLIDE 18: ROADMAP ============
+    function drawRoadmap() {
+        clearCanvas(); frame++;
+
+        const steps = [
+            { n:'01', title:'Open starter file',  sub:'drawing canvas + MNIST loader + UI', color:'#3b82f6' },
+            { n:'02', title:'Build the CNN',       sub:'7 model.add() calls', color:'#06b6d4' },
+            { n:'03', title:'model.compile()',    sub:'optimizer + loss', color:'#f59e0b' },
+            { n:'04', title:'trainModel()',       sub:'model.fit with epochs & batches', color:'#10b981' },
+            { n:'05', title:'classifyDrawing()',  sub:'pixels → tensor → predict → winner', color:'#ef4444' },
+            { n:'06', title:'Press ENTER',        sub:'train · draw digits · the wow moment', color:'#8b5cf6' }
+        ];
+
+        const stepH = (H - 60) / steps.length;
+        const leftP = W*0.05, rightP = W*0.95;
+        const currentStep = Math.floor((frame/40) % (steps.length + 3));
+
+        steps.forEach((s, i) => {
+            const y = 30 + i*stepH;
+            const done = i < currentStep;
+            const active = i === currentStep;
+
+            // Number bubble
+            const bubbleX = leftP + 30;
+            ctx.fillStyle = done ? s.color : (active ? s.color : s.color + '33');
+            ctx.strokeStyle = s.color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(bubbleX, y + stepH/2, 22, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = done || active ? '#fff' : s.color; ctx.font = '700 13px JetBrains Mono, monospace';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(s.n, bubbleX, y + stepH/2);
+
+            // Connector line
+            if (i < steps.length - 1) {
+                ctx.strokeStyle = done ? s.color : 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(bubbleX, y + stepH/2 + 22); ctx.lineTo(bubbleX, y + stepH + stepH/2 - 22); ctx.stroke();
+            }
+
+            // Title + sub
+            const textX = bubbleX + 38;
+            ctx.fillStyle = done || active ? '#fff' : 'rgba(255,255,255,0.5)';
+            ctx.font = '700 14px Inter, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(s.title, textX, y + stepH/2 - 8);
+            ctx.fillStyle = done || active ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.3)';
+            ctx.font = '400 11px JetBrains Mono, monospace';
+            ctx.fillText(s.sub, textX, y + stepH/2 + 10);
+
+            // Active pulse
+            if (active) {
+                const pulse = Math.sin(frame*0.1)*3;
+                ctx.strokeStyle = s.color;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.arc(bubbleX, y + stepH/2, 22 + 6 + pulse, 0, TWO_PI); ctx.stroke();
+            }
+            if (done) {
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(rightP - 30, y + stepH/2);
+                ctx.lineTo(rightP - 24, y + stepH/2 + 5);
+                ctx.lineTo(rightP - 14, y + stepH/2 - 6);
+                ctx.stroke();
+            }
+        });
+
+        ctx.fillStyle = '#8b5cf6'; ctx.font = 'italic 12px Inter, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('from 784 raw pixels to a digit prediction — built by you', W/2, H - 14);
+
+        updateStats('Roadmap', '6 steps', currentStep >= 6 ? 'Ready!' : `step ${Math.min(currentStep+1, 6)}`);
+    }
+
+    // ============ DRAW REGISTRY ============
+    const drawFns = {
+        drawPipelineHero, drawStoryTimeline, drawHierarchy, drawTensorFlow,
+        drawTensorShapes, drawAssemblyLine, drawConvolution, drawActivations,
+        drawMaxPool, drawDeepConv, drawFlatten, drawDense64, drawSoftmax,
+        drawCompile, drawTraining, drawInference, drawParamTable, drawRoadmap
+    };
+
+    function animate() {
+        const s = slides[currentSlide];
+        const fn = drawFns[s.drawFn];
+        if (fn) fn();
+        requestAnimationFrame(animate);
+    }
+
+    init();
+    </script>
+</body>
+</html>

@@ -40,12 +40,16 @@
         .back-btn svg { width:16px; height:16px; }
         .chapter-badge { background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan)); color:white; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; }
         .chapter-title { font-size:16px; font-weight:600; }
+        .header-tabs { display:flex; gap:0; }
+        .tab-link { padding:12px 24px; font-size:14px; font-weight:500; color:var(--text-muted); text-decoration:none; border-bottom:2px solid transparent; transition:all .2s; }
+        .tab-link:hover { color:var(--text-secondary); }
+        .tab-link.active { color:var(--accent-purple); border-bottom-color:var(--accent-purple); }
         .progress-container { display:flex; align-items:center; gap:12px; }
         .progress-text { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-secondary); }
         .progress-bar { width:120px; height:4px; background:var(--border-light); border-radius:2px; overflow:hidden; }
         .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent-purple),var(--accent-cyan)); border-radius:2px; transition:width .3s ease; }
 
-        main { max-width:1400px; margin:0 auto; padding:32px 40px; display:grid; grid-template-columns:1fr 1fr; gap:32px; min-height:calc(100vh - 100px); }
+        main { max-width:1400px; margin:0 auto; padding:32px 40px; display:grid; grid-template-columns:1fr 1fr; gap:32px; min-height:calc(100vh - 146px); }
 
         .content-panel { display:flex; flex-direction:column; }
         .slide-number { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-purple); font-weight:500; margin-bottom:8px; letter-spacing:.5px; }
@@ -98,7 +102,7 @@
         .slide-dot.completed { background:var(--accent-cyan); }
 
         @media (max-width:1024px) { main { grid-template-columns:1fr; padding:20px; } .canvas-panel { position:relative; top:0; height:440px; order:-1; } }
-        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:22px; } }
+        @media (max-width:640px) { header { padding:0 16px; } .slide-title { font-size:22px; } .header-tabs { overflow-x:auto; } }
         @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
         .slide-content { animation:fadeIn .4s ease; }
     </style>
@@ -119,6 +123,10 @@
                 <span class="progress-text" id="progressText">1 / 18</span>
                 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:5.5%"></div></div>
             </div>
+        </div>
+        <div class="header-tabs">
+            <a href="chapter-7-cnn.html" class="tab-link active">Slides</a>
+            <a href="chapter-7-live-guide.html" class="tab-link">Live Build Guide</a>
         </div>
     </header>
 

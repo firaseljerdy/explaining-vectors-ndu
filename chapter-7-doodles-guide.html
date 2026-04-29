@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 375 - Chapter 7: Doodle Classification Build Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-canvas: #f1f5f9;
+            --bg-dark: #0f172a;
+            --panel-dark: #111827;
+            --panel-dark-2: #1e293b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f97316;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+            --load-color: #f97316;
+            --build-color: #8b5cf6;
+            --train-color: #10b981;
+            --infer-color: #ef4444;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(249, 115, 22, 0.08), transparent 28%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 32%),
+                var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; }
+        .header-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
+
+        .back-btn { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; }
+        .back-btn:hover { background: var(--bg-canvas); color: var(--text-primary); }
+        .back-btn svg { width: 16px; height: 16px; }
+
+        .chapter-badge { background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple)); color: white; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 6px; white-space: nowrap; }
+        .chapter-title-wrap { min-width: 0; }
+        .chapter-title { font-size: 16px; font-weight: 700; }
+        .chapter-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .progress-stack { min-width: 320px; display: grid; gap: 8px; }
+        .progress-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .progress-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .progress-text { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-secondary); }
+        .progress-bar { width: 100%; height: 6px; background: var(--border-light); border-radius: 999px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-orange), var(--accent-purple)); border-radius: 999px; transition: width 0.3s ease; }
+        .section-progress-fill { background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan)); }
+
+        .header-tabs { display: flex; gap: 0; }
+        .tab-link { padding: 12px 24px; font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-link:hover { color: var(--text-secondary); }
+        .tab-link.active { color: var(--accent-orange); border-bottom-color: var(--accent-orange); }
+
+        main { max-width: 1500px; margin: 0 auto; padding: 28px 36px 32px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr); gap: 28px; min-height: calc(100vh - 150px); }
+
+        .guide-panel { display: flex; flex-direction: column; gap: 18px; }
+
+        .tracker-card, .content-card, .code-shell, .teacher-card, .canvas-panel { background: var(--bg-white); border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); }
+        .tracker-card { padding: 18px 20px; border-radius: 18px; }
+
+        .step-ribbon { display: grid; grid-template-columns: repeat(26, minmax(0, 1fr)); gap: 4px; margin-bottom: 16px; }
+        .ribbon-segment { height: 8px; border-radius: 999px; background: var(--border-light); position: relative; overflow: hidden; transition: transform 0.2s ease, opacity 0.2s ease; opacity: 0.45; }
+        .ribbon-segment::after { content: ""; position: absolute; inset: 0; border-radius: inherit; transform: scaleX(0); transform-origin: left center; transition: transform 0.25s ease, opacity 0.25s ease; opacity: 0.9; }
+        .ribbon-segment.load::after { background: linear-gradient(90deg, rgba(249, 115, 22, 0.85), rgba(234, 179, 8, 0.8)); }
+        .ribbon-segment.build::after { background: linear-gradient(90deg, rgba(139, 92, 246, 0.75), rgba(6, 182, 212, 0.75)); }
+        .ribbon-segment.train::after { background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(6, 182, 212, 0.8)); }
+        .ribbon-segment.infer::after { background: linear-gradient(90deg, rgba(239, 68, 68, 0.85), rgba(249, 115, 22, 0.8)); }
+        .ribbon-segment.completed, .ribbon-segment.active { opacity: 1; }
+        .ribbon-segment.completed::after, .ribbon-segment.active::after { transform: scaleX(1); }
+        .ribbon-segment.active { transform: scaleY(1.4); }
+
+        .section-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .section-card { border: 1px solid var(--border-light); border-radius: 14px; padding: 12px 12px 10px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.9)); transition: all 0.25s ease; }
+        .section-card.active { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .section-card.load.active { border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 12px 24px rgba(249, 115, 22, 0.14); }
+        .section-card.build.active { border-color: rgba(139, 92, 246, 0.35); box-shadow: 0 12px 24px rgba(139, 92, 246, 0.12); }
+        .section-card.train.active { border-color: rgba(16, 185, 129, 0.35); box-shadow: 0 12px 24px rgba(16, 185, 129, 0.12); }
+        .section-card.infer.active { border-color: rgba(239, 68, 68, 0.35); box-shadow: 0 12px 24px rgba(239, 68, 68, 0.12); }
+
+        .section-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+        .section-name { font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .section-card.load .section-name { color: var(--load-color); }
+        .section-card.build .section-name { color: var(--build-color); }
+        .section-card.train .section-name { color: var(--train-color); }
+        .section-card.infer .section-name { color: var(--infer-color); }
+        .section-range { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--text-muted); }
+        .section-desc { font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
+
+        .content-card { border-radius: 22px; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 18px; }
+        .step-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .meta-pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.55px; background: var(--bg-canvas); color: var(--text-secondary); }
+        .meta-pill.step-id { color: white; }
+        .meta-pill.load.step-id { background: linear-gradient(135deg, var(--load-color), var(--accent-yellow)); }
+        .meta-pill.build.step-id { background: linear-gradient(135deg, var(--build-color), var(--accent-cyan)); }
+        .meta-pill.train.step-id { background: linear-gradient(135deg, var(--train-color), var(--accent-cyan)); }
+        .meta-pill.infer.step-id { background: linear-gradient(135deg, var(--infer-color), var(--accent-orange)); }
+
+        .step-title { font-size: 32px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
+        .step-explanation { font-size: 16px; line-height: 1.75; color: var(--text-secondary); }
+
+        .shape-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+        .shape-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--bg-canvas); border: 1px solid var(--border-light); font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-primary); }
+        .shape-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange); flex-shrink: 0; }
+
+        .teacher-card { border-radius: 18px; padding: 18px 20px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)); border: 1px solid rgba(15, 23, 42, 0.08); }
+        .teacher-label { font-size: 11px; font-weight: 800; letter-spacing: 0.55px; text-transform: uppercase; color: var(--accent-orange); margin-bottom: 8px; }
+        .teacher-note { font-size: 14px; line-height: 1.7; color: var(--text-primary); }
+
+        .code-shell { border-radius: 20px; overflow: hidden; background: var(--bg-dark); border-color: #1e293b; }
+        .code-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.14); background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95)); }
+        .code-title { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #cbd5e1; }
+        .code-caption { font-size: 11px; color: #94a3b8; }
+        .code-body { max-height: 420px; overflow: auto; padding: 12px; }
+        .code-line { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 10px; padding: 3px 8px; border-radius: 10px; transition: all 0.22s ease; }
+        .code-line.active { background: linear-gradient(135deg, rgba(249, 115, 22, 0.22), rgba(139, 92, 246, 0.16)); box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.32); transform: translateX(4px); }
+        .code-line.near { opacity: 0.9; }
+        .code-line.dim { opacity: 0.34; }
+        .line-no, .line-text { font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.7; }
+        .line-no { text-align: right; color: #64748b; user-select: none; }
+        .line-text { white-space: pre; color: #e2e8f0; }
+        .code-line.comment .line-text { color: #7c8ba1; font-style: italic; }
+
+        .nav-controls { display: flex; gap: 12px; margin-top: 4px; }
+        .nav-btn { flex: 1; padding: 14px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .nav-btn svg { width: 16px; height: 16px; }
+        .nav-btn.primary { border: none; color: white; background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple)); box-shadow: var(--shadow-md); }
+        .nav-btn.primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+        .nav-btn.secondary { border: 1px solid var(--border-medium); color: var(--text-secondary); background: var(--bg-white); }
+        .nav-btn.secondary:hover { background: var(--bg-canvas); color: var(--text-primary); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .keyboard-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 6px; }
+        .keyboard-hint code { font-family: "JetBrains Mono", monospace; font-size: 10.5px; padding: 2px 6px; border-radius: 6px; background: var(--bg-canvas); color: var(--text-secondary); }
+
+        .canvas-panel { border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; position: sticky; top: 116px; height: calc(100vh - 150px); max-height: 820px; background: var(--bg-white); }
+        .canvas-header { padding: 18px 22px 16px; border-bottom: 1px solid var(--border-light); display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+        .canvas-title-wrap { min-width: 0; }
+        .canvas-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.55px; color: var(--text-secondary); margin-bottom: 6px; }
+        .canvas-subtitle { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .canvas-hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; max-width: 220px; text-align: right; }
+        .canvas-wrapper { position: relative; flex: 1; background: radial-gradient(circle at top, rgba(249, 115, 22, 0.18), transparent 42%), radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.14), transparent 38%), var(--bg-dark); }
+        canvas { display: block; width: 100%; height: 100%; }
+        .canvas-overlay { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); max-width: calc(100% - 32px); display: inline-flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.96); color: var(--text-secondary); font-size: 12.5px; border-radius: 999px; padding: 10px 16px; box-shadow: var(--shadow-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+        .canvas-overlay svg { width: 15px; height: 15px; color: var(--accent-orange); flex-shrink: 0; }
+
+        .stats-bar { padding: 14px 20px; border-top: 1px solid var(--border-light); background: var(--bg-white); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .stat-item { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .stat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .stat-copy { min-width: 0; }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 2px; }
+        .stat-value { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        footer { text-align: center; padding: 20px 32px 28px; border-top: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.88); }
+        footer p { font-size: 12px; color: var(--text-muted); }
+        footer strong { color: var(--text-secondary); }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card > * { animation: fadeUp 0.35s ease; }
+
+        .submit-section { max-width: 1500px; margin: 0 auto; padding: 8px 36px 40px; }
+        .submit-wrap { max-width: 720px; margin: 0 auto; text-align: center; }
+        .submit-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-orange); margin-bottom: 8px; }
+        .submit-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 10px; }
+        .submit-copy { font-size: 15px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 24px; }
+
+        .submit-card { background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 18px; padding: 28px; box-shadow: var(--shadow-lg); text-align: left; }
+        .submit-input-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .submit-input { width: 100%; padding: 13px 16px; border: 2px solid var(--border-medium); border-radius: 10px; font-size: 15px; color: var(--text-primary); outline: none; transition: border-color 0.2s; background: var(--bg-main); margin-bottom: 18px; font-family: "Inter", sans-serif; }
+        .submit-input.mono { font-family: "JetBrains Mono", monospace; font-size: 13px; margin-bottom: 12px; }
+        .submit-input:focus { border-color: var(--accent-orange); }
+        .submit-error { color: var(--accent-red); font-size: 13px; min-height: 20px; margin-bottom: 10px; }
+        .submit-btn { width: 100%; padding: 14px 28px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple)); color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.28); font-family: "Inter", sans-serif; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.32); }
+
+        .success-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(6, 182, 212, 0.06)); border: 2px solid rgba(16, 185, 129, 0.3); border-radius: 18px; padding: 36px 28px; text-align: center; box-shadow: var(--shadow-lg); animation: fadeUp 0.4s ease; }
+        .success-check { font-size: 56px; color: var(--accent-green); margin-bottom: 12px; line-height: 1; }
+        .success-title { font-size: 22px; font-weight: 700; color: var(--accent-green); margin-bottom: 12px; }
+        .success-copy { color: var(--text-secondary); font-size: 14px; line-height: 1.7; max-width: 520px; margin: 0 auto 14px; }
+        .success-link-row { color: var(--text-muted); font-size: 12px; }
+        .success-link { color: var(--accent-green); font-family: "JetBrains Mono", monospace; font-size: 12px; word-break: break-all; text-decoration: none; }
+        .success-link:hover { text-decoration: underline; }
+
+        @media (max-width: 1200px) {
+            .header-top { align-items: start; flex-direction: column; }
+            .progress-stack { min-width: 100%; }
+            main { grid-template-columns: 1fr; }
+            .canvas-panel { position: relative; top: 0; height: 520px; order: -1; }
+        }
+        @media (max-width: 760px) {
+            header { padding: 0 16px; }
+            main { padding: 18px 16px 24px; }
+            .section-strip { grid-template-columns: 1fr 1fr; }
+            .step-ribbon { grid-template-columns: repeat(13, minmax(0, 1fr)); }
+            .stats-bar { grid-template-columns: 1fr; }
+            .step-title { font-size: 26px; }
+            .content-card { padding: 22px 18px 20px; }
+            .canvas-header { flex-direction: column; align-items: start; }
+            .canvas-hint { max-width: none; text-align: left; }
+            .header-tabs { overflow-x: auto; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                </a>
+                <div class="chapter-badge">Chapter 7</div>
+                <div class="chapter-title-wrap">
+                    <div class="chapter-title">CNN &amp; Doodle Recognition</div>
+                    <div class="chapter-subtitle">Live build companion for the Quick, Draw! doodle classifier</div>
+                </div>
+            </div>
+
+            <div class="progress-stack">
+                <div>
+                    <div class="progress-row">
+                        <span class="progress-label">Overall Progress</span>
+                        <span class="progress-text" id="progressText">Step 1 / 26</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 3.85%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="progress-row">
+                        <span class="progress-label" id="sectionProgressLabel">loadDoodleData()</span>
+                        <span class="progress-text" id="sectionProgressText">1 / 5</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill section-progress-fill" id="sectionProgressFill" style="width: 20%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-tabs">
+            <a href="chapter-7-cnn.html" class="tab-link">Slides</a>
+            <a href="chapter-7-live-guide.html" class="tab-link">Digit Classification</a>
+            <a href="chapter-7-doodles-guide.html" class="tab-link active">Doodle Classification</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="guide-panel">
+            <div class="tracker-card">
+                <div class="step-ribbon" id="stepRibbon"></div>
+                <div class="section-strip" id="sectionStrip"></div>
+            </div>
+
+            <div class="content-card">
+                <div class="step-meta">
+                    <span class="meta-pill" id="sectionPill">loadDoodleData()</span>
+                    <span class="meta-pill step-id load" id="stepIdPill">LD1</span>
+                </div>
+
+                <h1 class="step-title" id="stepTitle">Fetch the binary doodle file</h1>
+                <p class="step-explanation" id="stepExplanation"></p>
+
+                <div class="shape-chips" id="shapeChips"></div>
+
+                <div class="teacher-card">
+                    <div class="teacher-label">What To Say</div>
+                    <p class="teacher-note" id="teacherNote"></p>
+                </div>
+
+                <div class="code-shell">
+                    <div class="code-header">
+                        <span class="code-title" id="codeTitle">loadDoodleData()</span>
+                        <span class="code-caption" id="codeCaption">Current line highlighted, surrounding context dimmed</span>
+                    </div>
+                    <div class="code-body" id="codeBody"></div>
+                </div>
+
+                <div class="nav-controls">
+                    <button class="nav-btn secondary" id="btnPrev" onclick="prevStep()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Previous Step
+                    </button>
+                    <button class="nav-btn primary" id="btnNext" onclick="nextStep()">
+                        Next Step
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <p class="keyboard-hint">Keyboard: <code>Left Arrow</code> and <code>Right Arrow</code></p>
+            </div>
+        </div>
+
+        <div class="canvas-panel">
+            <div class="canvas-header">
+                <div class="canvas-title-wrap">
+                    <div class="canvas-title">Interactive Visual</div>
+                    <div class="canvas-subtitle" id="canvasTitle">fetch -> ArrayBuffer -> bytes</div>
+                </div>
+                <div class="canvas-hint" id="canvasHint">Raw pixels arrive as one long stream of bytes.</div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+                <div class="canvas-overlay" id="canvasOverlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                    <span id="overlayText">Bytes -> tensors -> CNN -> doodle prediction</span>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-orange);"></div>
+                    <div class="stat-copy">
+                        <div class="stat-label">Focus</div>
+                        <div class="stat-value" id="statFocus">fetch()</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-cyan);"></div>
+                    <div class="stat-copy">
+                        <div class="stat-label">Shape</div>
+                        <div class="stat-value" id="statShape">11,000 x 784 bytes</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-dot" style="background: var(--accent-yellow);"></div>
+                    <div class="stat-copy">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" id="statStatus">Loading data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="submit-section">
+        <div class="submit-wrap">
+            <div class="submit-label">Submit Your Work</div>
+            <h2 class="submit-title">Share your finished doodle classifier</h2>
+            <p class="submit-copy">Once your CNN trains and recognizes your drawings, paste your <strong>p5.js Web Editor</strong> link below.</p>
+
+            <div id="submit-box" class="submit-card">
+                <label for="student-name" class="submit-input-label">Your name</label>
+                <input id="student-name" type="text" placeholder="e.g. Jane Doe" class="submit-input">
+
+                <label for="sketch-url" class="submit-input-label">Your p5.js sketch link</label>
+                <input id="sketch-url" type="url" placeholder="https://editor.p5js.org/yourname/sketches/abc123" class="submit-input mono">
+
+                <div id="submit-error" class="submit-error"></div>
+
+                <button id="submit-btn" onclick="submitSketch()" class="submit-btn">Submit Exercise</button>
+            </div>
+
+            <div id="success-box" class="success-card" style="display:none;">
+                <div class="success-check">&#10003;</div>
+                <h3 class="success-title">Nice work, <span id="submitted-name"></span>!</h3>
+                <p class="success-copy">You just trained a convolutional neural network to recognize doodles. Same architecture that reads handwritten digits, x-rays, and satellite images &mdash; you swapped the data and it learned a brand new task.</p>
+                <p class="success-link-row">Your link: <a id="submitted-link" href="#" target="_blank" class="success-link"></a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>By <strong>Firas El Jerdy</strong> &middot; CSC 375, NDU &middot; Chapter 7 doodle build companion</p>
+    </footer>
+
+    <script>
+        const TWO_PI = Math.PI * 2;
+        const PI = Math.PI;
+        const CATEGORIES = ["cat", "sun", "house", "tree", "fish"];
+        const CATEGORY_COLORS = ["#f97316", "#eab308", "#06b6d4", "#10b981", "#8b5cf6"];
+
+        const LOAD_DATA_CODE = [
+            "async function loadDoodleData() {",
+            "  // step 1 - fetch the binary file",
+            "  const response = await fetch(\"doodles.bin\");",
+            "  const arrayBuffer = await response.arrayBuffer();",
+            "  const allPixels = new Uint8Array(arrayBuffer);",
+            "",
+            "  // step 2 - allocate the four typed arrays",
+            "  const totalTrain = TRAIN_PER_CATEGORY * NUM_CLASSES;",
+            "  const totalTest  = TEST_PER_CATEGORY * NUM_CLASSES;",
+            "  const perCategory = TRAIN_PER_CATEGORY + TEST_PER_CATEGORY;",
+            "  const trainImages = new Float32Array(totalTrain * IMAGE_SIZE);",
+            "  const trainLabels = new Float32Array(totalTrain * NUM_CLASSES);",
+            "  const testImages  = new Float32Array(totalTest * IMAGE_SIZE);",
+            "  const testLabels  = new Float32Array(totalTest * NUM_CLASSES);",
+            "",
+            "  // step 3 - per category: normalize pixels and one-hot the label",
+            "  for (let c = 0; c < NUM_CLASSES; c++) {",
+            "    const catStart = c * perCategory * IMAGE_SIZE;",
+            "    for (let i = 0; i < TRAIN_PER_CATEGORY; i++) {",
+            "      const dst = (c * TRAIN_PER_CATEGORY + i) * IMAGE_SIZE;",
+            "      const src = catStart + i * IMAGE_SIZE;",
+            "      for (let j = 0; j < IMAGE_SIZE; j++) {",
+            "        trainImages[dst + j] = allPixels[src + j] / 255.0;",
+            "      }",
+            "      trainLabels[(c * TRAIN_PER_CATEGORY + i) * NUM_CLASSES + c] = 1;",
+            "    }",
+            "    // (test split: same idea with TEST_PER_CATEGORY)",
+            "  }",
+            "",
+            "  // step 4 - shuffle pixels and labels in lockstep",
+            "  for (let i = totalTrain - 1; i > 0; i--) {",
+            "    const j = Math.floor(Math.random() * (i + 1));",
+            "    // swap row i with row j (pixels AND labels)",
+            "  }",
+            "",
+            "  // step 5 - wrap the arrays into TensorFlow tensors",
+            "  doodleData = {",
+            "    trainImages: tf.tensor4d(trainImages, [totalTrain, 28, 28, 1]),",
+            "    trainLabels: tf.tensor2d(trainLabels, [totalTrain, NUM_CLASSES]),",
+            "    testImages:  tf.tensor4d(testImages,  [totalTest, 28, 28, 1]),",
+            "    testLabels:  tf.tensor2d(testLabels,  [totalTest, NUM_CLASSES])",
+            "  };",
+            "}"
+        ];
+
+        const BUILD_MODEL_CODE = [
+            "function buildModel() {",
+            "  // step 1",
+            "  model = tf.sequential();",
+            "",
+            "  // step 2",
+            "  model.add(tf.layers.conv2d({",
+            "    inputShape: [28, 28, 1],",
+            "    kernelSize: 3,",
+            "    filters: 16,",
+            "    activation: \"relu\"",
+            "  }));",
+            "  // step 3",
+            "  model.add(tf.layers.maxPooling2d({ poolSize: 2, strides: 2 }));",
+            "",
+            "  // step 4",
+            "  model.add(tf.layers.conv2d({",
+            "    kernelSize: 3,",
+            "    filters: 32,",
+            "    activation: \"relu\"",
+            "  }));",
+            "  // step 5",
+            "  model.add(tf.layers.maxPooling2d({ poolSize: 2, strides: 2 }));",
+            "",
+            "  // step 6",
+            "  model.add(tf.layers.flatten());",
+            "  // step 7",
+            "  model.add(tf.layers.dense({ units: 64, activation: \"relu\" }));",
+            "  // step 8 - one neuron per category: cat, sun, house, tree, fish",
+            "  model.add(tf.layers.dense({ units: NUM_CLASSES, activation: \"softmax\" }));",
+            "",
+            "  // step 9",
+            "  model.compile({",
+            "    optimizer: \"adam\",",
+            "    loss: \"categoricalCrossentropy\",",
+            "    metrics: [\"accuracy\"]",
+            "  });",
+            "}"
+        ];
+
+        const TRAIN_MODEL_CODE = [
+            "async function trainModel() {",
+            "  isTraining = true;",
+            "",
+            "  // step 1 - the actual training call",
+            "  await model.fit(doodleData.trainImages, doodleData.trainLabels, {",
+            "    epochs: 8,",
+            "    batchSize: 128,",
+            "    validationData: [doodleData.testImages, doodleData.testLabels],",
+            "    callbacks: {",
+            "      onEpochEnd: (e, logs) => {",
+            "        epoch = e + 1;",
+            "        accuracy = logs.val_acc;",
+            "      }",
+            "    }",
+            "  });",
+            "",
+            "  isTrained = true;",
+            "}"
+        ];
+
+        const CLASSIFY_DRAWING_CODE = [
+            "function classifyDrawing(gfx) {",
+            "  // step 1 - read the 28x28 pixel buffer",
+            "  let ctx = gfx.elt.getContext(\"2d\");",
+            "  let imgData = ctx.getImageData(0, 0, 28, 28);",
+            "  let pixels = new Float32Array(784);",
+            "  let sum = 0;",
+            "  for (let i = 0; i < 784; i++) {",
+            "    pixels[i] = imgData.data[i * 4] / 255.0;",
+            "    sum += pixels[i];",
+            "  }",
+            "",
+            "  // step 2 - blank canvas guard",
+            "  if (sum < 5) { prediction = -1; return; }",
+            "",
+            "  // step 3 - safe inference block",
+            "  tf.tidy(() => {",
+            "    // step 4 - shape the tensor",
+            "    let tensor = tf.tensor4d(pixels, [1, 28, 28, 1]);",
+            "    // step 5 - forward pass",
+            "    let output = model.predict(tensor);",
+            "    // step 6 - copy values back to JS",
+            "    let probs = output.dataSync();",
+            "",
+            "    // step 7 - pick the winning category",
+            "    prediction = 0;",
+            "    confidences = [];",
+            "    for (let i = 0; i < NUM_CLASSES; i++) {",
+            "      confidences.push(probs[i]);",
+            "      if (probs[i] > probs[prediction]) {",
+            "        prediction = i;",
+            "      }",
+            "    }",
+            "  });",
+            "}"
+        ];
+
+        const sections = [
+            { key: "load",  label: "Load Data",        functionName: "loadDoodleData()",  short: "LD1-LD5", description: "Read doodles.bin, normalize pixels, one-hot the labels, shuffle, wrap into tensors.", colorClass: "load" },
+            { key: "build", label: "Build Model",      functionName: "buildModel()",      short: "B1-B9",   description: "Same 7-station CNN as the digit guide. Only the final layer changes to 5 outputs.",  colorClass: "build" },
+            { key: "train", label: "Train Model",      functionName: "trainModel()",      short: "T1-T5",   description: "8 passes over 10,000 doodles. Watch validation accuracy climb after each epoch.",  colorClass: "train" },
+            { key: "infer", label: "Classify Drawing", functionName: "classifyDrawing()", short: "I1-I7",   description: "Every frame: capture the small canvas, push it through the CNN, render the bars.", colorClass: "infer" }
+        ];
+
+        const steps = [
+            // ===================== LOAD DATA =====================
+            {
+                id: "LD1", sectionKey: "load", section: "Load Data", functionName: "loadDoodleData()",
+                title: "Fetch the binary doodle file",
+                code: LOAD_DATA_CODE, focusLines: [2, 3, 4, 5],
+                explanation: "We download doodles.bin from the same folder as this sketch. The file has no headers, just raw pixel bytes for cat, sun, house, tree, and fish drawings packed end to end. Reading it as an ArrayBuffer gives us direct access to the bytes.",
+                teacherNote: "Say: This file is what prep_doodles.js produced earlier. Each byte is one pixel from one doodle. Nothing fancy: 11,000 sketches times 784 pixels equals about 8.6 megabytes of raw image data.",
+                shape: ["fetch -> ArrayBuffer", "Uint8Array of bytes", "11,000 doodles total"],
+                overlay: "Bytes from doodles.bin become a Uint8Array",
+                canvasTitle: "fetch -> ArrayBuffer -> bytes",
+                hint: "Raw pixels arrive as one long stream of bytes.",
+                drawFn: "drawLoadFetch",
+                stats: { focus: "fetch()", shape: "Uint8Array(8.6 MB)", status: "Bytes downloaded" }
+            },
+            {
+                id: "LD2", sectionKey: "load", section: "Load Data", functionName: "loadDoodleData()",
+                title: "Allocate the four typed arrays",
+                code: LOAD_DATA_CODE, focusLines: [7, 8, 9, 10, 11, 12, 13, 14],
+                explanation: "Before we copy any pixels, we reserve room for them. Float32Array is the fastest option because TensorFlow expects 32-bit floats. We make four buckets: training images, training labels, test images, test labels.",
+                teacherNote: "Say: TRAIN_PER_CATEGORY is 2,000 and TEST_PER_CATEGORY is 200, so we have 10,000 training doodles and 1,000 test doodles. Each image needs 784 floats and each label needs 5 floats.",
+                shape: ["10,000 train + 1,000 test", "trainImages: 7,840,000 floats", "labels are one-hot vectors"],
+                overlay: "Four empty Float32Arrays sized to fit every doodle",
+                canvasTitle: "Float32Array buckets",
+                hint: "Reserve memory now, fill it in the next step.",
+                drawFn: "drawLoadAllocate",
+                stats: { focus: "Float32Array", shape: "4 buckets allocated", status: "Memory ready" }
+            },
+            {
+                id: "LD3", sectionKey: "load", section: "Load Data", functionName: "loadDoodleData()",
+                title: "Normalize pixels and one-hot the labels",
+                code: LOAD_DATA_CODE, focusLines: [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27],
+                explanation: "For every doodle, we copy 784 pixels divided by 255 so the values land between 0 and 1. Then we mark the correct category by writing a 1 in position c of the label vector and leaving the other four as 0. This is one-hot encoding.",
+                teacherNote: "Say: A house doodle gets the label [0, 0, 1, 0, 0]. The softmax output later tries to reproduce that exact shape. Dividing by 255 keeps the math stable, just like in the digit demo.",
+                shape: ["pixels / 255 -> 0.0-1.0", "label[c] = 1, rest = 0", "house = [0, 0, 1, 0, 0]"],
+                overlay: "Each doodle: 784 normalized floats + a one-hot label",
+                canvasTitle: "Normalize + one-hot encode",
+                hint: "Same scale as training data + labels in the shape softmax expects.",
+                drawFn: "drawLoadExtract",
+                stats: { focus: "/ 255 + one-hot", shape: "10,000 train rows", status: "Doodles labeled" }
+            },
+            {
+                id: "LD4", sectionKey: "load", section: "Load Data", functionName: "loadDoodleData()",
+                title: "Shuffle pixels and labels in lockstep",
+                code: LOAD_DATA_CODE, focusLines: [30, 31, 32, 33, 34],
+                explanation: "Right now the dataset is sorted by category: 2,000 cats, then 2,000 suns, and so on. If we trained on that order, the network would only see one class at a time and never learn properly. Fisher-Yates shuffles the rows. Pixels and labels must move together or we destroy the data.",
+                teacherNote: "Say: Imagine flashcards. If you study 2,000 cats in a row, you stop trying to recognize them and just guess cat. Shuffling forces the network to actually compare categories on every batch.",
+                shape: ["Fisher-Yates shuffle", "swap row i with row j", "pixels AND labels move together"],
+                overlay: "Sorted dataset becomes a randomly mixed dataset",
+                canvasTitle: "Fisher-Yates shuffle",
+                hint: "Pixels and labels must stay synchronized.",
+                drawFn: "drawLoadShuffle",
+                stats: { focus: "shuffle", shape: "10,000 rows scrambled", status: "Order randomized" }
+            },
+            {
+                id: "LD5", sectionKey: "load", section: "Load Data", functionName: "loadDoodleData()",
+                title: "Wrap the arrays into TensorFlow tensors",
+                code: LOAD_DATA_CODE, focusLines: [37, 38, 39, 40, 41, 42],
+                explanation: "Plain JavaScript arrays cannot run on the GPU. tf.tensor4d wraps the pixel buffer with the shape [batch, height, width, channels] and tf.tensor2d wraps the labels as [batch, classes]. From here on TensorFlow controls these values.",
+                teacherNote: "Say: This is the bridge from the JS world to the TensorFlow world. Once data is in tensors it can run through every CNN layer in parallel on the GPU.",
+                shape: ["trainImages: [10000, 28, 28, 1]", "trainLabels: [10000, 5]", "ready for model.fit"],
+                overlay: "Float32Arrays become 4D and 2D tensors",
+                canvasTitle: "tf.tensor4d + tf.tensor2d",
+                hint: "Same numbers, now lives on the GPU.",
+                drawFn: "drawLoadTensorWrap",
+                stats: { focus: "tensor4d / tensor2d", shape: "[10000,28,28,1]", status: "Data on GPU" }
+            },
+            // ===================== BUILD MODEL =====================
+            {
+                id: "B1", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Start the empty assembly line",
+                code: BUILD_MODEL_CODE, focusLines: [2, 3],
+                explanation: "We begin with an empty sequential model. Nothing can learn yet, but we now have the one-way assembly line where every layer will be added in order.",
+                teacherNote: "Say: Same as the digit demo. Whether the data is digits, doodles, or x-rays, we always start with an empty conveyor belt.",
+                shape: ["Input 28x28x1", "Output pending", "Sequential flow"],
+                overlay: "Pixels in -> 7 stations -> doodle prediction out",
+                canvasTitle: "tf.sequential() - the empty conveyor",
+                hint: "One-way data flow from left to right.",
+                drawFn: "drawSequential",
+                stats: { focus: "Sequential", shape: "28x28x1 -> ?", status: "Assembly line created" }
+            },
+            {
+                id: "B2", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Add the first convolution layer",
+                code: BUILD_MODEL_CODE, focusLines: [5, 6, 7, 8, 9, 10, 11],
+                explanation: "Sixteen 3x3 filters slide across the input image. Each filter hunts a different local pattern: an edge, a stroke, a corner. ReLU keeps only the useful activations.",
+                teacherNote: "Say: Identical layer to the digit demo. The filters do not know they are looking at doodles, they just learn whichever local patterns help reduce the loss.",
+                shape: ["28x28x1 -> 26x26x16", "Kernel 3x3", "160 parameters"],
+                overlay: "A 3x3 filter scans the image and emits 16 feature maps",
+                canvasTitle: "Conv2D - first magnifying glass",
+                hint: "Local pattern detection on raw doodle pixels.",
+                drawFn: "drawConvolution",
+                stats: { focus: "Conv2D", shape: "28x28x1 -> 26x26x16", status: "Scanning patches" }
+            },
+            {
+                id: "B3", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Shrink with max pooling",
+                code: BUILD_MODEL_CODE, focusLines: [13],
+                explanation: "Pooling keeps the strongest activation in each 2x2 block and throws away the rest. The network keeps the important signal while cutting the spatial size in half.",
+                teacherNote: "Say: We care that an edge exists, not its exact pixel. MaxPool is the shrink ray that locks in features and reduces work for the next layer.",
+                shape: ["26x26x16 -> 13x13x16", "Pool 2x2", "0 learnable parameters"],
+                overlay: "Each 2x2 patch keeps only its brightest value",
+                canvasTitle: "MaxPooling2D - the shrink ray",
+                hint: "Half the width, half the height, same channels.",
+                drawFn: "drawMaxPool",
+                stats: { focus: "MaxPool", shape: "26x26x16 -> 13x13x16", status: "Reducing size" }
+            },
+            {
+                id: "B4", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Add a deeper convolution layer",
+                code: BUILD_MODEL_CODE, focusLines: [15, 16, 17, 18, 19, 20],
+                explanation: "Layer two combines simple clues into richer shapes: a sun's rays, the slope of a roof, a fish's tail fin. We bump the filters from 16 to 32 because there are more compound patterns to track.",
+                teacherNote: "Say: Layer one learned edges. Layer two learns features made of edges. The 32 filters here are the building blocks that will eventually shout cat or sun.",
+                shape: ["13x13x16 -> 11x11x32", "Kernel 3x3", "4,640 parameters"],
+                overlay: "More filters, richer doodle shapes, smaller spatial map",
+                canvasTitle: "Conv2D - the deeper detective",
+                hint: "Reasoning about features built from features.",
+                drawFn: "drawDeepConv",
+                stats: { focus: "Conv2D", shape: "13x13x16 -> 11x11x32", status: "Combining features" }
+            },
+            {
+                id: "B5", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Pool again to compress the feature maps",
+                code: BUILD_MODEL_CODE, focusLines: [22],
+                explanation: "Second pooling layer trims the feature maps once more. After this the network has a compact summary: cheaper to process and easier for the dense layers to use.",
+                teacherNote: "Say: We shrink one last time before the classic neural network part. Most of the signal survives, the unnecessary spatial detail is dropped.",
+                shape: ["11x11x32 -> 5x5x32", "Pool 2x2", "0 learnable parameters"],
+                overlay: "Compressed feature maps carry only the strongest responses",
+                canvasTitle: "Second MaxPooling2D - compact feature summary",
+                hint: "Shrinks the map, keeps the channels.",
+                drawFn: "drawMaxPoolCompact",
+                stats: { focus: "MaxPool", shape: "11x11x32 -> 5x5x32", status: "Compacting signal" }
+            },
+            {
+                id: "B6", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Flatten the 3D cube into one long list",
+                code: BUILD_MODEL_CODE, focusLines: [25],
+                explanation: "Convolution layers speak in grids, but dense layers expect a one-dimensional list. Flatten unrolls the 5x5x32 cube into 800 numbers in order. No learning happens here, only reshape.",
+                teacherNote: "Say: Flatten is a bridge. It does not create or destroy information, it only changes the shape so the next layer understands the input.",
+                shape: ["5x5x32 -> 800", "Pure reshape", "0 learnable parameters"],
+                overlay: "A 3D cube unrolls into one vector of 800 values",
+                canvasTitle: "Flatten - the bridge to dense layers",
+                hint: "Same numbers, different shape.",
+                drawFn: "drawFlatten",
+                stats: { focus: "Flatten", shape: "5x5x32 -> 800", status: "Reshaping only" }
+            },
+            {
+                id: "B7", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Add the hidden dense layer",
+                code: BUILD_MODEL_CODE, focusLines: [27],
+                explanation: "Each of the 800 inputs connects to each of the 64 hidden neurons, letting the model combine the extracted features into stronger doodle-level evidence.",
+                teacherNote: "Say: This is the classic perceptron math. Inputs times weights, summed up, passed through ReLU. Massively scaled up but conceptually identical to the simple network from chapter 6.",
+                shape: ["800 -> 64", "ReLU hidden layer", "51,264 parameters"],
+                overlay: "Every flattened feature can influence every hidden neuron",
+                canvasTitle: "Dense(64) - the reasoning layer",
+                hint: "Fully connected reasoning on doodle features.",
+                drawFn: "drawDense64",
+                stats: { focus: "Dense", shape: "800 -> 64", status: "Fully connected" }
+            },
+            {
+                id: "B8", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Add the 5-way softmax output layer",
+                code: BUILD_MODEL_CODE, focusLines: [29],
+                explanation: "The final dense layer has one neuron per category: cat, sun, house, tree, fish. Softmax turns the raw scores into five probabilities that add to 100 percent. Compare to the digit demo: same line of code, just NUM_CLASSES is 5 instead of 10.",
+                teacherNote: "Say: This is the only line in the whole network that changed compared to the digit demo. The architecture does not care that we swapped digits for sketches, it only cares how many output options there are.",
+                shape: ["64 -> 5", "Softmax probabilities", "325 parameters"],
+                overlay: "Five output neurons compete: cat, sun, house, tree, fish",
+                canvasTitle: "Dense(5) + softmax - the decision room",
+                hint: "Softmax outputs sum to 100 percent.",
+                drawFn: "drawSoftmax",
+                stats: { focus: "Softmax", shape: "64 -> 5", status: "Probabilities sum to 1" }
+            },
+            {
+                id: "B9", sectionKey: "build", section: "Build Model", functionName: "buildModel()",
+                title: "Compile the learning system",
+                code: BUILD_MODEL_CODE, focusLines: [32, 33, 34, 35, 36],
+                explanation: "Compile tells TensorFlow how to train. Adam updates the weights, categorical crossentropy measures how wrong the prediction is, and accuracy is the metric we display. Identical to the digit version because the loss function works for any number of classes.",
+                teacherNote: "Say: Adam is the teacher, crossentropy is the grading rubric, accuracy is the score we read out loud. Building the architecture was step one, choosing how to train it is step two.",
+                shape: ["Optimizer: adam", "Loss: categoricalCrossentropy", "Metric: accuracy"],
+                overlay: "Prediction -> loss -> optimizer -> weight updates",
+                canvasTitle: "compile() - choose the teacher and rubric",
+                hint: "Compile prepares the model. Training comes next.",
+                drawFn: "drawCompile",
+                stats: { focus: "compile()", shape: "Loss + optimizer", status: "Ready to learn" }
+            },
+            // ===================== TRAIN MODEL =====================
+            {
+                id: "T1", sectionKey: "train", section: "Train Model", functionName: "trainModel()",
+                title: "Start training with model.fit(...)",
+                code: TRAIN_MODEL_CODE, focusLines: [4, 5, 14],
+                explanation: "model.fit feeds 10,000 doodles through the network repeatedly, compares each prediction to the correct one-hot label, and nudges every weight to lower the loss. This is where the actual learning happens.",
+                teacherNote: "Say: Everything before this was setup. The moment we call model.fit, the network begins seeing examples and adjusting itself.",
+                shape: ["10,000 training doodles", "5 output classes", "Supervised learning loop"],
+                overlay: "Doodles + labels enter the network many times during training",
+                canvasTitle: "model.fit() - send the CNN to school",
+                hint: "Training is a repeated cycle of guess, grade, and update.",
+                drawFn: "drawFitIntro",
+                stats: { focus: "model.fit()", shape: "Train -> CNN -> updates", status: "Learning loop started" }
+            },
+            {
+                id: "T2", sectionKey: "train", section: "Train Model", functionName: "trainModel()",
+                title: "epochs: 8 - eight full passes over the dataset",
+                code: TRAIN_MODEL_CODE, focusLines: [6],
+                explanation: "An epoch is one full pass through every training doodle. We use 8 here, two fewer than the digit demo, because doodles converge faster: there are only 5 classes to separate instead of 10.",
+                teacherNote: "Say: One epoch is one full reading of the textbook. Eight epochs means the network rereads it eight times, getting a little sharper each pass.",
+                shape: ["Epochs = 8", "8 passes over data", "Accuracy rises each epoch"],
+                overlay: "Each epoch is one complete trip through the training set",
+                canvasTitle: "epochs: 8 - repeat the learning cycle",
+                hint: "Watch validation accuracy climb after each epoch.",
+                drawFn: "drawTrainingEpochs",
+                stats: { focus: "epochs", shape: "8 full passes", status: "Repeating learning" }
+            },
+            {
+                id: "T3", sectionKey: "train", section: "Train Model", functionName: "trainModel()",
+                title: "batchSize: 128 - mini-batch learning",
+                code: TRAIN_MODEL_CODE, focusLines: [7],
+                explanation: "Instead of updating after every doodle, the network studies 128 examples, computes the average gradient, and updates the weights once. Smaller batches are noisy, larger batches are slow. 128 is the sweet spot.",
+                teacherNote: "Say: Think of a batch as a stack of flashcards. The network guesses all 128, then learns from the group. Repeat until every doodle has been seen.",
+                shape: ["Batch size = 128", "Mini-batch gradient", "Balances speed and stability"],
+                overlay: "Bundle 128 doodles before each weight update",
+                canvasTitle: "batchSize: 128 - mini-batch learning",
+                hint: "Smaller than the dataset, larger than one image.",
+                drawFn: "drawTrainingBatch",
+                stats: { focus: "batchSize", shape: "128 doodles per update", status: "Mini-batch learning" }
+            },
+            {
+                id: "T4", sectionKey: "train", section: "Train Model", functionName: "trainModel()",
+                title: "validationData - the 1,000 doodle pop quiz",
+                code: TRAIN_MODEL_CODE, focusLines: [8],
+                explanation: "Validation doodles never touch the weights. After every epoch, TensorFlow runs them through the network so we can measure generalization, not memorization.",
+                teacherNote: "Say: Training data is homework. Validation data is the pop quiz. If quiz accuracy keeps rising, the model is learning real visual patterns, not just memorizing.",
+                shape: ["1,000 validation doodles", "Never used for weight updates", "Tracks generalization"],
+                overlay: "Training and validation must stay separate",
+                canvasTitle: "validationData - the pop quiz set",
+                hint: "These doodles evaluate but never teach.",
+                drawFn: "drawTrainingValidation",
+                stats: { focus: "validationData", shape: "Train vs test split", status: "Generalization check" }
+            },
+            {
+                id: "T5", sectionKey: "train", section: "Train Model", functionName: "trainModel()",
+                title: "onEpochEnd - update the live UI each epoch",
+                code: TRAIN_MODEL_CODE, focusLines: [9, 10, 11, 12, 13],
+                explanation: "After every epoch this callback fires. We save the new epoch number and validation accuracy so the sketch can update its status text live in front of the class.",
+                teacherNote: "Say: Without this callback, training would happen silently and the UI would never move. The callback is what turns training into a live performance.",
+                shape: ["epoch = e + 1", "accuracy = logs.val_acc", "Live UI feedback"],
+                overlay: "After each epoch, the UI receives fresh progress and accuracy",
+                canvasTitle: "callbacks.onEpochEnd - live training feedback",
+                hint: "Bridges TensorFlow internals to the visible interface.",
+                drawFn: "drawTrainingCallback",
+                stats: { focus: "onEpochEnd", shape: "Epoch -> UI state", status: "Live updates" }
+            },
+            // ===================== CLASSIFY DRAWING =====================
+            {
+                id: "I1", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Read the 28x28 pixel buffer",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [2, 3, 4, 5, 6, 7],
+                explanation: "Inference begins with plain browser code. We grab the tiny 28x28 graphics buffer, read the RGBA values, and prepare a Float32Array that will hold exactly 784 grayscale pixels.",
+                teacherNote: "Say: The network cannot read the visible 280x280 canvas directly. It only sees the small 28x28 version. This is the resolution the model was trained on.",
+                shape: ["28x28 image data", "784 grayscale values", "Standard canvas API"],
+                overlay: "Canvas pixels become a 784-value JavaScript array",
+                canvasTitle: "Extract pixels from the tiny graphics buffer",
+                hint: "Plain JavaScript before TensorFlow enters.",
+                drawFn: "drawPixelExtraction",
+                stats: { focus: "getImageData()", shape: "28x28 -> 784 values", status: "Reading pixels" }
+            },
+            {
+                id: "I2", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Normalize and reject blank drawings",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [8, 9, 12, 13],
+                explanation: "Each pixel is divided by 255 so the values match the 0.0 to 1.0 scale used during training. We also sum the brightness and return early if the canvas is essentially empty.",
+                teacherNote: "Say: Same scale as training data. And if the user has not drawn anything, predicting would only produce nonsense bars.",
+                shape: ["0-255 -> 0.0-1.0", "sum < 5 means blank", "Skip useless prediction"],
+                overlay: "Normalize the pixels, then guard against an empty canvas",
+                canvasTitle: "Normalization + blank-canvas guard",
+                hint: "Consistent input scale is critical.",
+                drawFn: "drawNormalizeGuard",
+                stats: { focus: "/ 255.0", shape: "784 normalized values", status: "Blank check active" }
+            },
+            {
+                id: "I3", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Wrap prediction work in tf.tidy()",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [16, 17],
+                explanation: "TensorFlow creates temporary tensors during inference. tf.tidy automatically cleans up the ones we do not keep, preventing a slow browser memory leak while the user keeps drawing.",
+                teacherNote: "Say: tidy is the garbage collector for TensorFlow math. Every frame creates new tensors. Without tidy, the browser hoards them all and eventually freezes.",
+                shape: ["Temporary tensors", "Auto cleanup", "Safe repeated inference"],
+                overlay: "Create tensors, use them, clean up the leftovers",
+                canvasTitle: "tf.tidy() - keep memory under control",
+                hint: "Live demos call predict many times.",
+                drawFn: "drawTidyCleanup",
+                stats: { focus: "tf.tidy()", shape: "Temp tensors cleaned", status: "Memory safe" }
+            },
+            {
+                id: "I4", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Build the 4D input tensor",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [18, 19],
+                explanation: "The CNN expects four dimensions: batch, height, width, channels. Even for one grayscale doodle we still need the shape [1, 28, 28, 1].",
+                teacherNote: "Say: TensorFlow always expects the full input shape, even for a single image. The leading 1 means batch size one.",
+                shape: ["tf.tensor4d(...)", "[1, 28, 28, 1]", "Batch x width x height x channel"],
+                overlay: "784 flat values are reshaped into a 4D image tensor",
+                canvasTitle: "tf.tensor4d - package the pixels for the CNN",
+                hint: "One image still needs the full CNN input shape.",
+                drawFn: "drawTensorShape",
+                stats: { focus: "tensor4d", shape: "[1,28,28,1]", status: "Tensor packaged" }
+            },
+            {
+                id: "I5", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Run model.predict(tensor)",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [20, 21],
+                explanation: "Now the input flies through the full CNN: convolution, pooling, flatten, dense, softmax. All learned weights collaborate to produce five output scores for the current drawing.",
+                teacherNote: "Say: This is the magic-looking moment, but it is the same pipeline we built earlier, now used in the forward direction without changing weights.",
+                shape: ["Input tensor -> CNN", "7 learned transformations", "Returns output tensor"],
+                overlay: "The tensor moves through all 7 layers in one forward pass",
+                canvasTitle: "model.predict() - run the forward pass",
+                hint: "Inference reuses the trained architecture.",
+                drawFn: "drawPredictFlow",
+                stats: { focus: "model.predict()", shape: "[1,28,28,1] -> [1,5]", status: "Forward pass" }
+            },
+            {
+                id: "I6", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Pull probabilities back into JavaScript",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [22, 23],
+                explanation: "dataSync copies the output values from TensorFlow's tensor world back into a normal JavaScript typed array. Once we have those five numbers, the UI can use them like any ordinary array.",
+                teacherNote: "Say: The network answers on the TensorFlow side. dataSync is the bridge back to everyday JavaScript so the UI can draw the bars.",
+                shape: ["Output tensor -> typed array", "5 probabilities", "Back on the JS side"],
+                overlay: "TensorFlow hands five probabilities back to JavaScript",
+                canvasTitle: "dataSync() - pull the answer off the GPU",
+                hint: "Prediction becomes UI data only after this transfer.",
+                drawFn: "drawDataSyncTransfer",
+                stats: { focus: "dataSync()", shape: "Tensor -> Float32Array(5)", status: "Results retrieved" }
+            },
+            {
+                id: "I7", sectionKey: "infer", section: "Classify Drawing", functionName: "classifyDrawing()",
+                title: "Pick the winner and build the bars",
+                code: CLASSIFY_DRAWING_CODE, focusLines: [25, 26, 27, 28, 29, 30, 31, 32, 33],
+                explanation: "We initialize the predicted class to zero, loop over the five probabilities, store each confidence, and replace the winner whenever we find a larger value. That gives us both the giant category label and the full probability bar chart.",
+                teacherNote: "Say: This final loop is just argmax in plain JavaScript. The model already did the hard work. We pick the biggest score and visualize all five.",
+                shape: ["5 probabilities", "argmax over classes", "Populate confidence bars"],
+                overlay: "Compare all five probabilities and keep the biggest one",
+                canvasTitle: "Pick the winner and render the bars",
+                hint: "Final translation from probabilities into a visible label.",
+                drawFn: "drawWinnerBars",
+                stats: { focus: "argmax loop", shape: "5 scores -> 1 winner", status: "Prediction visible" }
+            }
+        ];
+
+        // === Sample doodle pixel patterns (28x28) =====
+        function blankGrid() { return Array.from({ length: 28 }, () => new Array(28).fill(0)); }
+        function paintCircle(g, cx, cy, rIn, rOut, value) {
+            for (let y = 0; y < 28; y++) {
+                for (let x = 0; x < 28; x++) {
+                    const d = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+                    if (d >= rIn && d <= rOut) g[y][x] = Math.max(g[y][x], value);
+                }
+            }
+        }
+        function paintLine(g, x0, y0, x1, y1, value) {
+            const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) + 1;
+            for (let s = 0; s <= steps; s++) {
+                const x = Math.round(x0 + ((x1 - x0) * s) / steps);
+                const y = Math.round(y0 + ((y1 - y0) * s) / steps);
+                if (x >= 0 && x < 28 && y >= 0 && y < 28) g[y][x] = Math.max(g[y][x], value);
+            }
+        }
+
+        const sunGrid = (() => {
+            const g = blankGrid();
+            paintCircle(g, 14, 14, 3.4, 4.6, 0.95);
+            for (let i = 0; i < 8; i++) {
+                const a = (i * Math.PI) / 4;
+                const x0 = 14 + Math.cos(a) * 6;
+                const y0 = 14 + Math.sin(a) * 6;
+                const x1 = 14 + Math.cos(a) * 11;
+                const y1 = 14 + Math.sin(a) * 11;
+                paintLine(g, Math.round(x0), Math.round(y0), Math.round(x1), Math.round(y1), 0.95);
+            }
+            return g;
+        })();
+
+        const houseGrid = (() => {
+            const g = blankGrid();
+            for (let y = 14; y <= 22; y++) { g[y][8] = 0.95; g[y][20] = 0.95; }
+            for (let x = 8; x <= 20; x++) { g[22][x] = 0.95; }
+            paintLine(g, 8, 14, 14, 6, 0.95);
+            paintLine(g, 14, 6, 20, 14, 0.95);
+            for (let y = 17; y <= 20; y++) g[y][13] = 0.85;
+            for (let y = 17; y <= 20; y++) g[y][15] = 0.85;
+            for (let x = 13; x <= 15; x++) g[17][x] = 0.85;
+            return g;
+        })();
+
+        const catGrid = (() => {
+            const g = blankGrid();
+            paintCircle(g, 14, 17, 5.2, 6.4, 0.9);
+            paintLine(g, 9, 12, 7, 7, 0.9); paintLine(g, 7, 7, 11, 10, 0.9);
+            paintLine(g, 19, 12, 21, 7, 0.9); paintLine(g, 21, 7, 17, 10, 0.9);
+            g[16][11] = 0.95; g[16][17] = 0.95;
+            paintLine(g, 13, 19, 15, 19, 0.85);
+            return g;
+        })();
+
+        const treeGrid = (() => {
+            const g = blankGrid();
+            paintCircle(g, 14, 11, 5.5, 6.7, 0.92);
+            for (let y = 17; y <= 23; y++) { g[y][13] = 0.95; g[y][14] = 0.95; g[y][15] = 0.95; }
+            return g;
+        })();
+
+        const fishGrid = (() => {
+            const g = blankGrid();
+            paintCircle(g, 12, 14, 3.6, 4.8, 0.92);
+            paintLine(g, 17, 14, 22, 9, 0.95);
+            paintLine(g, 17, 14, 22, 19, 0.95);
+            paintLine(g, 22, 9, 22, 19, 0.95);
+            g[13][9] = 0.95;
+            return g;
+        })();
+
+        const CATEGORY_GRIDS = [catGrid, sunGrid, houseGrid, treeGrid, fishGrid];
+
+        // === core state and DOM wiring ====================================
+        let currentStep = 0;
+        let frame = 0;
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let W = 0;
+        let H = 0;
+
+        function init() {
+            resize();
+            renderRibbon();
+            renderSections();
+            updateUI();
+            animate();
+        }
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + "px";
+            canvas.style.height = rect.height + "px";
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            W = rect.width;
+            H = rect.height;
+        }
+        window.addEventListener("resize", resize);
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep += 1; frame = 0; updateUI(); } }
+        function prevStep() { if (currentStep > 0) { currentStep -= 1; frame = 0; updateUI(); } }
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowRight") nextStep();
+            if (event.key === "ArrowLeft") prevStep();
+        });
+
+        function renderRibbon() {
+            const ribbon = document.getElementById("stepRibbon");
+            ribbon.innerHTML = "";
+            steps.forEach((step) => {
+                const segment = document.createElement("div");
+                segment.className = `ribbon-segment ${step.sectionKey}`;
+                ribbon.appendChild(segment);
+            });
+        }
+        function renderSections() {
+            const strip = document.getElementById("sectionStrip");
+            strip.innerHTML = "";
+            sections.forEach((section) => {
+                const card = document.createElement("div");
+                card.className = `section-card ${section.colorClass}`;
+                card.dataset.sectionKey = section.key;
+                card.innerHTML = `
+                    <div class="section-top">
+                        <span class="section-name">${section.functionName}</span>
+                        <span class="section-range">${section.short}</span>
+                    </div>
+                    <p class="section-desc">${section.description}</p>
+                `;
+                strip.appendChild(card);
+            });
+        }
+        function updateUI() {
+            const step = steps[currentStep];
+            const sectionInfo = sections.find((section) => section.key === step.sectionKey);
+            const sectionSteps = steps.filter((item) => item.sectionKey === step.sectionKey);
+            const sectionIndex = sectionSteps.findIndex((item) => item.id === step.id);
+
+            document.getElementById("stepIdPill").textContent = step.id;
+            document.getElementById("stepIdPill").className = `meta-pill step-id ${step.sectionKey}`;
+            document.getElementById("sectionPill").textContent = step.functionName;
+            document.getElementById("stepTitle").textContent = step.title;
+            document.getElementById("stepExplanation").textContent = step.explanation;
+            document.getElementById("teacherNote").textContent = step.teacherNote;
+            document.getElementById("codeTitle").textContent = step.functionName;
+            document.getElementById("canvasTitle").textContent = step.canvasTitle;
+            document.getElementById("canvasHint").textContent = step.hint;
+            document.getElementById("overlayText").textContent = step.overlay;
+
+            document.getElementById("progressText").textContent = `Step ${currentStep + 1} / ${steps.length}`;
+            document.getElementById("progressFill").style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            document.getElementById("sectionProgressLabel").textContent = sectionInfo.functionName;
+            document.getElementById("sectionProgressText").textContent = `${sectionIndex + 1} / ${sectionSteps.length}`;
+            document.getElementById("sectionProgressFill").style.width = `${((sectionIndex + 1) / sectionSteps.length) * 100}%`;
+
+            document.getElementById("statFocus").textContent = step.stats.focus;
+            document.getElementById("statShape").textContent = step.stats.shape;
+            document.getElementById("statStatus").textContent = step.stats.status;
+
+            renderShapes(step);
+            renderCode(step);
+            updateRibbonState();
+            updateSectionState(step.sectionKey);
+
+            document.getElementById("btnPrev").disabled = currentStep === 0;
+            document.getElementById("btnNext").disabled = currentStep === steps.length - 1;
+        }
+        function renderShapes(step) {
+            const container = document.getElementById("shapeChips");
+            container.innerHTML = "";
+            step.shape.forEach((item, index) => {
+                const chip = document.createElement("span");
+                chip.className = "shape-chip";
+                chip.innerHTML = `<span class="dot" style="background:${getChipColor(step.sectionKey, index)};"></span>${escapeHtml(item)}`;
+                container.appendChild(chip);
+            });
+        }
+        function renderCode(step) {
+            const container = document.getElementById("codeBody");
+            const focus = step.focusLines;
+            container.innerHTML = step.code.map((line, index) => {
+                const lineNumber = index + 1;
+                const distance = minDistance(lineNumber, focus);
+                const isActive = focus.includes(lineNumber);
+                const lineClass = isActive ? "active" : distance <= 2 ? "near" : "dim";
+                const commentClass = line.trim().startsWith("//") ? " comment" : "";
+                return `
+                    <div class="code-line ${lineClass}${commentClass}">
+                        <span class="line-no">${String(lineNumber).padStart(2, "0")}</span>
+                        <span class="line-text">${escapeHtml(line)}</span>
+                    </div>
+                `;
+            }).join("");
+        }
+        function updateRibbonState() {
+            document.querySelectorAll(".ribbon-segment").forEach((segment, index) => {
+                segment.classList.remove("completed", "active");
+                if (index < currentStep) segment.classList.add("completed");
+                if (index === currentStep) segment.classList.add("active");
+            });
+        }
+        function updateSectionState(sectionKey) {
+            document.querySelectorAll(".section-card").forEach((card) => {
+                card.classList.toggle("active", card.dataset.sectionKey === sectionKey);
+            });
+        }
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function minDistance(value, list) {
+            return Math.min(...list.map((item) => Math.abs(item - value)));
+        }
+        function getChipColor(sectionKey, index) {
+            const palettes = {
+                load:  ["#f97316", "#eab308", "#06b6d4"],
+                build: ["#8b5cf6", "#06b6d4", "#f59e0b"],
+                train: ["#10b981", "#06b6d4", "#eab308"],
+                infer: ["#ef4444", "#f97316", "#06b6d4"]
+            };
+            return palettes[sectionKey][index % palettes[sectionKey].length];
+        }
+
+        // === drawing utilities ===========================================
+        function clearCanvas(bg = "#0f172a") { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+        function roundRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + width, y, x + width, y + height, radius);
+            ctx.arcTo(x + width, y + height, x, y + height, radius);
+            ctx.arcTo(x, y + height, x, y, radius);
+            ctx.arcTo(x, y, x + width, y, radius);
+            ctx.closePath();
+        }
+        function mapVal(value, inMin, inMax, outMin, outMax) { return outMin + ((value - inMin) / (inMax - inMin)) * (outMax - outMin); }
+        function clamp(value, low, high) { return Math.max(low, Math.min(high, value)); }
+        function drawGridLines(x, y, rows, cols, cellSize, color) {
+            ctx.strokeStyle = color; ctx.lineWidth = 0.5;
+            for (let row = 0; row <= rows; row++) {
+                ctx.beginPath(); ctx.moveTo(x, y + row * cellSize); ctx.lineTo(x + cols * cellSize, y + row * cellSize); ctx.stroke();
+            }
+            for (let col = 0; col <= cols; col++) {
+                ctx.beginPath(); ctx.moveTo(x + col * cellSize, y); ctx.lineTo(x + col * cellSize, y + rows * cellSize); ctx.stroke();
+            }
+        }
+        function drawDoodle(grid, x, y, cellSize, tint = [255, 255, 255]) {
+            for (let row = 0; row < grid.length; row++) {
+                for (let col = 0; col < grid[0].length; col++) {
+                    const value = grid[row][col];
+                    if (value > 0.01) {
+                        ctx.fillStyle = `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, ${value})`;
+                        ctx.fillRect(x + col * cellSize, y + row * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+        function drawArrow(x1, y1, x2, y2, color = "rgba(255,255,255,0.3)", dashed = false) {
+            ctx.save();
+            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.6;
+            if (dashed) ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            ctx.setLineDash([]);
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 9 * Math.cos(angle - PI / 6), y2 - 9 * Math.sin(angle - PI / 6));
+            ctx.lineTo(x2 - 9 * Math.cos(angle + PI / 6), y2 - 9 * Math.sin(angle + PI / 6));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function drawLabel(text, x, y, color = "rgba(255,255,255,0.7)", align = "center", size = 11) {
+            ctx.fillStyle = color;
+            ctx.font = `600 ${size}px JetBrains Mono, monospace`;
+            ctx.textAlign = align; ctx.textBaseline = "middle";
+            ctx.fillText(text, x, y);
+        }
+
+        // === LOAD section drawings ========================================
+        function drawLoadFetch() {
+            clearCanvas(); frame += 1;
+            const cardX = W * 0.08, cardY = H * 0.18, cardW = W * 0.26, cardH = H * 0.5;
+            ctx.fillStyle = "rgba(249,115,22,0.14)";
+            ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2;
+            roundRect(cardX, cardY, cardW, cardH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("doodles.bin", cardX + cardW / 2, cardY + 28, "#f97316", "center", 14);
+            drawLabel("8.6 MB", cardX + cardW / 2, cardY + 50, "rgba(255,255,255,0.5)", "center", 10);
+            for (let i = 0; i < 5; i++) {
+                const cy = cardY + 86 + i * 32;
+                ctx.fillStyle = `${CATEGORY_COLORS[i]}33`;
+                roundRect(cardX + 18, cy, cardW - 36, 24, 6); ctx.fill();
+                ctx.fillStyle = CATEGORY_COLORS[i];
+                ctx.font = "700 11px Inter, sans-serif";
+                ctx.textAlign = "left"; ctx.textBaseline = "middle";
+                ctx.fillText(CATEGORIES[i], cardX + 32, cy + 12);
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.font = "500 10px JetBrains Mono, monospace";
+                ctx.textAlign = "right";
+                ctx.fillText("2,200 doodles", cardX + cardW - 24, cy + 12);
+            }
+
+            const flowX1 = cardX + cardW + 18;
+            const flowX2 = W * 0.56;
+            const flowY = cardY + cardH / 2;
+            const dotPos = ((frame % 80) / 80);
+            for (let i = 0; i < 3; i++) {
+                const offset = (dotPos + i * 0.33) % 1;
+                ctx.fillStyle = `rgba(249,115,22,${0.7 - offset * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(flowX1 + offset * (flowX2 - flowX1), flowY, 5, 0, TWO_PI);
+                ctx.fill();
+            }
+            drawArrow(flowX1, flowY, flowX2, flowY, "rgba(255,255,255,0.2)", true);
+            drawLabel("await fetch()", (flowX1 + flowX2) / 2, flowY - 20, "#fbbf24", "center", 11);
+
+            const bufX = W * 0.6, bufY = cardY, bufW = W * 0.32, bufH = cardH;
+            ctx.fillStyle = "rgba(15,23,42,0.7)";
+            ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 2;
+            roundRect(bufX, bufY, bufW, bufH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("Uint8Array(arrayBuffer)", bufX + bufW / 2, bufY + 24, "#06b6d4", "center", 12);
+
+            const cellSize = 8;
+            const cols = Math.floor((bufW - 24) / cellSize);
+            const rows = Math.floor((bufH - 60) / cellSize);
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const idx = r * cols + c;
+                    const wave = Math.sin(idx * 0.13 + frame * 0.05) * 0.4 + 0.5;
+                    if (idx <= dotPos * rows * cols) {
+                        ctx.fillStyle = `rgba(6,182,212,${wave})`;
+                        ctx.fillRect(bufX + 12 + c * cellSize, bufY + 44 + r * cellSize, cellSize - 1, cellSize - 1);
+                    } else {
+                        ctx.fillStyle = "rgba(255,255,255,0.05)";
+                        ctx.fillRect(bufX + 12 + c * cellSize, bufY + 44 + r * cellSize, cellSize - 1, cellSize - 1);
+                    }
+                }
+            }
+            drawLabel("each byte = one pixel from one doodle", W / 2, H - 22, "rgba(255,255,255,0.36)", "center", 10);
+        }
+
+        function drawLoadAllocate() {
+            clearCanvas(); frame += 1;
+            const buckets = [
+                { label: "trainImages", sub: "Float32Array(7,840,000)", chip: "10,000 x 784", color: "#3b82f6" },
+                { label: "trainLabels", sub: "Float32Array(50,000)",    chip: "10,000 x 5",  color: "#8b5cf6" },
+                { label: "testImages",  sub: "Float32Array(784,000)",  chip: "1,000 x 784", color: "#06b6d4" },
+                { label: "testLabels",  sub: "Float32Array(5,000)",     chip: "1,000 x 5",   color: "#10b981" }
+            ];
+            const top = H * 0.18, bottom = H * 0.78;
+            const colW = W * 0.2;
+            const startX = W * 0.06;
+            buckets.forEach((bucket, i) => {
+                const x = startX + i * (colW + W * 0.012);
+                const fillProgress = clamp((frame - i * 30) / 60, 0, 1);
+                ctx.fillStyle = `${bucket.color}1a`;
+                ctx.strokeStyle = bucket.color;
+                ctx.lineWidth = 2;
+                roundRect(x, top, colW, bottom - top, 14);
+                ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = bucket.color;
+                ctx.fillRect(x + 8, bottom - 12 - (bottom - top - 60) * fillProgress, colW - 16, (bottom - top - 60) * fillProgress);
+
+                drawLabel(bucket.label, x + colW / 2, top + 22, bucket.color, "center", 13);
+                drawLabel(bucket.sub, x + colW / 2, top + 42, "rgba(255,255,255,0.55)", "center", 10);
+                drawLabel(bucket.chip, x + colW / 2, top + 62, "rgba(255,255,255,0.4)", "center", 10);
+                drawLabel(`${Math.round(fillProgress * 100)}%`, x + colW / 2, bottom - 18, "#ffffff", "center", 12);
+            });
+            drawLabel("four empty buckets sized exactly for the dataset", W / 2, H - 22, "rgba(255,255,255,0.4)", "center", 11);
+        }
+
+        function drawLoadExtract() {
+            clearCanvas(); frame += 1;
+            const cycle = Math.floor((frame / 80) % 5);
+            const grid = CATEGORY_GRIDS[cycle];
+
+            const leftX = W * 0.06, leftY = H * 0.18;
+            const cellSize = Math.min((W * 0.26) / 28, (H * 0.5) / 28);
+            const drawSize = cellSize * 28;
+            ctx.fillStyle = "rgba(15,23,42,0.7)";
+            ctx.strokeStyle = "#f97316";
+            ctx.lineWidth = 2;
+            roundRect(leftX, leftY, drawSize + 16, drawSize + 16, 12);
+            ctx.fill(); ctx.stroke();
+            drawDoodle(grid, leftX + 8, leftY + 8, cellSize, [255, 240, 200]);
+            drawGridLines(leftX + 8, leftY + 8, 28, 28, cellSize, "rgba(255,255,255,0.04)");
+            drawLabel(CATEGORIES[cycle].toUpperCase(), leftX + drawSize / 2 + 8, leftY + drawSize + 32, CATEGORY_COLORS[cycle], "center", 14);
+            drawLabel("/ 255.0", leftX + drawSize / 2 + 8, leftY + drawSize + 50, "#fbbf24", "center", 10);
+
+            const arrX = W * 0.42, arrY = H * 0.24, arrW = Math.max(260, W * 0.34);
+            drawArrow(leftX + drawSize + 24, leftY + drawSize / 2 + 8, arrX - 12, arrY + 60, "rgba(255,255,255,0.3)", true);
+            ctx.fillStyle = "rgba(15,23,42,0.6)";
+            ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 2;
+            roundRect(arrX, arrY, arrW, 90, 12);
+            ctx.fill(); ctx.stroke();
+            drawLabel("trainImages[dst .. dst+784]", arrX + arrW / 2, arrY + 22, "#06b6d4", "center", 12);
+            const sampleCount = 22;
+            const samplePadX = 14;
+            const samplePitch = (arrW - samplePadX * 2) / sampleCount;
+            const sampleW = Math.max(3, samplePitch - 2);
+            for (let i = 0; i < sampleCount; i++) {
+                const value = grid[Math.floor(i / 5) + 4][(i % 5) * 4 + 4] || 0;
+                const x = arrX + samplePadX + i * samplePitch;
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                roundRect(x, arrY + 38, sampleW, 36, 3); ctx.fill();
+                ctx.fillStyle = `rgba(255,255,255,${0.25 + value * 0.7})`;
+                ctx.fillRect(x + 1, arrY + 39, Math.max(1, sampleW - 2), 34);
+                ctx.fillStyle = "rgba(255,255,255,0.7)";
+                ctx.font = "500 7px JetBrains Mono, monospace";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(value.toFixed(1), x + sampleW / 2, arrY + 80);
+            }
+
+            const labY = arrY + 122;
+            ctx.fillStyle = "rgba(15,23,42,0.6)";
+            ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 2;
+            roundRect(arrX, labY, arrW, 80, 12);
+            ctx.fill(); ctx.stroke();
+            drawLabel("trainLabels (one-hot)", arrX + arrW / 2, labY + 22, "#8b5cf6", "center", 12);
+            const labelPitch = (arrW - 24) / 5;
+            const labelCellW = Math.min(48, labelPitch - 8);
+            for (let i = 0; i < 5; i++) {
+                const x = arrX + 12 + labelPitch * (i + 0.5);
+                const isOn = i === cycle;
+                ctx.fillStyle = isOn ? "rgba(139,92,246,0.85)" : "rgba(255,255,255,0.08)";
+                ctx.strokeStyle = isOn ? "#c4b5fd" : "rgba(255,255,255,0.18)";
+                ctx.lineWidth = 1.5;
+                roundRect(x - labelCellW / 2, labY + 40, labelCellW, 26, 6); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = isOn ? "#ffffff" : "rgba(255,255,255,0.6)";
+                ctx.font = "700 14px JetBrains Mono, monospace";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(isOn ? "1" : "0", x, labY + 53);
+                drawLabel(CATEGORIES[i], x, labY + 76, isOn ? CATEGORY_COLORS[i] : "rgba(255,255,255,0.42)", "center", 9);
+            }
+            drawLabel("each row: 784 normalized pixels + 5-class one-hot label", W / 2, H - 22, "rgba(255,255,255,0.4)", "center", 11);
+        }
+
+        function drawLoadShuffle() {
+            clearCanvas(); frame += 1;
+            const rows = 12;
+            const rowH = (H - 100) / rows;
+            const leftX = W * 0.08;
+            const labelW = 50;
+            const barX = leftX + labelW + 10;
+            const barW = W * 0.36 - labelW;
+            const startY = 60;
+
+            const order = [];
+            const t = (frame / 60) % 1;
+            for (let r = 0; r < rows; r++) {
+                const original = Math.floor((r / rows) * 5);
+                const target = (original + Math.floor(frame / 20)) % 5;
+                const blended = original + (target - original) * t;
+                order.push(blended);
+            }
+
+            drawLabel("BEFORE shuffle (sorted by category)", leftX + (labelW + barW) / 2, 30, "rgba(255,255,255,0.6)", "center", 11);
+            for (let r = 0; r < rows; r++) {
+                const cat = Math.floor((r / rows) * 5);
+                const y = startY + r * rowH;
+                ctx.fillStyle = CATEGORY_COLORS[cat];
+                roundRect(leftX, y, labelW, rowH - 6, 4); ctx.fill();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "700 9px Inter, sans-serif";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(CATEGORIES[cat], leftX + labelW / 2, y + (rowH - 6) / 2);
+                ctx.fillStyle = `${CATEGORY_COLORS[cat]}55`;
+                roundRect(barX, y, barW, rowH - 6, 4); ctx.fill();
+            }
+
+            const rightX = W * 0.56;
+            const rightBarX = rightX + labelW + 10;
+            drawLabel("AFTER shuffle (random order)", rightX + (labelW + barW) / 2, 30, "rgba(255,255,255,0.6)", "center", 11);
+            const seed = Math.floor(frame / 60);
+            for (let r = 0; r < rows; r++) {
+                const cat = Math.floor(((r * 7 + seed * 3) % rows) / rows * 5);
+                const y = startY + r * rowH;
+                ctx.fillStyle = CATEGORY_COLORS[cat];
+                roundRect(rightX, y, labelW, rowH - 6, 4); ctx.fill();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "700 9px Inter, sans-serif";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(CATEGORIES[cat], rightX + labelW / 2, y + (rowH - 6) / 2);
+                ctx.fillStyle = `${CATEGORY_COLORS[cat]}55`;
+                roundRect(rightBarX, y, barW, rowH - 6, 4); ctx.fill();
+            }
+
+            drawArrow(barX + barW + 14, H / 2, rightX - 14, H / 2, "rgba(251,191,36,0.7)", true);
+            drawLabel("Fisher-Yates", (barX + barW + rightX) / 2, H / 2 - 18, "#fbbf24", "center", 12);
+            drawLabel("swap pixels AND labels together", W / 2, H - 22, "rgba(255,255,255,0.4)", "center", 11);
+        }
+
+        function drawLoadTensorWrap() {
+            clearCanvas(); frame += 1;
+            const leftX = W * 0.06, topY = H * 0.18;
+            const arrW = W * 0.34, arrH = H * 0.28;
+
+            ctx.fillStyle = "rgba(6,182,212,0.16)";
+            ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 2;
+            roundRect(leftX, topY, arrW, arrH, 14); ctx.fill(); ctx.stroke();
+            drawLabel("Float32Array (CPU)", leftX + arrW / 2, topY + 24, "#06b6d4", "center", 12);
+            for (let i = 0; i < 40; i++) {
+                const x = leftX + 18 + (i % 10) * ((arrW - 36) / 10);
+                const y = topY + 50 + Math.floor(i / 10) * 22;
+                const v = Math.abs(Math.sin(i * 0.4 + frame * 0.03));
+                ctx.fillStyle = `rgba(6,182,212,${0.2 + v * 0.6})`;
+                ctx.fillRect(x, y, ((arrW - 36) / 10) - 4, 16);
+            }
+
+            const botY = topY + arrH + 30;
+            ctx.fillStyle = "rgba(249,115,22,0.16)";
+            ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2;
+            roundRect(leftX, botY, arrW, arrH, 14); ctx.fill(); ctx.stroke();
+            drawLabel("Float32Array (CPU)", leftX + arrW / 2, botY + 24, "#f97316", "center", 12);
+            drawLabel("labels: one-hot rows", leftX + arrW / 2, botY + 42, "rgba(255,255,255,0.4)", "center", 9);
+            const oneHotPitch = (arrW - 32) / 5;
+            const oneHotCellW = Math.min(32, oneHotPitch - 4);
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const x = leftX + 16 + c * oneHotPitch;
+                    const y = botY + 60 + r * 18;
+                    const isOn = c === r;
+                    ctx.fillStyle = isOn ? "#f97316" : "rgba(255,255,255,0.1)";
+                    roundRect(x, y, oneHotCellW, 14, 3); ctx.fill();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "700 9px JetBrains Mono, monospace";
+                    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                    ctx.fillText(isOn ? "1" : "0", x + oneHotCellW / 2, y + 7);
+                }
+            }
+
+            const arrowX = leftX + arrW + 18;
+            drawArrow(arrowX, H / 2, W * 0.55, H / 2, "rgba(251,191,36,0.7)", true);
+            drawLabel("tf.tensor4d", (arrowX + W * 0.55) / 2, H / 2 - 30, "#fbbf24", "center", 12);
+            drawLabel("tf.tensor2d", (arrowX + W * 0.55) / 2, H / 2 + 18, "#fbbf24", "center", 12);
+
+            const cubeX = W * 0.6, cubeY = H * 0.2, cubeSize = Math.min(W * 0.18, H * 0.34);
+            for (let i = 3; i >= 0; i--) {
+                ctx.fillStyle = `rgba(139,92,246,${0.18 + i * 0.12})`;
+                ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 1.5;
+                roundRect(cubeX + i * 9, cubeY + i * 9, cubeSize, cubeSize, 8);
+                ctx.fill(); ctx.stroke();
+            }
+            drawDoodle(sunGrid, cubeX + 27 + 8, cubeY + 27 + 8, (cubeSize - 16) / 28, [255, 240, 200]);
+            drawLabel("trainImages tensor", cubeX + cubeSize / 2 + 14, cubeY + cubeSize + 36, "#8b5cf6", "center", 12);
+            drawLabel("[10000, 28, 28, 1]", cubeX + cubeSize / 2 + 14, cubeY + cubeSize + 54, "rgba(255,255,255,0.55)", "center", 10);
+
+            const labelTensorY = cubeY + cubeSize + 90;
+            ctx.fillStyle = "rgba(16,185,129,0.18)";
+            ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+            roundRect(cubeX, labelTensorY, cubeSize + 14, 64, 12); ctx.fill(); ctx.stroke();
+            drawLabel("trainLabels tensor", cubeX + (cubeSize + 14) / 2, labelTensorY + 22, "#10b981", "center", 12);
+            drawLabel("[10000, 5]", cubeX + (cubeSize + 14) / 2, labelTensorY + 44, "rgba(255,255,255,0.55)", "center", 10);
+
+            drawLabel("data now lives on the GPU", W / 2, H - 22, "rgba(255,255,255,0.4)", "center", 11);
+        }
+
+        // === BUILD section drawings (adapted from digit guide) ============
+        function drawSequential() {
+            clearCanvas(); frame += 1;
+            const t = (frame % 400) / 400;
+            const beltY = H * 0.58;
+            const beltH = 52;
+            ctx.fillStyle = "#1e293b";
+            roundRect(W * 0.05, beltY, W * 0.9, beltH, 8); ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.08)";
+            roundRect(W * 0.05, beltY, W * 0.9, beltH, 8); ctx.stroke();
+            for (let i = 0; i < 40; i++) {
+                const tx = W * 0.05 + ((i * 24 + frame * 2) % (W * 0.9));
+                ctx.fillStyle = "rgba(255,255,255,0.05)";
+                ctx.fillRect(tx, beltY + beltH - 8, 15, 4);
+            }
+            const stations = [
+                { label: "Conv2D", sub: "16 filters", color: "#3b82f6" },
+                { label: "MaxPool", sub: "2x2", color: "#f59e0b" },
+                { label: "Conv2D", sub: "32 filters", color: "#3b82f6" },
+                { label: "MaxPool", sub: "2x2", color: "#f59e0b" },
+                { label: "Flatten", sub: "-> 800", color: "#8b5cf6" },
+                { label: "Dense", sub: "64 relu", color: "#06b6d4" },
+                { label: "Dense", sub: "5 softmax", color: "#ef4444" }
+            ];
+            const stationWidth = W * 0.84 / stations.length;
+            const stationY = H * 0.21;
+            const stationH = H * 0.24;
+            stations.forEach((station, index) => {
+                const sx = W * 0.08 + stationWidth * index;
+                const sw = stationWidth * 0.8;
+                ctx.fillStyle = `${station.color}22`;
+                ctx.strokeStyle = station.color; ctx.lineWidth = 1.5;
+                roundRect(sx, stationY, sw, stationH, 8); ctx.fill(); ctx.stroke();
+                drawLabel(`#${index + 1}`, sx + sw / 2, stationY + 18, station.color, "center", 11);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "700 11px Inter, sans-serif";
+                ctx.textAlign = "center"; ctx.textBaseline = "top";
+                ctx.fillText(station.label, sx + sw / 2, stationY + 30);
+                ctx.fillStyle = "rgba(255,255,255,0.48)";
+                ctx.font = "500 10px JetBrains Mono, monospace";
+                ctx.fillText(station.sub, sx + sw / 2, stationY + 50);
+                ctx.strokeStyle = "rgba(255,255,255,0.08)";
+                ctx.beginPath();
+                ctx.moveTo(sx + sw / 2, stationY + stationH);
+                ctx.lineTo(sx + sw / 2, beltY); ctx.stroke();
+            });
+            const packageX = W * 0.05 + t * W * 0.9;
+            ctx.fillStyle = "#f97316";
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5;
+            roundRect(packageX - 20, beltY + 8, 40, 38, 6); ctx.fill(); ctx.stroke();
+            drawDoodle(sunGrid, packageX - 18, beltY + 10, 36 / 28, [255, 250, 220]);
+            drawLabel("PIXELS IN ->", W * 0.08, beltY - 10, "rgba(255,255,255,0.48)", "left", 11);
+            drawLabel("-> DOODLE OUT", W * 0.92, beltY - 10, "rgba(255,255,255,0.48)", "right", 11);
+            drawLabel("model = tf.sequential()", W / 2, beltY + beltH + 22, "rgba(255,255,255,0.58)", "center", 11);
+            drawLabel("data never goes backward and never skips a station", W / 2, H - 20, "rgba(255,255,255,0.28)", "center", 10);
+        }
+
+        function drawConvolution() {
+            clearCanvas(); frame += 1;
+            const gridSize = Math.min(H * 0.68, W * 0.34);
+            const cells = 14;
+            const cs = gridSize / cells;
+            const leftX = W * 0.08, leftY = H * 0.18;
+            const rightX = W * 0.62, rightY = H * 0.18;
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(leftX, leftY, gridSize, gridSize);
+            for (let row = 0; row < cells; row++) {
+                for (let col = 0; col < cells; col++) {
+                    const sourceRow = Math.floor(row * 28 / cells);
+                    const sourceCol = Math.floor(col * 28 / cells);
+                    const value = sunGrid[sourceRow][sourceCol];
+                    if (value > 0.01) {
+                        ctx.fillStyle = `rgba(255,240,200,${value})`;
+                        ctx.fillRect(leftX + col * cs, leftY + row * cs, cs, cs);
+                    }
+                }
+            }
+            drawGridLines(leftX, leftY, cells, cells, cs, "rgba(255,255,255,0.05)");
+
+            const totalSteps = (cells - 2) * (cells - 2);
+            const step = Math.floor(frame / 3) % totalSteps;
+            const kernelRow = Math.floor(step / (cells - 2));
+            const kernelCol = step % (cells - 2);
+            const kernelX = leftX + kernelCol * cs;
+            const kernelY = leftY + kernelRow * cs;
+
+            ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2.4;
+            ctx.strokeRect(kernelX, kernelY, cs * 3, cs * 3);
+            ctx.fillStyle = "rgba(16,185,129,0.15)";
+            ctx.fillRect(kernelX, kernelY, cs * 3, cs * 3);
+
+            const midX = W * 0.49, midY = H * 0.45;
+            const zoomCell = 18;
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#10b981";
+            roundRect(midX - zoomCell * 1.5 - 5, midY - zoomCell * 1.5 - 5, zoomCell * 3 + 10, zoomCell * 3 + 10, 5);
+            ctx.fill(); ctx.stroke();
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const sourceRow = Math.floor((kernelRow + row) * 28 / cells);
+                    const sourceCol = Math.floor((kernelCol + col) * 28 / cells);
+                    const value = sunGrid[sourceRow][sourceCol];
+                    ctx.fillStyle = `rgba(255,240,200,${value})`;
+                    ctx.fillRect(midX - zoomCell * 1.5 + col * zoomCell, midY - zoomCell * 1.5 + row * zoomCell, zoomCell, zoomCell);
+                    ctx.strokeStyle = "rgba(16,185,129,0.32)";
+                    ctx.strokeRect(midX - zoomCell * 1.5 + col * zoomCell, midY - zoomCell * 1.5 + row * zoomCell, zoomCell, zoomCell);
+                }
+            }
+
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(rightX, rightY, gridSize, gridSize);
+            const outCells = cells - 2;
+            const outCS = gridSize / outCells;
+            for (let row = 0; row < outCells; row++) {
+                for (let col = 0; col < outCells; col++) {
+                    const idx = row * outCells + col;
+                    if (idx <= step) {
+                        const sourceRow = Math.floor((row + 1) * 28 / cells);
+                        const sourceCol = Math.floor((col + 1) * 28 / cells);
+                        const value = sunGrid[sourceRow][sourceCol];
+                        const prevRow = Math.max(0, sourceRow - 1);
+                        const contrast = Math.abs(value - sunGrid[prevRow][sourceCol]);
+                        const activation = Math.min(1, value * 0.5 + contrast * 1.5);
+                        ctx.fillStyle = `rgba(139,92,246,${activation})`;
+                        ctx.fillRect(rightX + col * outCS, rightY + row * outCS, outCS, outCS);
+                    }
+                }
+            }
+            drawGridLines(rightX, rightY, outCells, outCells, outCS, "rgba(139,92,246,0.16)");
+            ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 2;
+            ctx.strokeRect(rightX + kernelCol * outCS, rightY + kernelRow * outCS, outCS, outCS);
+
+            drawArrow(leftX + gridSize + 14, leftY + gridSize / 2, rightX - 14, rightY + gridSize / 2, "rgba(255,255,255,0.2)", true);
+            drawLabel("INPUT 28x28", leftX + gridSize / 2, leftY + gridSize + 14, "rgba(255,255,255,0.45)");
+            drawLabel("3x3 patch x filter = 1 activation", midX, midY + zoomCell * 1.8 + 22, "rgba(16,185,129,0.85)", "center", 10);
+            drawLabel("OUTPUT 26x26 (1 of 16)", rightX + gridSize / 2, rightY + gridSize + 14, "rgba(255,255,255,0.45)");
+        }
+
+        function drawMaxPoolBase(leftLabel, rightLabel, accent = "#10b981") {
+            clearCanvas(); frame += 1;
+            const gridSize = Math.min(H * 0.74, W * 0.36);
+            const inputCells = 8, outputCells = 4;
+            const inputCS = gridSize / inputCells;
+            const outputCS = gridSize / outputCells;
+            const leftX = W * 0.1, leftY = H * 0.16;
+            const rightX = W * 0.62, rightY = H * 0.16;
+
+            const actMap = [];
+            for (let row = 0; row < inputCells; row++) {
+                actMap.push([]);
+                for (let col = 0; col < inputCells; col++) {
+                    const value = Math.abs(Math.sin(row * 1.3) * Math.cos(col * 0.9) + Math.sin((row + col) * 0.5));
+                    actMap[row].push(clamp(value, 0, 1));
+                }
+            }
+            for (let row = 0; row < inputCells; row++) {
+                for (let col = 0; col < inputCells; col++) {
+                    ctx.fillStyle = `rgba(139,92,246,${actMap[row][col]})`;
+                    ctx.fillRect(leftX + col * inputCS, leftY + row * inputCS, inputCS, inputCS);
+                }
+            }
+            drawGridLines(leftX, leftY, inputCells, inputCells, inputCS, "rgba(255,255,255,0.14)");
+
+            const blockStep = Math.floor(frame / 30) % (outputCells * outputCells);
+            const blockRow = Math.floor(blockStep / outputCells);
+            const blockCol = blockStep % outputCells;
+            ctx.strokeStyle = accent; ctx.lineWidth = 3;
+            ctx.strokeRect(leftX + blockCol * 2 * inputCS, leftY + blockRow * 2 * inputCS, inputCS * 2, inputCS * 2);
+
+            let maxValue = 0, maxR = 0, maxC = 0;
+            for (let row = 0; row < 2; row++) {
+                for (let col = 0; col < 2; col++) {
+                    const value = actMap[blockRow * 2 + row][blockCol * 2 + col];
+                    if (value > maxValue) { maxValue = value; maxR = row; maxC = col; }
+                }
+            }
+            ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 2;
+            ctx.strokeRect(leftX + (blockCol * 2 + maxC) * inputCS + 2, leftY + (blockRow * 2 + maxR) * inputCS + 2, inputCS - 4, inputCS - 4);
+
+            for (let row = 0; row < outputCells; row++) {
+                for (let col = 0; col < outputCells; col++) {
+                    let max = 0;
+                    for (let innerRow = 0; innerRow < 2; innerRow++) {
+                        for (let innerCol = 0; innerCol < 2; innerCol++) {
+                            max = Math.max(max, actMap[row * 2 + innerRow][col * 2 + innerCol]);
+                        }
+                    }
+                    const idx = row * outputCells + col;
+                    ctx.fillStyle = idx <= blockStep ? `rgba(16,185,129,${max})` : "rgba(255,255,255,0.05)";
+                    ctx.fillRect(rightX + col * outputCS, rightY + row * outputCS, outputCS, outputCS);
+                }
+            }
+            drawGridLines(rightX, rightY, outputCells, outputCells, outputCS, "rgba(16,185,129,0.2)");
+            ctx.strokeStyle = accent; ctx.lineWidth = 3;
+            ctx.strokeRect(rightX + blockCol * outputCS, rightY + blockRow * outputCS, outputCS, outputCS);
+
+            drawArrow(leftX + gridSize + 14, leftY + gridSize / 2, rightX - 14, rightY + gridSize / 2, "rgba(255,255,255,0.2)", true);
+            drawLabel(leftLabel, leftX + gridSize / 2, leftY + gridSize + 16, "rgba(255,255,255,0.45)");
+            drawLabel(rightLabel, rightX + gridSize / 2, rightY + gridSize + 16, "rgba(255,255,255,0.45)");
+            drawLabel("pick the brightest value in every 2x2 block", W / 2, leftY + gridSize + 38, "rgba(251,191,36,0.9)", "center", 10);
+        }
+        function drawMaxPool() { drawMaxPoolBase("26x26x16 feature map", "13x13x16 pooled map"); }
+        function drawMaxPoolCompact() {
+            drawMaxPoolBase("11x11x32 feature map", "5x5x32 pooled map", "#06b6d4");
+            ctx.fillStyle = "rgba(255,255,255,0.28)";
+            ctx.font = "italic 10px Inter, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("same idea again, now on richer features", W / 2, H - 18);
+        }
+
+        function drawDeepConv() {
+            clearCanvas(); frame += 1;
+            const featureBoxX = Math.min(W * 0.88, W - 76);
+            const stages = [
+                { label: "13x13x16", gridSize: 13, channels: 16, color: "#3b82f6", x: W * 0.13 },
+                { label: "Conv 3x3 x 32", arrow: true, x: W * 0.34 },
+                { label: "11x11x32", gridSize: 11, channels: 32, color: "#8b5cf6", x: W * 0.54 },
+                { label: "Richer doodle parts", arrow: true, x: W * 0.72 },
+                { label: "rays roof tail", textOnly: true, x: featureBoxX }
+            ];
+            const centerY = H * 0.5;
+            stages.forEach((stage) => {
+                if (stage.arrow) {
+                    drawArrow(stage.x - 56, centerY, stage.x + 36, centerY, "rgba(255,255,255,0.25)", true);
+                    drawLabel(stage.label, stage.x - 10, centerY - 22, "#f59e0b", "center", 11);
+                    return;
+                }
+                if (stage.textOnly) {
+                    ctx.fillStyle = "rgba(16,185,129,0.16)";
+                    ctx.strokeStyle = "#10b981"; ctx.lineWidth = 1.5;
+                    roundRect(stage.x - 70, centerY - 64, 140, 128, 12); ctx.fill(); ctx.stroke();
+                    drawLabel("feature ideas", stage.x, centerY - 30, "#10b981", "center", 11);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "700 18px Inter, sans-serif";
+                    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                    ctx.fillText("rays", stage.x, centerY);
+                    ctx.fillText("roof", stage.x, centerY + 26);
+                    ctx.fillStyle = "rgba(255,255,255,0.42)";
+                    ctx.font = "500 10px JetBrains Mono, monospace";
+                    ctx.fillText("tail fin", stage.x, centerY + 50);
+                    return;
+                }
+                const displayChannels = Math.min(stage.channels, 6);
+                const baseSize = stage.gridSize * 8;
+                const shift = 6;
+                for (let channel = displayChannels - 1; channel >= 0; channel--) {
+                    const ox = stage.x - baseSize / 2 - (displayChannels - 1) * shift / 2 + channel * shift;
+                    const oy = centerY - baseSize / 2 + channel * shift;
+                    ctx.fillStyle = `${stage.color}${Math.round(50 + channel * 22).toString(16).padStart(2, "0")}`;
+                    ctx.strokeStyle = stage.color; ctx.lineWidth = 1;
+                    ctx.fillRect(ox, oy, baseSize, baseSize);
+                    ctx.strokeRect(ox, oy, baseSize, baseSize);
+                }
+                const topX = stage.x - baseSize / 2 + (displayChannels - 1) * shift / 2;
+                const topY = centerY - baseSize / 2 + (displayChannels - 1) * shift;
+                const cellSize = baseSize / stage.gridSize;
+                for (let row = 0; row < stage.gridSize; row++) {
+                    for (let col = 0; col < stage.gridSize; col++) {
+                        const value = Math.abs(Math.sin((row * 1.3 + col * 0.8 + frame * 0.03) * (stage.channels > 20 ? 1.25 : 1)));
+                        ctx.fillStyle = `rgba(255,255,255,${value * 0.52})`;
+                        ctx.fillRect(topX + col * cellSize, topY + row * cellSize, cellSize, cellSize);
+                    }
+                }
+                drawLabel(stage.label, stage.x, centerY + baseSize / 2 + 22, stage.color, "center", 11);
+                drawLabel(`${stage.channels} channels`, stage.x, centerY + baseSize / 2 + 40, "rgba(255,255,255,0.42)", "center", 9);
+            });
+            drawLabel("layer 2 combines edges into doodle-sized parts", W / 2, 22, "rgba(255,255,255,0.55)", "center", 11);
+        }
+
+        function drawFlatten() {
+            clearCanvas(); frame += 1;
+            const centerY = H * 0.52;
+            const leftX = W * 0.24;
+            const size = 18, stackDepth = 5, shift = 4, n = 5;
+            for (let depth = stackDepth - 1; depth >= 0; depth--) {
+                const ox = leftX - n * size / 2 + depth * shift;
+                const oy = centerY - n * size / 2 + depth * shift;
+                ctx.fillStyle = `rgba(139,92,246,${0.3 + depth * 0.14})`;
+                ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 1;
+                ctx.fillRect(ox, oy, n * size, n * size);
+                ctx.strokeRect(ox, oy, n * size, n * size);
+            }
+            const topX = leftX - n * size / 2 + (stackDepth - 1) * shift;
+            const topY = centerY - n * size / 2 + (stackDepth - 1) * shift;
+            for (let row = 0; row < n; row++) {
+                for (let col = 0; col < n; col++) {
+                    const value = Math.abs(Math.sin(row * 1.3 + col * 0.9 + frame * 0.03));
+                    ctx.fillStyle = `rgba(255,255,255,${value * 0.7})`;
+                    ctx.fillRect(topX + col * size, topY + row * size, size - 1, size - 1);
+                }
+            }
+            drawLabel("5x5x32 feature cube", leftX, centerY + n * size / 2 + 30, "#8b5cf6", "center", 12);
+            drawArrow(leftX + 80, centerY, W * 0.56, centerY, "rgba(6,182,212,0.8)", true);
+            drawLabel("flatten()", W * 0.45, centerY - 30, "#06b6d4", "center", 11);
+            drawLabel("no learning, just reshape", W * 0.45, centerY - 14, "rgba(255,255,255,0.32)", "center", 9);
+
+            const stripX = W * 0.56, stripY = centerY - 6, stripW = W * 0.34, stripH = 14;
+            ctx.fillStyle = "#1e293b"; ctx.strokeStyle = "#06b6d4";
+            ctx.fillRect(stripX, stripY, stripW, stripH);
+            ctx.strokeRect(stripX, stripY, stripW, stripH);
+            const cells = 80;
+            const cellW = stripW / cells;
+            for (let i = 0; i < cells; i++) {
+                const value = Math.abs(Math.sin(i * 0.3 + frame * 0.03));
+                ctx.fillStyle = `rgba(6,182,212,${value * 0.8})`;
+                ctx.fillRect(stripX + i * cellW, stripY + 1, cellW - 0.5, stripH - 2);
+            }
+            drawLabel("[ 800 numbers ]", stripX + stripW / 2, stripY + stripH + 18, "#06b6d4", "center", 12);
+            drawLabel("ready for the dense layer", stripX + stripW / 2, stripY + stripH + 36, "rgba(255,255,255,0.42)", "center", 10);
+        }
+
+        function drawDense64() {
+            clearCanvas(); frame += 1;
+            const inputs = 20, hidden = 12;
+            const leftX = W * 0.16, rightX = W * 0.75;
+            const topY = H * 0.15, bottomY = H * 0.84;
+            const inputStep = (bottomY - topY) / inputs;
+            const hiddenStep = (bottomY - topY) / hidden;
+
+            ctx.strokeStyle = "rgba(6,182,212,0.08)"; ctx.lineWidth = 0.5;
+            for (let i = 0; i < inputs; i++) {
+                for (let j = 0; j < hidden; j++) {
+                    ctx.beginPath();
+                    ctx.moveTo(leftX + 10, topY + inputStep * i + inputStep / 2);
+                    ctx.lineTo(rightX - 10, topY + hiddenStep * j + hiddenStep / 2);
+                    ctx.stroke();
+                }
+            }
+            for (let k = 0; k < 10; k++) {
+                const ii = (Math.floor(frame / 3) + k * 3) % inputs;
+                const jj = (Math.floor(frame / 4) + k * 2) % hidden;
+                const alpha = 0.5 + Math.sin(frame * 0.1 + k) * 0.3;
+                ctx.strokeStyle = `rgba(16,185,129,${alpha})`; ctx.lineWidth = 1.1;
+                ctx.beginPath();
+                ctx.moveTo(leftX + 10, topY + inputStep * ii + inputStep / 2);
+                ctx.lineTo(rightX - 10, topY + hiddenStep * jj + hiddenStep / 2);
+                ctx.stroke();
+            }
+            for (let i = 0; i < inputs; i++) {
+                const y = topY + inputStep * i + inputStep / 2;
+                const active = Math.abs(Math.sin(i * 0.8 + frame * 0.05));
+                ctx.fillStyle = `rgba(6,182,212,${0.28 + active * 0.54})`;
+                ctx.beginPath(); ctx.arc(leftX, y, 4, 0, TWO_PI); ctx.fill();
+            }
+            for (let j = 0; j < hidden; j++) {
+                const y = topY + hiddenStep * j + hiddenStep / 2;
+                const active = Math.abs(Math.sin(j * 0.7 + frame * 0.06));
+                ctx.fillStyle = `rgba(16,185,129,${0.28 + active * 0.62})`;
+                ctx.strokeStyle = "#10b981"; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(rightX, y, 6, 0, TWO_PI); ctx.fill(); ctx.stroke();
+            }
+            drawLabel("800", leftX, bottomY + 14, "#06b6d4", "center", 14);
+            drawLabel("flattened inputs", leftX, bottomY + 34, "rgba(255,255,255,0.42)", "center", 10);
+            drawLabel("64", rightX, bottomY + 14, "#10b981", "center", 14);
+            drawLabel("ReLU neurons", rightX, bottomY + 34, "rgba(255,255,255,0.42)", "center", 10);
+            drawLabel("fully connected", W / 2, 36, "rgba(255,255,255,0.72)", "center", 16);
+            drawLabel("51,264 weights", W / 2, H - 54, "#f59e0b", "center", 22);
+            drawLabel("800 x 64 + 64 biases", W / 2, H - 26, "rgba(255,255,255,0.42)", "center", 11);
+        }
+
+        function drawSoftmax() {
+            clearCanvas(); frame += 1;
+            const neuronY = H * 0.22;
+            const startX = W * 0.14;
+            const endX = W * 0.86;
+            const spacing = (endX - startX) / 4;
+
+            const rawScores = [];
+            const winnerIdx = 1; // sun
+            for (let i = 0; i < 5; i++) {
+                let base = 0.4;
+                if (i === winnerIdx) base = 4;
+                else if (i === 2) base = 1.3;
+                const wiggle = Math.sin(frame * 0.04 + i * 1.3) * 0.3;
+                rawScores.push(base + wiggle);
+            }
+            const exp = rawScores.map((value) => Math.exp(value));
+            const sum = exp.reduce((total, value) => total + value, 0);
+            const probs = exp.map((value) => value / sum);
+            const winner = probs.indexOf(Math.max(...probs));
+
+            for (let i = 0; i < 5; i++) {
+                const x = startX + spacing * i;
+                const isWinner = i === winner;
+                ctx.fillStyle = isWinner ? "rgba(16,185,129,0.32)" : `${CATEGORY_COLORS[i]}26`;
+                ctx.strokeStyle = isWinner ? "#10b981" : CATEGORY_COLORS[i];
+                ctx.lineWidth = isWinner ? 2.5 : 1.4;
+                ctx.beginPath();
+                ctx.arc(x, neuronY, 22, 0, TWO_PI);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "700 11px JetBrains Mono, monospace";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(CATEGORIES[i], x, neuronY);
+                drawLabel(rawScores[i].toFixed(1), x, neuronY - 32, "rgba(255,255,255,0.42)", "center", 10);
+            }
+            drawLabel("raw scores ->", W * 0.14, neuronY - 32, "rgba(255,255,255,0.36)", "left", 10);
+            drawLabel("softmax", W / 2, neuronY + 56, "#8b5cf6", "center", 13);
+            drawLabel("five outputs share the same probability pie", W / 2, neuronY + 72, "rgba(255,255,255,0.36)", "center", 10);
+
+            const barTop = H * 0.52;
+            const barBottom = H * 0.9;
+            const barH = barBottom - barTop;
+            const barW = spacing * 0.7;
+            for (let i = 0; i < 5; i++) {
+                const x = startX + spacing * i - barW / 2;
+                const p = probs[i];
+                const h = barH * p * 1.08;
+                const isWinner = i === winner;
+                ctx.fillStyle = "rgba(255,255,255,0.06)";
+                ctx.fillRect(x, barBottom - barH, barW, barH);
+                ctx.fillStyle = isWinner ? "#10b981" : `${CATEGORY_COLORS[i]}cc`;
+                ctx.fillRect(x, barBottom - h, barW, h);
+                ctx.fillStyle = isWinner ? "#34d399" : CATEGORY_COLORS[i];
+                ctx.fillRect(x, barBottom - h - 2, barW, 2);
+                drawLabel(`${(p * 100).toFixed(1)}%`, x + barW / 2, barBottom - h - 10, isWinner ? "#10b981" : "rgba(255,255,255,0.75)", "center", 10);
+                drawLabel(CATEGORIES[i], x + barW / 2, barBottom + 12, "rgba(255,255,255,0.6)", "center", 10);
+            }
+            const winnerX = startX + spacing * winner;
+            drawArrow(winnerX, neuronY + 24, winnerX, barTop, "rgba(16,185,129,0.75)", true);
+        }
+
+        function drawCompile() {
+            clearCanvas(); frame += 1;
+            const blocks = [
+                { x: W * 0.1, y: H * 0.2, w: W * 0.22, h: H * 0.58, label: "prediction", sub: "[0.05, 0.78, 0.1, 0.05, 0.02]", color: "#06b6d4" },
+                { x: W * 0.39, y: H * 0.2, w: W * 0.2, h: H * 0.58, label: "loss", sub: "categoricalCrossentropy", color: "#ef4444" },
+                { x: W * 0.66, y: H * 0.2, w: W * 0.24, h: H * 0.58, label: "optimizer", sub: "adam", color: "#10b981" }
+            ];
+            blocks.forEach((block) => {
+                ctx.fillStyle = `${block.color}22`;
+                ctx.strokeStyle = block.color; ctx.lineWidth = 2;
+                roundRect(block.x, block.y, block.w, block.h, 14); ctx.fill(); ctx.stroke();
+                drawLabel(block.label, block.x + block.w / 2, block.y + 22, block.color, "center", 13);
+                drawLabel(block.sub, block.x + block.w / 2, block.y + 42, "rgba(255,255,255,0.46)", "center", 10);
+            });
+            const pred = blocks[0];
+            const predProbs = [0.05, 0.78, 0.1, 0.05, 0.02];
+            const predLabelW = 38;
+            const predBarX = pred.x + 16 + predLabelW;
+            const predBarW = pred.w - 32 - predLabelW;
+            for (let i = 0; i < 5; i++) {
+                const by = pred.y + 80 + i * ((pred.h - 110) / 5);
+                const bw = predBarW * predProbs[i];
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                ctx.fillRect(predBarX, by, predBarW, 12);
+                ctx.fillStyle = i === 1 ? "#06b6d4" : `${CATEGORY_COLORS[i]}aa`;
+                ctx.fillRect(predBarX, by, bw, 12);
+                drawLabel(CATEGORIES[i], pred.x + 14 + predLabelW, by + 6, "rgba(255,255,255,0.6)", "right", 9);
+            }
+            drawLabel("target = SUN", pred.x + pred.w / 2, pred.y + pred.h - 16, "rgba(255,255,255,0.52)", "center", 10);
+
+            const loss = blocks[1];
+            const lossValue = 0.62 + Math.sin(frame * 0.05) * 0.08;
+            ctx.fillStyle = "#ef4444";
+            ctx.font = "700 34px JetBrains Mono, monospace";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(lossValue.toFixed(2), loss.x + loss.w / 2, loss.y + loss.h / 2);
+            drawLabel("how wrong was the guess?", loss.x + loss.w / 2, loss.y + loss.h / 2 + 34, "rgba(255,255,255,0.44)", "center", 10);
+
+            const opt = blocks[2];
+            drawLabel("adjusting weights", opt.x + opt.w / 2, opt.y + 72, "rgba(255,255,255,0.48)", "center", 10);
+            for (let i = 0; i < 8; i++) {
+                const y = opt.y + 100 + i * ((opt.h - 130) / 8);
+                const phase = (frame / 180 + i * 0.12) % 1;
+                const value = Math.sin(phase * TWO_PI) * 0.5;
+                const start = opt.x + opt.w * 0.16;
+                const end = opt.x + opt.w * 0.84;
+                const mid = opt.x + opt.w / 2;
+                ctx.fillStyle = "rgba(255,255,255,0.09)";
+                ctx.fillRect(start, y, end - start, 4);
+                ctx.fillStyle = value > 0 ? "#10b981" : "#f59e0b";
+                if (value > 0) ctx.fillRect(mid, y, Math.abs(value) * (end - mid), 4);
+                else ctx.fillRect(mid + value * (mid - start), y, Math.abs(value) * (mid - start), 4);
+                drawLabel(`w${i}`, start - 6, y + 2, "rgba(255,255,255,0.32)", "right", 8);
+            }
+            drawArrow(pred.x + pred.w + 8, pred.y + pred.h / 2, loss.x - 8, loss.y + loss.h / 2, "rgba(255,255,255,0.22)", true);
+            drawArrow(loss.x + loss.w + 8, loss.y + loss.h / 2, opt.x - 8, opt.y + opt.h / 2, "rgba(255,255,255,0.22)", true);
+            drawLabel("error = desired - guess -> adjust weights", W / 2, H - 18, "rgba(255,255,255,0.3)", "center", 10);
+        }
+
+        function drawFitIntro() {
+            clearCanvas(); frame += 1;
+            const cardW = W * 0.24, cardH = H * 0.56;
+            const leftX = W * 0.08, centerX = W * 0.39, rightX = W * 0.7;
+            const topY = H * 0.2;
+            const cards = [
+                { x: leftX, label: "training set", color: "#3b82f6" },
+                { x: centerX, label: "model.fit()", color: "#10b981" },
+                { x: rightX, label: "weight updates", color: "#8b5cf6" }
+            ];
+            cards.forEach((card) => {
+                ctx.fillStyle = `${card.color}18`;
+                ctx.strokeStyle = card.color; ctx.lineWidth = 2;
+                roundRect(card.x, topY, cardW, cardH, 16); ctx.fill(); ctx.stroke();
+                drawLabel(card.label, card.x + cardW / 2, topY + 22, card.color, "center", 13);
+            });
+            const doodleRowH = (cardH - 90) / 3;
+            const doodleH = Math.min(44, doodleRowH - 8);
+            for (let i = 0; i < 12; i++) {
+                const row = Math.floor(i / 4);
+                const col = i % 4;
+                const colPitch = (cardW - 36) / 4;
+                const x = leftX + 18 + col * colPitch;
+                const y = topY + 56 + row * doodleRowH;
+                const cat = i % 5;
+                const dW = Math.min(36, colPitch - 8);
+                ctx.fillStyle = `${CATEGORY_COLORS[cat]}33`;
+                ctx.strokeStyle = CATEGORY_COLORS[cat]; ctx.lineWidth = 1.4;
+                roundRect(x, y, dW, doodleH, 5); ctx.fill(); ctx.stroke();
+                drawDoodle(CATEGORY_GRIDS[cat], x + 2, y + 4, (dW - 4) / 28, [255, 250, 220]);
+            }
+            drawLabel("10,000 labeled doodles", leftX + cardW / 2, topY + cardH - 20, "rgba(255,255,255,0.44)", "center", 10);
+
+            const pulse = Math.floor((frame / 16) % 5);
+            const pulsePitch = (cardW - 60) / 5;
+            for (let i = 0; i < 5; i++) {
+                const x = centerX + 30 + (i + 0.5) * pulsePitch;
+                ctx.fillStyle = i <= pulse ? "rgba(16,185,129,0.9)" : "rgba(255,255,255,0.08)";
+                ctx.beginPath(); ctx.arc(x, topY + cardH / 2, Math.min(12, pulsePitch / 2 - 4), 0, TWO_PI); ctx.fill();
+            }
+            drawLabel("guess -> grade -> update", centerX + cardW / 2, topY + cardH - 20, "rgba(255,255,255,0.44)", "center", 10);
+
+            const weightCount = 8;
+            const weightTop = topY + 60;
+            const weightBottom = topY + cardH - 40;
+            const weightPitch = (weightBottom - weightTop) / (weightCount - 1);
+            const weightHalf = Math.min(50, cardW / 2 - 16);
+            for (let i = 0; i < weightCount; i++) {
+                const y = weightTop + i * weightPitch;
+                const shift = Math.sin(frame * 0.08 + i) * (weightHalf - 16);
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                ctx.fillRect(rightX + cardW / 2 - weightHalf, y, weightHalf * 2, 5);
+                ctx.fillStyle = shift > 0 ? "#10b981" : "#f59e0b";
+                ctx.fillRect(rightX + cardW / 2, y, shift, 5);
+            }
+            drawLabel("weights move a little each step", rightX + cardW / 2, topY + cardH - 20, "rgba(255,255,255,0.44)", "center", 10);
+            drawArrow(leftX + cardW + 12, topY + cardH / 2, centerX - 12, topY + cardH / 2, "rgba(255,255,255,0.22)", true);
+            drawArrow(centerX + cardW + 12, topY + cardH / 2, rightX - 12, topY + cardH / 2, "rgba(255,255,255,0.22)", true);
+        }
+
+        function drawTrainingEpochs() {
+            clearCanvas(); frame += 1;
+            const centerX = W * 0.28, centerY = H * 0.5;
+            const radius = Math.min(W, H) * 0.24;
+            const totalEpochs = 8;
+            const currentEpoch = Math.min(totalEpochs, Math.floor((frame / 24) % (totalEpochs + 2)));
+
+            ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.lineWidth = 16;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, TWO_PI); ctx.stroke();
+            for (let epoch = 0; epoch < totalEpochs; epoch++) {
+                const startAngle = -PI / 2 + epoch * (TWO_PI / totalEpochs);
+                const endAngle = startAngle + (TWO_PI / totalEpochs) * 0.78;
+                ctx.strokeStyle = epoch < currentEpoch ? "#10b981" : "rgba(255,255,255,0.08)";
+                ctx.lineWidth = 16;
+                ctx.beginPath(); ctx.arc(centerX, centerY, radius, startAngle, endAngle); ctx.stroke();
+                const labelAngle = startAngle + (endAngle - startAngle) / 2;
+                drawLabel(String(epoch + 1), centerX + Math.cos(labelAngle) * (radius + 26), centerY + Math.sin(labelAngle) * (radius + 26), epoch < currentEpoch ? "#10b981" : "rgba(255,255,255,0.32)", "center", 11);
+            }
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "800 30px JetBrains Mono, monospace";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(`${currentEpoch}`, centerX, centerY - 10);
+            drawLabel("epochs done", centerX, centerY + 20, "rgba(255,255,255,0.42)", "center", 10);
+
+            const values = [55, 76, 84, 88, 90, 91, 92, 92.5];
+            const plotX = W * 0.56, plotY = H * 0.18, plotW = W * 0.32, plotH = H * 0.58;
+            ctx.fillStyle = "rgba(255,255,255,0.03)";
+            roundRect(plotX, plotY, plotW, plotH, 14); ctx.fill();
+            const left = plotX + 34, right = plotX + plotW - 16;
+            const top = plotY + 22, bottom = plotY + plotH - 28;
+            ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(right, bottom); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, bottom); ctx.stroke();
+
+            if (currentEpoch > 0) {
+                ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < currentEpoch; i++) {
+                    const px = mapVal(i + 1, 1, totalEpochs, left, right);
+                    const py = mapVal(values[i], 0, 100, bottom, top);
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                for (let i = 0; i < currentEpoch; i++) {
+                    const px = mapVal(i + 1, 1, totalEpochs, left, right);
+                    const py = mapVal(values[i], 0, 100, bottom, top);
+                    ctx.fillStyle = "#10b981";
+                    ctx.beginPath(); ctx.arc(px, py, 3, 0, TWO_PI); ctx.fill();
+                }
+            }
+            drawLabel("validation accuracy across 8 epochs", plotX + plotW / 2, plotY + plotH + 18, "rgba(255,255,255,0.42)", "center", 10);
+        }
+
+        function drawTrainingBatch() {
+            clearCanvas(); frame += 1;
+            const gridCols = 16, gridRows = 8;
+            const cardSize = Math.min((W * 0.52) / gridCols, (H * 0.58) / gridRows);
+            const startX = W * 0.08, startY = H * 0.2;
+            const active = Math.floor((frame / 2) % 128);
+            for (let index = 0; index < 128; index++) {
+                const row = Math.floor(index / gridCols);
+                const col = index % gridCols;
+                const x = startX + col * (cardSize + 4);
+                const y = startY + row * (cardSize + 6);
+                const cat = index % 5;
+                ctx.fillStyle = index <= active ? `${CATEGORY_COLORS[cat]}cc` : "rgba(255,255,255,0.08)";
+                roundRect(x, y, cardSize, cardSize * 1.12, 4); ctx.fill();
+                if (index % 9 === 0 && index <= active) {
+                    drawDoodle(CATEGORY_GRIDS[cat], x + 1, y + 1, (cardSize - 2) / 28, [255, 250, 220]);
+                }
+            }
+            drawLabel("128 doodles in one mini-batch", startX + (gridCols * (cardSize + 4)) / 2 - 2, startY - 20, "#3b82f6", "center", 12);
+
+            const rightX = W * 0.72;
+            const boxW = W * 0.18, boxH = H * 0.5;
+            ctx.fillStyle = "rgba(16,185,129,0.14)";
+            ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+            roundRect(rightX, H * 0.24, boxW, boxH, 14); ctx.fill(); ctx.stroke();
+            drawLabel("one update", rightX + boxW / 2, H * 0.24 + 24, "#10b981", "center", 14);
+            for (let i = 0; i < 7; i++) {
+                const y = H * 0.24 + 70 + i * 42;
+                const value = Math.sin(frame * 0.08 + i) * 0.45;
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                ctx.fillRect(rightX + 20, y, boxW - 40, 4);
+                ctx.fillStyle = value > 0 ? "#10b981" : "#f59e0b";
+                if (value > 0) ctx.fillRect(rightX + boxW / 2, y, value * (boxW / 2 - 20), 4);
+                else ctx.fillRect(rightX + boxW / 2 + value * (boxW / 2 - 20), y, Math.abs(value) * (boxW / 2 - 20), 4);
+            }
+            drawArrow(startX + gridCols * (cardSize + 4) + 10, H * 0.48, rightX - 12, H * 0.48, "rgba(255,255,255,0.22)", true);
+            drawLabel("predict all 128 doodles, then adjust once", W * 0.54, H * 0.78, "rgba(255,255,255,0.42)", "center", 10);
+        }
+
+        function drawTrainingValidation() {
+            clearCanvas(); frame += 1;
+            const leftX = W * 0.08, topY = H * 0.18;
+            const trainW = W * 0.42, boxH = H * 0.56;
+            const valX = W * 0.58, valW = W * 0.28;
+
+            ctx.fillStyle = "rgba(59,130,246,0.16)";
+            ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
+            roundRect(leftX, topY, trainW, boxH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("training doodles", leftX + trainW / 2, topY + 24, "#3b82f6", "center", 14);
+            drawLabel("used for weight updates", leftX + trainW / 2, topY + 44, "rgba(255,255,255,0.42)", "center", 10);
+
+            ctx.fillStyle = "rgba(16,185,129,0.15)";
+            ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+            roundRect(valX, topY, valW, boxH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("validation doodles", valX + valW / 2, topY + 24, "#10b981", "center", 14);
+            drawLabel("quiz only, no learning", valX + valW / 2, topY + 44, "rgba(255,255,255,0.42)", "center", 10);
+
+            const trainCols = 6, trainRows = 3;
+            const trainColPitch = (trainW - 40) / trainCols;
+            const trainRowPitch = (boxH - 90) / trainRows;
+            const trainCardW = Math.min(44, trainColPitch - 6);
+            const trainCardH = Math.min(60, trainRowPitch - 8);
+            for (let i = 0; i < trainCols * trainRows; i++) {
+                const x = leftX + 20 + (i % trainCols) * trainColPitch;
+                const y = topY + 70 + Math.floor(i / trainCols) * trainRowPitch;
+                const cat = i % 5;
+                ctx.fillStyle = `${CATEGORY_COLORS[cat]}cc`;
+                roundRect(x, y, trainCardW, trainCardH, 6); ctx.fill();
+                drawDoodle(CATEGORY_GRIDS[cat], x + 4, y + 6, (trainCardW - 8) / 28, [255, 250, 220]);
+            }
+            const valCols = 2, valRows = 3;
+            const valColPitch = (valW - 36) / valCols;
+            const valRowPitch = (boxH - 90) / valRows;
+            const valCardW = Math.min(50, valColPitch - 8);
+            const valCardH = Math.min(70, valRowPitch - 10);
+            for (let i = 0; i < valCols * valRows; i++) {
+                const x = valX + 18 + (i % valCols) * valColPitch;
+                const y = topY + 76 + Math.floor(i / valCols) * valRowPitch;
+                const cat = i % 5;
+                ctx.fillStyle = "rgba(236,253,245,0.95)";
+                roundRect(x, y, valCardW, valCardH, 6); ctx.fill();
+                drawDoodle(CATEGORY_GRIDS[cat], x + 4, y + 6, (valCardW - 8) / 28, [10, 60, 40]);
+            }
+            drawArrow(leftX + trainW + 16, H * 0.46, valX - 16, H * 0.46, "rgba(255,255,255,0.18)", true);
+            drawLabel("never mix the quiz set into training", W / 2, H - 22, "#fbbf24", "center", 11);
+        }
+
+        function drawTrainingCallback() {
+            clearCanvas(); frame += 1;
+            const chartX = W * 0.08, chartY = H * 0.16;
+            const chartW = W * 0.48, chartH = H * 0.62;
+            const left = chartX + 34, right = chartX + chartW - 18;
+            const top = chartY + 18, bottom = chartY + chartH - 26;
+            ctx.fillStyle = "rgba(255,255,255,0.03)";
+            roundRect(chartX, chartY, chartW, chartH, 16); ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.beginPath(); ctx.moveTo(left, bottom); ctx.lineTo(right, bottom); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, bottom); ctx.stroke();
+
+            const values = [55, 76, 84, 88, 90, 91, 92, 92.5];
+            const totalEpochs = 8;
+            const epoch = Math.min(totalEpochs, Math.floor((frame / 24) % (totalEpochs + 2)));
+            if (epoch > 0) {
+                ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < epoch; i++) {
+                    const px = mapVal(i + 1, 1, totalEpochs, left, right);
+                    const py = mapVal(values[i], 0, 100, bottom, top);
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                const px = mapVal(epoch, 1, totalEpochs, left, right);
+                const py = mapVal(values[Math.max(0, epoch - 1)], 0, 100, bottom, top);
+                ctx.fillStyle = "#10b981";
+                ctx.beginPath(); ctx.arc(px, py, 5, 0, TWO_PI); ctx.fill();
+                drawLabel(`epoch ${epoch}`, px, py - 18, "#10b981", "center", 10);
+            }
+            drawLabel("validation accuracy", chartX + chartW / 2, chartY + chartH + 18, "rgba(255,255,255,0.42)", "center", 10);
+
+            const panelX = W * 0.64, panelY = H * 0.22;
+            const panelW = W * 0.24, panelH = H * 0.44;
+            ctx.fillStyle = "rgba(15,23,42,0.7)";
+            ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 2;
+            roundRect(panelX, panelY, panelW, panelH, 14); ctx.fill(); ctx.stroke();
+            drawLabel("UI state", panelX + panelW / 2, panelY + 22, "#06b6d4", "center", 13);
+
+            const epochValue = Math.max(1, epoch);
+            const accuracyValue = values[Math.max(0, epochValue - 1)];
+            drawLabel(`epoch = ${epochValue}`, panelX + panelW / 2, panelY + 82, "#ffffff", "center", 16);
+            drawLabel(`accuracy = ${accuracyValue}%`, panelX + panelW / 2, panelY + 130, "#10b981", "center", 16);
+            drawLabel("updated after every epoch", panelX + panelW / 2, panelY + panelH - 24, "rgba(255,255,255,0.42)", "center", 10);
+            drawArrow(chartX + chartW + 12, chartY + chartH / 2, panelX - 12, panelY + panelH / 2, "rgba(255,255,255,0.22)", true);
+        }
+
+        function drawPixelExtraction() {
+            clearCanvas(); frame += 1;
+            const cycle = Math.floor((frame / 80) % 5);
+            const grid = CATEGORY_GRIDS[cycle];
+
+            const leftX = W * 0.08, topY = H * 0.16;
+            const drawW = W * 0.28, drawH = H * 0.58;
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 2;
+            roundRect(leftX, topY, drawW, drawH, 14); ctx.fill(); ctx.stroke();
+            const previewSize = Math.min(drawW - 30, drawH - 30);
+            drawDoodle(grid, leftX + (drawW - previewSize) / 2, topY + (drawH - previewSize) / 2, previewSize / 28, [255, 250, 220]);
+            drawLabel("280x280 draw canvas", leftX + drawW / 2, topY + drawH + 18, "rgba(255,255,255,0.42)", "center", 10);
+
+            const rightX = W * 0.48;
+            const gridSize = Math.min(W * 0.32, H * 0.54);
+            const cell = gridSize / 28;
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#06b6d4";
+            roundRect(rightX, topY, gridSize, gridSize, 12); ctx.fill(); ctx.stroke();
+            drawDoodle(grid, rightX + 8, topY + 8, (gridSize - 16) / 28);
+            drawGridLines(rightX + 8, topY + 8, 28, 28, (gridSize - 16) / 28, "rgba(255,255,255,0.04)");
+            drawLabel("28x28 preview", rightX + gridSize / 2, topY + gridSize + 18, "rgba(255,255,255,0.42)", "center", 10);
+            drawArrow(leftX + drawW + 18, topY + drawH / 2, rightX - 16, topY + gridSize / 2, "rgba(255,255,255,0.22)", true);
+
+            const arrayX = rightX + 18;
+            const arrayY = topY + gridSize + 52;
+            drawLabel("Float32Array(784)", arrayX + 110, arrayY - 12, "#06b6d4", "center", 11);
+            for (let i = 0; i < 14; i++) {
+                const value = (Math.abs(Math.sin(i * 0.6 + frame * 0.04)) * 0.98).toFixed(2);
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                roundRect(arrayX + i * 14, arrayY, 12, 28, 4); ctx.fill();
+                ctx.fillStyle = "rgba(255,255,255,0.82)";
+                ctx.font = "500 7px JetBrains Mono, monospace";
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(value.slice(0, 3), arrayX + i * 14 + 6, arrayY + 14);
+            }
+        }
+
+        function drawNormalizeGuard() {
+            clearCanvas(); frame += 1;
+            const leftX = W * 0.12, topY = H * 0.2;
+            for (let i = 0; i < 10; i++) {
+                const raw = 40 + i * 20;
+                const norm = raw / 255;
+                const y = topY + i * 36;
+                drawLabel(String(raw), leftX, y, "#3b82f6", "center", 11);
+                drawArrow(leftX + 28, y, leftX + 120, y, "rgba(255,255,255,0.18)");
+                drawLabel(norm.toFixed(2), leftX + 160, y, "#10b981", "center", 11);
+            }
+            drawLabel("0-255", leftX, topY - 24, "rgba(255,255,255,0.44)", "center", 10);
+            drawLabel("/ 255.0", leftX + 74, topY - 24, "#fbbf24", "center", 10);
+            drawLabel("0.0-1.0", leftX + 160, topY - 24, "rgba(255,255,255,0.44)", "center", 10);
+
+            const meterX = W * 0.56, meterY = H * 0.34;
+            const meterH = H * 0.32;
+            ctx.fillStyle = "rgba(255,255,255,0.08)";
+            roundRect(meterX, meterY, 42, meterH, 14); ctx.fill();
+            const blankLevel = 0.18 + Math.sin(frame * 0.04) * 0.05;
+            ctx.fillStyle = "rgba(16,185,129,0.85)";
+            roundRect(meterX + 6, meterY + meterH * (1 - blankLevel), 30, meterH * blankLevel - 6, 10);
+            ctx.fill();
+            const thresholdY = meterY + meterH * 0.76;
+            ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(meterX - 18, thresholdY); ctx.lineTo(meterX + 60, thresholdY); ctx.stroke();
+            ctx.setLineDash([]);
+            drawLabel("sum < 5", meterX + 84, thresholdY, "#ef4444", "left", 11);
+            drawLabel("if too empty -> prediction = -1", meterX + 20, meterY + meterH + 24, "rgba(255,255,255,0.42)", "center", 10);
+        }
+
+        function drawTidyCleanup() {
+            clearCanvas(); frame += 1;
+            const leftX = W * 0.08, centerX = W * 0.44, rightX = W * 0.76;
+            const centerY = H * 0.5;
+            ctx.fillStyle = "rgba(6,182,212,0.14)";
+            ctx.strokeStyle = "#06b6d4"; ctx.lineWidth = 2;
+            roundRect(leftX, H * 0.22, W * 0.22, H * 0.5, 16); ctx.fill(); ctx.stroke();
+            drawLabel("temporary tensors", leftX + W * 0.11, H * 0.22 + 24, "#06b6d4", "center", 13);
+            for (let i = 0; i < 8; i++) {
+                const x = leftX + 28 + (i % 2) * 86 + Math.sin(frame * 0.04 + i) * 8;
+                const y = H * 0.34 + Math.floor(i / 2) * 56;
+                ctx.fillStyle = "rgba(191,219,254,0.95)";
+                roundRect(x, y, 54, 34, 6); ctx.fill();
+                drawLabel(`t${i}`, x + 27, y + 17, "#1e293b", "center", 10);
+            }
+            ctx.fillStyle = "rgba(16,185,129,0.14)";
+            ctx.strokeStyle = "#10b981";
+            roundRect(centerX, H * 0.18, W * 0.18, H * 0.58, 16); ctx.fill(); ctx.stroke();
+            drawLabel("tf.tidy()", centerX + W * 0.09, H * 0.18 + 26, "#10b981", "center", 16);
+            drawLabel("run prediction work", centerX + W * 0.09, H * 0.18 + 54, "rgba(255,255,255,0.42)", "center", 10);
+            drawLabel("keep only what we return", centerX + W * 0.09, H * 0.18 + H * 0.58 - 28, "rgba(255,255,255,0.42)", "center", 10);
+            ctx.fillStyle = "rgba(239,68,68,0.14)";
+            ctx.strokeStyle = "#ef4444";
+            roundRect(rightX, H * 0.24, W * 0.14, H * 0.46, 16); ctx.fill(); ctx.stroke();
+            drawLabel("cleanup", rightX + W * 0.07, H * 0.24 + 24, "#ef4444", "center", 13);
+            for (let i = 0; i < 6; i++) {
+                const y = H * 0.34 + i * 42;
+                ctx.strokeStyle = "rgba(239,68,68,0.6)"; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(rightX + 26, y); ctx.lineTo(rightX + W * 0.14 - 26, y + 16); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(rightX + 26, y + 16); ctx.lineTo(rightX + W * 0.14 - 26, y); ctx.stroke();
+            }
+            drawArrow(leftX + W * 0.22 + 12, centerY, centerX - 12, centerY, "rgba(255,255,255,0.22)", true);
+            drawArrow(centerX + W * 0.18 + 12, centerY, rightX - 12, centerY, "rgba(255,255,255,0.22)", true);
+        }
+
+        function drawTensorShape() {
+            clearCanvas(); frame += 1;
+            const baseX = W * 0.18, baseY = H * 0.24;
+            const size = Math.min(W, H) * 0.26;
+            const shift = 10;
+            for (let i = 3; i >= 0; i--) {
+                ctx.fillStyle = `rgba(139,92,246,${0.18 + i * 0.1})`;
+                ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 1.5;
+                roundRect(baseX + i * shift, baseY + i * shift, size, size, 8); ctx.fill(); ctx.stroke();
+            }
+            drawDoodle(houseGrid, baseX + 3 * shift + 10, baseY + 3 * shift + 10, (size - 20) / 28, [255, 240, 210]);
+            drawGridLines(baseX + 3 * shift + 10, baseY + 3 * shift + 10, 28, 28, (size - 20) / 28, "rgba(255,255,255,0.04)");
+
+            const labelX = W * 0.63, labelY = H * 0.22;
+            const rows = [
+                { name: "batch", value: "1", color: "#3b82f6" },
+                { name: "width", value: "28", color: "#06b6d4" },
+                { name: "height", value: "28", color: "#10b981" },
+                { name: "channel", value: "1", color: "#f97316" }
+            ];
+            const rowBoxH = Math.min(50, (H * 0.66 - 4 * 4) / 4);
+            const rowPitch = Math.max(rowBoxH + 6, Math.min(74, (H * 0.7) / rows.length));
+            const rowBoxW = W * 0.18;
+            rows.forEach((row, index) => {
+                const y = labelY + index * rowPitch;
+                ctx.fillStyle = `${row.color}22`;
+                ctx.strokeStyle = row.color; ctx.lineWidth = 2;
+                roundRect(labelX, y, rowBoxW, rowBoxH, 12); ctx.fill(); ctx.stroke();
+                drawLabel(row.name, labelX + 56, y + rowBoxH * 0.36, row.color, "center", 11);
+                drawLabel(row.value, labelX + rowBoxW - 30, y + rowBoxH * 0.55, "#ffffff", "center", 16);
+            });
+            drawArrow(baseX + size + 48, H * 0.5, labelX - 18, H * 0.5, "rgba(255,255,255,0.22)", true);
+            drawLabel("[1, 28, 28, 1]", W * 0.54, H * 0.14, "#8b5cf6", "center", 16);
+        }
+
+        function drawPredictFlow() {
+            clearCanvas(); frame += 1;
+            const stageW = W / 4.5, stageH = H * 0.56;
+            const stageY = H * 0.2, startX = W * 0.04;
+            const layers = ["conv2d", "maxPool", "conv2d", "maxPool", "flatten", "dense", "softmax"];
+            const travel = Math.floor(((frame % 280) / 280) * layers.length);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#3b82f6";
+            roundRect(startX, stageY, stageW, stageH, 12); ctx.fill(); ctx.stroke();
+            drawDoodle(catGrid, startX + stageW * 0.18, stageY + stageH * 0.16, stageW * 0.64 / 28, [255, 240, 210]);
+            drawLabel("input tensor", startX + stageW / 2, stageY - 18, "#3b82f6", "center", 11);
+
+            const modelX = startX + stageW + W * 0.03;
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#8b5cf6";
+            roundRect(modelX, stageY, stageW, stageH, 12); ctx.fill(); ctx.stroke();
+            const layerH = (stageH - 20) / layers.length;
+            layers.forEach((layer, index) => {
+                const y = stageY + 10 + index * layerH;
+                const active = index <= travel;
+                ctx.fillStyle = active ? "rgba(139,92,246,0.4)" : "rgba(139,92,246,0.12)";
+                ctx.strokeStyle = active ? "#8b5cf6" : "rgba(139,92,246,0.28)";
+                roundRect(modelX + 12, y, stageW - 24, layerH - 4, 4); ctx.fill(); ctx.stroke();
+                drawLabel(layer, modelX + stageW / 2, y + (layerH - 4) / 2, active ? "#ffffff" : "rgba(255,255,255,0.42)", "center", 10);
+            });
+            drawLabel("CNN forward pass", modelX + stageW / 2, stageY - 18, "#8b5cf6", "center", 11);
+
+            const outX = modelX + stageW + W * 0.03;
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#10b981";
+            roundRect(outX, stageY, stageW, stageH, 12); ctx.fill(); ctx.stroke();
+            const probs = [0.86, 0.05, 0.02, 0.05, 0.02];
+            const winnerIdx = 0;
+            const barH = (stageH - 22) / 5;
+            for (let i = 0; i < 5; i++) {
+                const y = stageY + 14 + i * barH;
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                ctx.fillRect(outX + 60, y, stageW - 80, 14);
+                ctx.fillStyle = i === winnerIdx ? "#10b981" : `${CATEGORY_COLORS[i]}99`;
+                ctx.fillRect(outX + 60, y, (stageW - 80) * probs[i], 14);
+                drawLabel(CATEGORIES[i], outX + 36, y + 7, "rgba(255,255,255,0.6)", "center", 9);
+            }
+            drawLabel("output scores", outX + stageW / 2, stageY - 18, "#10b981", "center", 11);
+            drawArrow(startX + stageW + 10, stageY + stageH / 2, modelX - 10, stageY + stageH / 2, "rgba(255,255,255,0.18)", true);
+            drawArrow(modelX + stageW + 10, stageY + stageH / 2, outX - 10, stageY + stageH / 2, "rgba(255,255,255,0.18)", true);
+        }
+
+        function drawDataSyncTransfer() {
+            clearCanvas(); frame += 1;
+            const leftX = W * 0.1, topY = H * 0.22;
+            const leftW = W * 0.28, boxH = H * 0.48;
+            ctx.fillStyle = "rgba(139,92,246,0.16)";
+            ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 2;
+            roundRect(leftX, topY, leftW, boxH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("TensorFlow output tensor", leftX + leftW / 2, topY + 24, "#8b5cf6", "center", 13);
+
+            const ringCenterX = leftX + leftW / 2;
+            const ringCenterY = topY + boxH / 2;
+            const winner = 1;
+            for (let i = 0; i < 5; i++) {
+                const angle = -PI / 2 + i * (TWO_PI / 5);
+                const x = ringCenterX + Math.cos(angle) * 70;
+                const y = ringCenterY + Math.sin(angle) * 70;
+                ctx.fillStyle = i === winner ? "#10b981" : `${CATEGORY_COLORS[i]}55`;
+                ctx.beginPath(); ctx.arc(x, y, 18, 0, TWO_PI); ctx.fill();
+                drawLabel(CATEGORIES[i], x, y, "#ffffff", "center", 10);
+            }
+
+            const rightX = W * 0.58, rightW = W * 0.24;
+            ctx.fillStyle = "rgba(6,182,212,0.16)";
+            ctx.strokeStyle = "#06b6d4";
+            roundRect(rightX, topY, rightW, boxH, 16); ctx.fill(); ctx.stroke();
+            drawLabel("JavaScript typed array", rightX + rightW / 2, topY + 24, "#06b6d4", "center", 13);
+
+            const probs = [0.05, 0.86, 0.05, 0.02, 0.02];
+            const probTop = topY + 56;
+            const probBottom = topY + boxH - 14;
+            const probH = Math.min(30, (probBottom - probTop) / 5 - 6);
+            const probPitch = (probBottom - probTop - probH) / 4;
+            for (let i = 0; i < 5; i++) {
+                const y = probTop + i * probPitch;
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                roundRect(rightX + 18, y, rightW - 36, probH, 5); ctx.fill();
+                ctx.fillStyle = i === winner ? "#10b981" : "#ffffff";
+                ctx.font = "500 11px JetBrains Mono, monospace";
+                ctx.textAlign = "left"; ctx.textBaseline = "middle";
+                ctx.fillText(`[${i}] ${CATEGORIES[i]} = ${probs[i].toFixed(2)}`, rightX + 28, y + probH / 2);
+            }
+            drawArrow(leftX + leftW + 20, topY + boxH / 2, rightX - 20, topY + boxH / 2, "rgba(255,255,255,0.22)", true);
+            drawLabel("dataSync()", W * 0.5, topY + boxH / 2 - 26, "#fbbf24", "center", 12);
+            drawLabel("copy tensor values back to regular JS", W * 0.5, topY + boxH / 2 + 24, "rgba(255,255,255,0.4)", "center", 10);
+        }
+
+        function drawWinnerBars() {
+            clearCanvas(); frame += 1;
+            const probs = [0.05, 0.86, 0.04, 0.03, 0.02];
+            const winner = 1;
+
+            ctx.fillStyle = "rgba(16,185,129,0.16)";
+            ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2;
+            roundRect(W * 0.06, H * 0.14, W * 0.26, H * 0.72, 18); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = "#10b981";
+            ctx.font = "800 56px Inter, sans-serif";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(CATEGORIES[winner].toUpperCase(), W * 0.19, H * 0.42);
+            drawDoodle(CATEGORY_GRIDS[winner], W * 0.19 - 60, H * 0.55, 120 / 28, [16, 185, 129]);
+            drawLabel("largest probability wins", W * 0.19, H * 0.82, "rgba(255,255,255,0.42)", "center", 10);
+
+            const barX = W * 0.42, barY = H * 0.18;
+            const rowH = 80;
+            for (let i = 0; i < 5; i++) {
+                const y = barY + i * rowH;
+                const visible = clamp((frame / 18) - i * 0.25, 0, 1);
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                roundRect(barX, y, W * 0.42, 28, 7); ctx.fill();
+                ctx.fillStyle = i === winner ? "#10b981" : `${CATEGORY_COLORS[i]}cc`;
+                roundRect(barX, y, W * 0.42 * probs[i] * visible, 28, 7); ctx.fill();
+                drawLabel(CATEGORIES[i], barX - 32, y + 14, "rgba(255,255,255,0.7)", "center", 12);
+                drawLabel(`${Math.round(probs[i] * 100)}%`, barX + W * 0.42 + 38, y + 14, i === winner ? "#10b981" : "rgba(255,255,255,0.62)", "center", 12);
+            }
+            drawLabel("loop through all 5 categories and keep the biggest score", W * 0.6, H - 22, "rgba(255,255,255,0.42)", "center", 11);
+        }
+
+        const drawFns = {
+            drawLoadFetch, drawLoadAllocate, drawLoadExtract, drawLoadShuffle, drawLoadTensorWrap,
+            drawSequential, drawConvolution, drawMaxPool, drawMaxPoolCompact, drawDeepConv,
+            drawFlatten, drawDense64, drawSoftmax, drawCompile,
+            drawFitIntro, drawTrainingEpochs, drawTrainingBatch, drawTrainingValidation, drawTrainingCallback,
+            drawPixelExtraction, drawNormalizeGuard, drawTidyCleanup, drawTensorShape,
+            drawPredictFlow, drawDataSyncTransfer, drawWinnerBars
+        };
+
+        function animate() {
+            const step = steps[currentStep];
+            const drawFn = drawFns[step.drawFn];
+            if (drawFn) drawFn();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+
+        // ── Submit form ──────────────────────────────────────
+        function submitSketch() {
+            const name = document.getElementById("student-name").value.trim();
+            const url = document.getElementById("sketch-url").value.trim();
+            const errEl = document.getElementById("submit-error");
+            const nameInput = document.getElementById("student-name");
+            const urlInput = document.getElementById("sketch-url");
+
+            if (!name) {
+                errEl.textContent = "Please enter your name.";
+                nameInput.style.borderColor = "var(--accent-red)";
+                return;
+            }
+            if (!url) {
+                errEl.textContent = "Please paste your p5.js sketch link.";
+                urlInput.style.borderColor = "var(--accent-red)";
+                return;
+            }
+            if (!url.startsWith("http")) {
+                errEl.textContent = "That doesn't look like a URL. It should start with https://";
+                urlInput.style.borderColor = "var(--accent-red)";
+                return;
+            }
+
+            errEl.textContent = "";
+            const btn = document.getElementById("submit-btn");
+            btn.textContent = "Submitting...";
+            btn.style.opacity = "0.6";
+            btn.style.pointerEvents = "none";
+
+            setTimeout(() => {
+                document.getElementById("submit-box").style.display = "none";
+                const success = document.getElementById("success-box");
+                success.style.display = "block";
+                document.getElementById("submitted-name").textContent = name;
+                const link = document.getElementById("submitted-link");
+                link.href = url;
+                link.textContent = url;
+            }, 1000);
+        }
+        window.submitSketch = submitSketch;
+
+        document.getElementById("sketch-url").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); submitSketch(); }
+        });
+    </script>
+</body>
+
+</html>
